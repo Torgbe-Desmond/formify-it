@@ -34,6 +34,10 @@ async function processOperation(op) {
           await projectsApi.delete(op.entityId);
           break;
         }
+        default: {
+          console.warn(`Unknown operation ${op.operation} for project:`, op.entityId);
+          break;
+        }
       }
       break;
     }
@@ -53,6 +57,10 @@ async function processOperation(op) {
         }
         case 'DELETE': {
           await foldersApi.delete(op.entityId);
+          break;
+        }
+        default: {
+          console.warn(`Unknown operation ${op.operation} for folder:`, op.entityId);
           break;
         }
       }
@@ -82,6 +90,10 @@ async function processOperation(op) {
         }
         case 'DELETE': {
           await filesApi.delete(op.entityId);
+          break;
+        }
+        default: {
+          console.warn(`Unknown operation ${op.operation} for file:`, op.entityId);
           break;
         }
       }
