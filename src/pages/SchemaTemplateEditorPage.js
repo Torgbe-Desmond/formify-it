@@ -80,7 +80,7 @@ export default function SchemaTemplateEditorPage() {
     if (!folderId) return;
     dispatch(loadSchema({ folderId }));
     if (!folder) dispatch(loadFolders({ projectId: '' }));
-  }, [folderId, dispatch]);
+  }, [folderId, dispatch, folder]);
 
   useEffect(() => {
     if (!schema) return;

@@ -40,7 +40,7 @@ export default function FolderBoard() {
   useEffect(() => {
     dispatch(loadFolders({ projectId }));
     if (!project) dispatch(loadProjects());
-  }, [projectId, dispatch]);
+  }, [projectId, dispatch, project]);
 
   const filteredFolders = useMemo(() => {
     if (!searchQuery) return folders;

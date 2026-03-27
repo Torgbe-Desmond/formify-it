@@ -50,7 +50,7 @@ export default function FileBoard() {
     dispatch(loadSchema({ folderId }));
     // Load folder data in case of direct navigation
     if (!folder) dispatch(loadFolders({ projectId: null }));
-  }, [folderId, dispatch]);
+  }, [folderId, dispatch, folder]);
 
   useEffect(() => {
     if (folder) setNewFolderName(folder.name);

@@ -1,6 +1,6 @@
 import {
   Box, Typography, Button, TextField,
-  InputAdornment, IconButton, useTheme,
+  InputAdornment, IconButton,
 } from '@mui/material';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import AddRoundedIcon             from '@mui/icons-material/AddRounded';

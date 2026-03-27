@@ -1,11 +1,10 @@
 import {
-  Box, Typography, Button, TextField, InputAdornment, useTheme,
+  Box, Typography, Button, TextField, InputAdornment,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon     from '@mui/icons-material/Search';
 
 export default function ProjectHeader({ onAddProject, onSearchChange, searchQuery }) {
-  const theme = useTheme();
 
   return (
     <Box sx={{

@@ -8,7 +8,6 @@ import MoreVertIcon                     from '@mui/icons-material/MoreVert';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import FolderDeleteRoundedIcon          from '@mui/icons-material/FolderDeleteRounded';
 import SchemaRoundedIcon                from '@mui/icons-material/SchemaRounded';
-import InsertDriveFileRoundedIcon       from '@mui/icons-material/InsertDriveFileRounded';
 import { useNavigate } from 'react-router-dom';
 
 export default function FolderCard({ folder, onClick, onRename, onDelete }) {
