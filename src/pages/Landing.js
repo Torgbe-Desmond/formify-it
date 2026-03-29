@@ -187,8 +187,8 @@ const S = {
 
 const features = [
   { icon: '◈', title: 'Schema Templates', desc: 'Define reusable form fields with YAML. Write your HTML layout once, fill it forever.' },
-  { icon: '⬡', title: 'Offline First', desc: 'Every change is saved locally. When connectivity returns, everything syncs automatically.' },
-  { icon: '◇', title: 'Structured Docs', desc: 'Project → Folder → File. Navigate with breadcrumbs. Export any document to PDF.' },
+//   { icon: '⬡', title: 'Offline First', desc: 'Every change is saved locally. When connectivity returns, everything syncs automatically.' },
+//   { icon: '◇', title: 'Structured Docs', desc: 'Project → Folder → File. Navigate with breadcrumbs. Export any document to PDF.' },
   { icon: '⬘', title: 'Rich Text', desc: 'Bold, italic, lists — inline rich text in any form field via Tiptap.' },
   { icon: '○', title: 'Live Preview', desc: 'See your rendered HTML document update in real time as you fill in the form.' },
   { icon: '△', title: 'Team Ready', desc: 'JWT-secured accounts. Each user owns their projects independently.' },
