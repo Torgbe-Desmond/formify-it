@@ -1,36 +1,28 @@
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Skeleton } from '@mui/material';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import { useNavigate } from 'react-router-dom';
-// import FolderIcon from '@mui/icons-material/Folder';
-// import DescriptionIcon from '@mui/icons-material/Description';
-// import WorkspacesIcon from '@mui/icons-material/Workspaces';
-
-// const getIcon = (type) => {
-//     switch (type) {
-//         case 'project': return <WorkspacesIcon sx={{ fontSize: 16 }} />;
-//         case 'folder': return <FolderIcon sx={{ fontSize: 16 }} />;
-//         case 'file': return <DescriptionIcon sx={{ fontSize: 16 }} />;
-//         default: return null;
-//     }
-// };
 
 const getPath = (crumb) => {
     switch (crumb.type) {
-        case 'project':
-            return `/project/${crumb.id}`;
-        case 'folder':
-            return `/folder/${crumb.id}`;
-        case 'file':
-            return `/file/${crumb.id}`;
-        default:
-            return '/';
+        case 'project': return `/project/${crumb.id}`;
+        case 'folder': return `/folder/${crumb.id}`;
+        case 'file': return `/file/${crumb.id}`;
+        default: return '/';
     }
 };
 
-export default function Breadcrumbs({ crumbs }) {
+export default function Breadcrumbs({ crumbs = [], loadingBreadcrumbs }) {
     const navigate = useNavigate();
 
-    if (!crumbs || crumbs.length === 0) return null;
+    // Fix: Added return statement and adjusted skeleton to match text height
+    if (loadingBreadcrumbs) {
+        return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, py: 0.5 }}>
+                <Skeleton variant="circular" width={24} height={24} />
+                <Skeleton variant="text" width={150} sx={{ fontSize: 'body2.fontSize' }} />
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
@@ -46,32 +38,37 @@ export default function Breadcrumbs({ crumbs }) {
                 </IconButton>
             )}
 
-            <Typography variant="body2"
-                onClick={() => navigate("/")}
-                sx={{
-                    cursor: 'pointer',
-                    pr: 0.2,
-                    '&:hover': {
-                        color: 'primary.main',
-                        textDecoration: 'underline',
-                    },
-                }}>
-                Projects / {" "}
-            </Typography>
+    
+            {crumbs.length > 0 && (
+                <Typography
+                    variant="body2"
+                    onClick={() => navigate("/")}
+                    sx={{
+                        cursor: 'pointer',
+                        color: crumbs.length === 0 ? 'text.primary' : 'text.secondary',
+                        fontWeight: crumbs.length === 0 ? 600 : 400,
+                        '&:hover': {
+                            color: 'primary.main',
+                            textDecoration: 'underline',
+                        },
+                    }}
+                >
+                    Projects /
+                </Typography>
+            )}
 
             {crumbs.map((crumb, index) => {
                 const isLast = index === crumbs.length - 1;
 
                 return (
-                    <Box key={crumb.id} sx={{ display: 'flex', alignItems: 'center' }}>
-
-                        {/* Clickable (not last) */}
+                    <Box key={crumb.id} sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
                         {!isLast ? (
                             <Typography
                                 variant="body2"
                                 color="text.secondary"
                                 sx={{
                                     cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
                                     '&:hover': {
                                         color: 'primary.main',
                                         textDecoration: 'underline',
@@ -82,18 +79,17 @@ export default function Breadcrumbs({ crumbs }) {
                                 {crumb.name}
                             </Typography>
                         ) : (
-                            /* Current item */
                             <Typography
                                 variant="body2"
                                 fontWeight={600}
                                 color="text.primary"
                                 noWrap
+                                sx={{ minWidth: 0 }}
                             >
                                 {crumb.name}
                             </Typography>
                         )}
 
-                        {/* Divider */}
                         {!isLast && (
                             <Typography variant="body2" color="text.disabled" sx={{ mx: 0.5 }}>
                                 /

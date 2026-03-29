@@ -27,7 +27,7 @@ export const loadFileById = createAsyncThunk(
       return { file, content };
     } catch (err) {
       return rejectWithValue(err.message);
-    } 
+    }
   }
 );
 
@@ -74,13 +74,21 @@ const filesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Load files by folder
+      .addCase(loadFilesFromServer.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(loadFilesFromServer.fulfilled, (state, action) => {
         const { folderId, files } = action.payload;
         state.byFolder[folderId] = [...files].sort(
           (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
         );
+        state.loading = false;
       })
-
+      .addCase(loadFilesFromServer.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
+      })
+      
       // Load single file
       .addCase(loadFileById.pending, (state) => { state.loading = true; })
       .addCase(loadFileById.fulfilled, (state, action) => {

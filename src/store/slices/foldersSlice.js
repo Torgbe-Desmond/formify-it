@@ -48,20 +48,26 @@ const foldersSlice = createSlice({
   name: 'folders',
   initialState: {
     byProject: {},
-    loading:   false,
-    error:     null,
+    loading: false,
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(loadFoldersFromServer.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(loadFoldersFromServer.fulfilled, (state, action) => {
         const { projectId, folders } = action.payload;
         state.byProject[projectId] = [...folders].sort((a, b) =>
           a.name.localeCompare(b.name)
         );
+        state.loading = false;
+
       })
       .addCase(loadFoldersFromServer.rejected, (state, action) => {
         state.error = action.payload;
+        state.loading = false;
       })
 
       .addCase(createFolder.fulfilled, (state, action) => {

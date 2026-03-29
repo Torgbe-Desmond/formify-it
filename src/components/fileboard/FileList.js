@@ -1,8 +1,39 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded';
 import FileRow from './FileRow';
 
-export default function FileList({ files, onFileClick }) {
+const FileSkeleton = ({ isLast }) => (
+  <Box sx={{
+    display: 'grid',
+    gridTemplateColumns: { xs: '1fr 48px', sm: '1fr 100px 140px 48px' },
+    alignItems: 'center',
+    px: { xs: 2, sm: 2.5 },
+    py: { xs: 1.5, sm: 1.25 },
+    borderBottom: isLast ? 'none' : '1px solid',
+    borderColor: 'divider',
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Skeleton variant="circular" width={24} height={24} />
+      <Box sx={{ width: '60%' }}>
+        <Skeleton variant="text" width="80%" sx={{ fontSize: 'body2.fontSize' }} />
+        <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+          <Skeleton variant="text" width="40%" sx={{ fontSize: 'caption.fontSize' }} />
+        </Box>
+      </Box>
+    </Box>
+    <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}>
+      <Skeleton variant="rounded" width={30} height={20} />
+    </Box>
+    <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 2 }}>
+      <Skeleton variant="text" width={60} sx={{ ml: 'auto' }} />
+    </Box>
+    <Skeleton variant="circular" width={24} height={24} sx={{ ml: 'auto' }} />
+  </Box>
+);
+
+
+
+export default function FileList({ files, loading, onFileClick }) {
   if (!files?.length) {
     return (
       <Box sx={{
@@ -35,8 +66,17 @@ export default function FileList({ files, onFileClick }) {
           <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>Updated</Typography>
         </Box>
 
+        {/* Loading Rows */}
+        {loading && (
+          <>
+            <FileSkeleton />
+            <FileSkeleton />
+            <FileSkeleton isLast={true} />
+          </>
+        )}
+
         {/* Data rows */}
-        {files.map((file, idx) => (
+        {!loading && files.map((file, idx) => (
           <FileRow
             key={file.id}
             file={file}

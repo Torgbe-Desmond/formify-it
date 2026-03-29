@@ -17,16 +17,22 @@ export default function FolderBoardHeader({
 }) {
   const { projectId } = useParams();
   const [crumbs, setCrumbs] = useState([]);
+  const [loadingBreadcrumbs, setLoadingBreadcrumbs] = useState(false)
 
   useEffect(() => {
     if (!projectId) return;
 
     const fetchBreadcrumb = async () => {
       try {
+        setLoadingBreadcrumbs(true)
         const res = await breadcrumbApi.get('project', projectId);
         setCrumbs(res.data);
       } catch (error) {
         console.error(error);
+        setLoadingBreadcrumbs(false)
+      } finally {
+        setLoadingBreadcrumbs(false)
+
       }
     };
 
@@ -36,8 +42,8 @@ export default function FolderBoardHeader({
   return (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
       {/* Breadcrumb */}
-  
-      <Breadcrumbs crumbs={crumbs}/>
+
+      <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 
       {/* Title + search + button */}
       <Box sx={{

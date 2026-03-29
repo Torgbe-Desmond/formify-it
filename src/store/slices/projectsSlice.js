@@ -47,20 +47,26 @@ export const deleteProject = createAsyncThunk(
 const projectsSlice = createSlice({
   name: 'projects',
   initialState: {
-    items:   [],
+    items: [],
     loading: false,
-    error:   null,
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(loadProjectsFromServer.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(loadProjectsFromServer.fulfilled, (state, action) => {
         state.items = [...action.payload].sort(
           (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+
         );
+        state.loading = false;
       })
       .addCase(loadProjectsFromServer.rejected, (state, action) => {
         state.error = action.payload;
+        state.loading = false;
       })
 
       .addCase(createProject.fulfilled, (state, action) => {

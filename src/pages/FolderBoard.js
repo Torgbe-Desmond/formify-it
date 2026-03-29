@@ -9,6 +9,7 @@ import {
   renameFolder,
   deleteFolder,
   selectFoldersByProject,
+  selectFoldersLoading,
 } from '../store/slices/foldersSlice';
 
 import {
@@ -29,6 +30,8 @@ export default function FolderBoard() {
 
   const project = useSelector(selectProjectById(projectId));
   const folders = useSelector(selectFoldersByProject(projectId));
+  const loading = useSelector(selectFoldersLoading);
+
 
   const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,6 +94,7 @@ export default function FolderBoard() {
 
       <FolderList
         folders={filteredFolders}
+        loading={loading}
         onFolderClick={(id) => navigate(`/folder/${id}`)}
         onRenameClick={handleRenameOpen}
         onDeleteClick={handleDeleteOpen}
