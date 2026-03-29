@@ -1,11 +1,10 @@
 import {
   Box, Typography, Button, TextField,
-  InputAdornment, IconButton,
+  InputAdornment,
 } from '@mui/material';
-import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon from '@mui/icons-material/Search';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { breadcrumbApi } from '../../store/api/apiClient';
 import Breadcrumbs from '../Breadcrumbs';
@@ -16,7 +15,6 @@ export default function FolderBoardHeader({
   searchQuery,
   onSearchChange,
 }) {
-  const navigate = useNavigate();
   const { projectId } = useParams();
   const [crumbs, setCrumbs] = useState([]);
 
@@ -39,24 +37,7 @@ export default function FolderBoardHeader({
   return (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
       {/* Breadcrumb */}
-      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-        <IconButton size="small" onClick={() => navigate('/')} sx={{ color: 'text.secondary', p: 0.5 }}>
-          <ArrowBackIosNewRoundedIcon sx={{ fontSize: 14 }} />
-        </IconButton>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
-          onClick={() => navigate('/')}
-        >
-          Projects
-        </Typography>
-        <Typography variant="body2" color="text.disabled" sx={{ mx: 0.25 }}>/</Typography>
-        <Typography variant="body2" fontWeight={600} color="text.primary" noWrap>
-          {projectName || '...'}
-        </Typography>
-      </Box> */}
-
+  
       <Breadcrumbs crumbs={crumbs}/>
 
       {/* Title + search + button */}

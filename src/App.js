@@ -14,10 +14,11 @@ import OfflineBanner            from './components/OfflineBanner';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LightTheme from './theme/LightTheme';
+import Landing from './pages/Landing';
 
 function ProtectedRoute({ children }) {
   const isAuth = useSelector(selectIsAuth);
-  if (!isAuth) return <Navigate to="/login" replace />;
+  if (!isAuth) return <Navigate to="/home" replace />;
   return children;
 }
 
@@ -28,7 +29,6 @@ export default function App() {
     if (meta) meta.setAttribute('content','#ffffff');
   }, []);
 
-
   return (
     <ThemeProvider theme={LightTheme}>
       <CssBaseline />
@@ -37,6 +37,7 @@ export default function App() {
         <Routes>
           <Route path="/login"    element={<Login/>} />
           <Route path="/register" element={ <Register/>}/>
+          <Route path="/home" element={ <Landing/>}/>
 
           {/* Level 1: projects */}
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

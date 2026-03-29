@@ -1,18 +1,18 @@
 import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import { useNavigate } from 'react-router-dom';
-import FolderIcon from '@mui/icons-material/Folder';
-import DescriptionIcon from '@mui/icons-material/Description';
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
+// import FolderIcon from '@mui/icons-material/Folder';
+// import DescriptionIcon from '@mui/icons-material/Description';
+// import WorkspacesIcon from '@mui/icons-material/Workspaces';
 
-const getIcon = (type) => {
-    switch (type) {
-        case 'project': return <WorkspacesIcon sx={{ fontSize: 16 }} />;
-        case 'folder': return <FolderIcon sx={{ fontSize: 16 }} />;
-        case 'file': return <DescriptionIcon sx={{ fontSize: 16 }} />;
-        default: return null;
-    }
-};
+// const getIcon = (type) => {
+//     switch (type) {
+//         case 'project': return <WorkspacesIcon sx={{ fontSize: 16 }} />;
+//         case 'folder': return <FolderIcon sx={{ fontSize: 16 }} />;
+//         case 'file': return <DescriptionIcon sx={{ fontSize: 16 }} />;
+//         default: return null;
+//     }
+// };
 
 const getPath = (crumb) => {
     switch (crumb.type) {
