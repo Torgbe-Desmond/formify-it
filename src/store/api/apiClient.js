@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://formify-wyqh.onrender.com';
+const BASE_URL = ['https://formify-node.onrender.com',"http://localhost:5000"][0];
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -62,4 +62,9 @@ export const filesApi = {
   create:      (folderId, data) => apiClient.post(`/api/folders/${folderId}/files`, data),
   update:      (id, data) => apiClient.put(`/api/files/${id}`, data),
   delete:      (id)       => apiClient.delete(`/api/files/${id}`),
+};
+
+// ── Breadcrumbs ─────────────────────────────────────────────────────────
+export const breadcrumbApi = {
+  get: (type, id) => apiClient.get(`/api/breadcrumb/${type}/${id}`),
 };

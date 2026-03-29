@@ -387,7 +387,7 @@ export default function SchemaTemplateEditorPage() {
               {templateSubView === 'html' && (
                 <>
                   <Typography variant="subtitle1" gutterBottom>HTML Template + Liquid</Typography>
-                  <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 1 }}>
+                  <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 1, bgcolor:"inherit" }}>
                     <CodeMirror
                       value={htmlContent} height="500px"
                       extensions={[html({})]}

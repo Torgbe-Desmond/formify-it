@@ -3,9 +3,12 @@ import {
   InputAdornment, IconButton,
 } from '@mui/material';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
-import AddRoundedIcon             from '@mui/icons-material/AddRounded';
-import SearchIcon                 from '@mui/icons-material/Search';
-import { useNavigate } from 'react-router-dom';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import SearchIcon from '@mui/icons-material/Search';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { breadcrumbApi } from '../../store/api/apiClient';
+import Breadcrumbs from '../Breadcrumbs';
 
 export default function FolderBoardHeader({
   projectName,
@@ -14,11 +17,29 @@ export default function FolderBoardHeader({
   onSearchChange,
 }) {
   const navigate = useNavigate();
+  const { projectId } = useParams();
+  const [crumbs, setCrumbs] = useState([]);
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    const fetchBreadcrumb = async () => {
+      try {
+        const res = await breadcrumbApi.get('project', projectId);
+        console.log("res", res)
+        setCrumbs(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchBreadcrumb();
+  }, [projectId]);
 
   return (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
       {/* Breadcrumb */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+      {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
         <IconButton size="small" onClick={() => navigate('/')} sx={{ color: 'text.secondary', p: 0.5 }}>
           <ArrowBackIosNewRoundedIcon sx={{ fontSize: 14 }} />
         </IconButton>
@@ -34,7 +55,9 @@ export default function FolderBoardHeader({
         <Typography variant="body2" fontWeight={600} color="text.primary" noWrap>
           {projectName || '...'}
         </Typography>
-      </Box>
+      </Box> */}
+
+      <Breadcrumbs crumbs={crumbs}/>
 
       {/* Title + search + button */}
       <Box sx={{

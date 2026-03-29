@@ -64,6 +64,7 @@ const projectsSlice = createSlice({
       })
 
       .addCase(createProject.fulfilled, (state, action) => {
+        console.log("payload", action.payload)
         state.items.unshift(action.payload);
       })
 

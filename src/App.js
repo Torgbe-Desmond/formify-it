@@ -1,6 +1,6 @@
-import { useMemo, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline, useMediaQuery } from '@mui/material';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 import { useSelector } from 'react-redux';
 
 import { selectIsAuth } from './store/slices/authSlice';
@@ -13,6 +13,7 @@ import SchemaTemplateEditorPage from './pages/SchemaTemplateEditorPage';
 import OfflineBanner            from './components/OfflineBanner';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import LightTheme from './theme/LightTheme';
 
 function ProtectedRoute({ children }) {
   const isAuth = useSelector(selectIsAuth);
@@ -21,45 +22,15 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', prefersDarkMode ? '#121212' : '#ffffff');
-  }, [prefersDarkMode]);
+    if (meta) meta.setAttribute('content','#ffffff');
+  }, []);
 
-  const theme = useMemo(() =>
-    createTheme({
-      palette: {
-        mode:       prefersDarkMode ? 'dark' : 'light',
-        primary:    { main: '#1976d2' },
-        secondary:  { main: '#9c27b0' },
-        background: {
-          default: prefersDarkMode ? '#0d1117' : '#f8f9fa',
-          paper:   prefersDarkMode ? '#161b22' : '#ffffff',
-        },
-      },
-      typography: { fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif' },
-      shape: { borderRadius: 10 },
-      components: {
-        MuiButton: { styleOverrides: { root: { textTransform: 'none', borderRadius: 8 } } },
-        MuiCard: {
-          styleOverrides: {
-            root: {
-              borderRadius: 12,
-              boxShadow: prefersDarkMode
-                ? '0 4px 20px rgba(0,0,0,0.4)'
-                : '0 4px 20px rgba(0,0,0,0.08)',
-            },
-          },
-        },
-      },
-    }),
-    [prefersDarkMode]
-  );
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={LightTheme}>
       <CssBaseline />
       <OfflineBanner />
       <Router>

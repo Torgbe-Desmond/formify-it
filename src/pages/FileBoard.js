@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,27 +20,29 @@ import {
   loadSchema,
 } from '../store/slices/schemaSlice';
 
-import AddFile            from '../components/AddFile';
-import FileBoardHeader    from '../components/fileboard/FileBoardHeader';
-import FileList           from '../components/fileboard/FileList';
+import AddFile from '../components/AddFile';
+import FileBoardHeader from '../components/fileboard/FileBoardHeader';
+import FileList from '../components/fileboard/FileList';
 import RenameFolderDialog from '../components/fileboard/RenameFolderDialog';
 import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
+import { breadcrumbApi } from '../store/api/apiClient';
 
 export default function FileBoard() {
   const { folderId } = useParams();
-  const navigate     = useNavigate();
-  const dispatch     = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const folder  = useSelector(selectFolderById(folderId));
-  const files   = useSelector(selectFilesByFolder(folderId));
+  const folder = useSelector(selectFolderById(folderId));
+  const files = useSelector(selectFilesByFolder(folderId));
   const loading = useSelector(selectFilesLoading);
 
-  const [isModalOpen,       setIsModalOpen]       = useState(false);
-  const [anchorEl,          setAnchorEl]          = useState(null);
-  const [renameOpen,        setRenameOpen]        = useState(false);
-  const [newFolderName,     setNewFolderName]     = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [searchQuery,       setSearchQuery]       = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [crumbs, setCrumbs] = useState([]);
 
   const open = Boolean(anchorEl);
 
@@ -56,6 +58,26 @@ export default function FileBoard() {
     if (folder) setNewFolderName(folder.name);
   }, [folder]);
 
+//http://localhost:5000/api/folders/69c88d2dcc05dd5bc8a4fb40/schema
+
+  useEffect(() => {
+    if (!folderId) return;
+
+    const fetchBreadcrumb = async () => {
+      try {
+        const res = await breadcrumbApi.get('folder', folderId);
+        console.log("res",res)
+        setCrumbs(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchBreadcrumb();
+  }, [folderId]);
+
+
+
   const filteredFiles = useMemo(() => {
     if (!searchQuery) return files;
     return files.filter((f) =>
@@ -63,8 +85,8 @@ export default function FileBoard() {
     );
   }, [files, searchQuery]);
 
-  const handleMenuClick  = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
-  const handleMenuClose  = () => setAnchorEl(null);
+  const handleMenuClick = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
+  const handleMenuClose = () => setAnchorEl(null);
 
   const handleRenameSave = async () => {
     if (!folderId || !newFolderName.trim()) return;

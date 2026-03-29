@@ -16,31 +16,32 @@ import {
   loadProjects,
 } from '../store/slices/projectsSlice';
 
-import FolderBoardHeader  from '../components/folderboard/FolderBoardHeader';
-import FolderList         from '../components/folderboard/FolderList';
-import NewFolderDialog    from '../components/folderboard/NewFolderDialog';
+import FolderBoardHeader from '../components/folderboard/FolderBoardHeader';
+import FolderList from '../components/folderboard/FolderList';
+import NewFolderDialog from '../components/folderboard/NewFolderDialog';
 import RenameFolderDialog from '../components/fileboard/RenameFolderDialog';
 import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
 
 export default function FolderBoard() {
   const { projectId } = useParams();
-  const navigate      = useNavigate();
-  const dispatch      = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const project = useSelector(selectProjectById(projectId));
   const folders = useSelector(selectFoldersByProject(projectId));
 
-  const [newFolderOpen,     setNewFolderOpen]     = useState(false);
-  const [searchQuery,       setSearchQuery]       = useState('');
-  const [targetFolder,      setTargetFolder]      = useState(null);
-  const [renameOpen,        setRenameOpen]        = useState(false);
-  const [renameName,        setRenameName]        = useState('');
-  const [deleteOpen,        setDeleteOpen]        = useState(false);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [targetFolder, setTargetFolder] = useState(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameName, setRenameName] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     dispatch(loadFolders({ projectId }));
     if (!project) dispatch(loadProjects());
   }, [projectId, dispatch, project]);
+
 
   const filteredFolders = useMemo(() => {
     if (!searchQuery) return folders;

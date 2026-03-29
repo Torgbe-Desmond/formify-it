@@ -30,10 +30,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await dispatch(login(form));
+    try {
+      const res = await dispatch(login(form));
 
-    if (res.meta.requestStatus === 'fulfilled') {
-      navigate('/');
+      if (res.meta.requestStatus === 'fulfilled') {
+        navigate('/');
+      }
+    } catch (err) {
+      console.log(err)
     }
   };
 
