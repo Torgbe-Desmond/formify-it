@@ -118,7 +118,7 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
         Object.entries(formData).map(([k, v]) => [k, JSON.stringify(v)])
       );
 
-      await dispatch(createFile({ name: fileName, folderId, renderedHtml, metadata }));
+      await dispatch(createFile({ name: fileName, folderId, content:renderedHtml, metadata }));
 
       setFormData({});
       setErrors({});

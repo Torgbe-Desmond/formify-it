@@ -34,8 +34,8 @@ export const loadFileById = createAsyncThunk(
 
 export const createFile = createAsyncThunk(
   'files/create',
-  async ({ name, folderId, renderedHtml, metadata }) => {
-    const res = await filesApi.create(folderId, { name, renderedHtml, metadata });
+  async ({ name, folderId, content, metadata }) => {
+    const res = await filesApi.create(folderId, { name, content, metadata });
     return { serverFile: res.data, folderId };
   }
 );

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, useMediaQuery, useTheme, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { Liquid } from 'liquidjs';
+// import html2pdf from "html2pdf.js";
 
 import {
   loadFileById,
@@ -118,6 +119,51 @@ export default function FileEditorPage() {
     await dispatch(deleteFile({ id: fileId }));
     navigate(-1);
   };
+
+
+  // const handleDownloadPDF = () => {
+
+  //   if (!renderedContent || !file) {
+  //     alert("Nothing to download");
+  //     return;
+  //   }
+
+  //   // Create a temporary container with the exact rendered HTML (including <style>)
+  //   const tempDiv = document.createElement("div");
+  //   tempDiv.innerHTML = renderedContent;
+  //   tempDiv.style.padding = "40px";           // nice margins for PDF
+  //   tempDiv.style.backgroundColor = "#fff";
+  //   tempDiv.style.maxWidth = "800px";
+  //   tempDiv.style.margin = "0 auto";
+
+  //   // Optional: hide any UI elements you don't want in the PDF
+  //   // tempDiv.querySelectorAll('button, .no-print').forEach(el => el.remove());
+
+  //   const opt = {
+  //     margin: [10, 10, 10, 10],   // top, right, bottom, left (mm)
+  //     filename: `${file.name || "document"}.pdf`,
+  //     image: { type: "jpeg", quality: 0.98 },
+  //     html2canvas: {
+  //       scale: 2,                   // higher quality
+  //       useCORS: true,
+  //       letterRendering: true,
+  //     },
+  //     jsPDF: {
+  //       unit: "mm",
+  //       format: "a4",
+  //       orientation: "portrait",
+  //     },
+  //   };
+
+  //   html2pdf()
+  //     .set(opt)
+  //     .from(tempDiv)
+  //     .save()
+  //     .finally(() => {
+  //       // cleanup
+  //       tempDiv.remove();
+  //     });
+  // };
 
   const isEmpty = !renderedContent || renderedContent.trim() === '';
 
