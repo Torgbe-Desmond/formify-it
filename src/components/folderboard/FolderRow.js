@@ -41,10 +41,13 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
       onClick={onClick}
       sx={{
         display: 'grid',
-        gridTemplateColumns: '1fr 80px 80px 120px 40px',
+        gridTemplateColumns: {
+          xs: '1fr 40px',                  // mobile:  name+meta stacked | actions
+          sm: '1fr 80px 80px 120px 40px',  // desktop: name | files | schema | updated | actions
+        },
         alignItems: 'center',
         px: { xs: 2, sm: 2.5 },
-        py: 1.25,
+        py: { xs: 1.5, sm: 1.25 },
         cursor: 'pointer',
         borderBottom: isLast ? 'none' : '1px solid',
         borderColor: 'divider',
@@ -53,18 +56,56 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
         '&:hover .row-actions': { opacity: 1 },
       }}
     >
-      {/* Name + icon */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0 }} />
-        <Typography
-          variant="body2" fontWeight={600} noWrap
-          sx={{ '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
-        >
-          {folder.name}
-        </Typography>
+      {/* Name + icon — on mobile shows meta underneath */}
+      <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, minWidth: 0 }}>
+        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
+
+        <Box sx={{ minWidth: 0 }}>
+          {/* Folder name */}
+          <Typography
+            variant="body2" fontWeight={600} noWrap
+            sx={{ '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
+          >
+            {folder.name}
+          </Typography>
+
+          {/* Mobile-only: files + schema + time inline below name */}
+          <Box sx={{
+            display: { xs: 'flex', sm: 'none' },
+            alignItems: 'center',
+            gap: 1,
+            mt: 0.4,
+            flexWrap: 'wrap',
+          }}>
+            {/* File count badge */}
+            {(folder.fileCount ?? 0) > 0 ? (
+              <Chip
+                label={`${folder.fileCount} file${folder.fileCount === 1 ? '' : 's'}`}
+                size="small"
+                variant="outlined"
+                sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }}
+              />
+            ) : (
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
+                No files
+              </Typography>
+            )}
+
+            {/* Schema dot */}
+            {folder.hasSchema
+              ? <CheckCircleOutlineRoundedIcon sx={{ fontSize: 13, color: 'success.main' }} />
+              : <RemoveRoundedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+            }
+
+            {/* Updated time */}
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
+              {timeAgo(folder.updatedAt)}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
-      {/* File count */}
+      {/* File count — desktop only */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}>
         {(folder.fileCount ?? 0) > 0 ? (
           <Chip
@@ -78,7 +119,7 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
         )}
       </Box>
 
-      {/* Has schema indicator */}
+      {/* Has schema — desktop only */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}>
         {folder.hasSchema
           ? <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16, color: 'success.main' }} />
@@ -86,7 +127,7 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
         }
       </Box>
 
-      {/* Updated time */}
+      {/* Updated time — desktop only */}
       <Typography
         variant="caption" color="text.secondary"
         sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1 }}
@@ -94,10 +135,15 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
         {timeAgo(folder.updatedAt)}
       </Typography>
 
-      {/* Actions */}
+      {/* Actions — always visible on mobile, hover-only on desktop */}
       <Box
         className="row-actions"
-        sx={{ opacity: 0, transition: 'opacity 0.15s', display: 'flex', justifyContent: 'flex-end' }}
+        sx={{
+          opacity: { xs: 1, sm: 0 },
+          transition: 'opacity 0.15s',
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <IconButton size="small" onClick={handleMenuClick} sx={{ color: 'text.secondary' }}>

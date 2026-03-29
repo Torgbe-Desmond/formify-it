@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, useMediaQuery, useTheme, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { Liquid } from 'liquidjs';
-// import html2pdf from "html2pdf.js";
+import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
 
 import {
   loadFileById,
@@ -14,15 +14,16 @@ import {
   clearCurrentFile,
 } from '../store/slices/filesSlice';
 
-import { selectSchemaByFolder } from '../store/slices/schemaSlice';
+import { loadSchema, selectSchemaByFolder } from '../store/slices/schemaSlice';
 
-import EditorHeader      from '../components/fileEditor/EditorHeader';
-import MarkdownViewer    from '../components/fileEditor/MarkdownViewer';
-import MarkdownEditor    from '../components/fileEditor/MarkdownEditor';
-import EditorActions     from '../components/fileEditor/EditorActions';
-import RenameFileDialog  from '../components/fileEditor/RenameFileDialog';
-import DeleteFileDialog  from '../components/fileEditor/DeleteFileDialog';
+import EditorHeader from '../components/fileEditor/EditorHeader';
+import MarkdownViewer from '../components/fileEditor/MarkdownViewer';
+import MarkdownEditor from '../components/fileEditor/MarkdownEditor';
+import EditorActions from '../components/fileEditor/EditorActions';
+import RenameFileDialog from '../components/fileEditor/RenameFileDialog';
+import DeleteFileDialog from '../components/fileEditor/DeleteFileDialog';
 import EditFileDataDialog from '../components/EditFileDataDialog';
+import { breadcrumbApi } from '../store/api/apiClient';
 
 function stripCssBlock(content) {
   if (!content) return content;
@@ -32,53 +33,64 @@ function stripCssBlock(content) {
 }
 
 export default function FileEditorPage() {
-  const { fileId }  = useParams();
-  const navigate    = useNavigate();
-  const dispatch    = useDispatch();
-  const theme       = useTheme();
-  const isMobile    = useMediaQuery(theme.breakpoints.down('sm'));
+  const { fileId } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const file           = useSelector(selectCurrentFile);
-  const storedContent  = useSelector(selectCurrentContent);
-  const schema         = useSelector(selectSchemaByFolder(file?.folderId));
+  const file = useSelector(selectCurrentFile);
+  const storedContent = useSelector(selectCurrentContent);
+  const schema = useSelector(selectSchemaByFolder(file?.folderId));
 
-  const [content,         setContent]         = useState('');
+  const [content, setContent] = useState('');
   const [renderedContent, setRenderedContent] = useState('');
-  const [isEditing,       setIsEditing]       = useState(false);
-  const [anchorEl,        setAnchorEl]        = useState(null);
-  const [renameOpen,      setRenameOpen]      = useState(false);
-  const [newFileName,     setNewFileName]     = useState('');
-  const [deleteOpen,      setDeleteOpen]      = useState(false);
-  const [editDataOpen,    setEditDataOpen]    = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editDataOpen, setEditDataOpen] = useState(false);
 
   const open = Boolean(anchorEl);
 
   useEffect(() => {
     if (!fileId) return;
     dispatch(loadFileById({ id: fileId }));
-    return () => dispatch(clearCurrentFile());
-  }, [fileId, dispatch]);
+    return () => {
+      dispatch(clearCurrentFile())
+      LoadSchema()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileId, dispatch, loadSchema]);
+
+  async function LoadSchema() {
+    if (!fileId) return;
+    const res = await breadcrumbApi.get('file', fileId);
+    const folder = res?.data.filter((f) => f.type === "folder")[0]
+    dispatch(loadSchema({ folderId: folder.id }));
+  }
 
   useEffect(() => {
     if (storedContent) setContent(stripCssBlock(storedContent));
-    if (file)          setNewFileName(file.name || '');
+    if (file) setNewFileName(file.name || '');
   }, [storedContent, file]);
 
   useEffect(() => {
     if (!content || !file) { setRenderedContent(''); return; }
 
-    const engine  = new Liquid();
-    const css     = schema?.templateCss || '';
+    const engine = new Liquid();
+    const css = schema?.templateCss || '';
     const context = {
-      name:      file.name || '',
+      name: file.name || '',
       createdAt: file.createdAt || '',
       updatedAt: file.updatedAt || '',
       ...(file.metadata
         ? Object.fromEntries(
-            Object.entries(file.metadata).map(([k, v]) => {
-              try { return [k, JSON.parse(v)]; } catch { return [k, v]; }
-            })
-          )
+          Object.entries(file.metadata).map(([k, v]) => {
+            try { return [k, JSON.parse(v)]; } catch { return [k, v]; }
+          })
+        )
         : {}),
     };
 
@@ -94,10 +106,10 @@ export default function FileEditorPage() {
   const handleSave = async () => {
     if (!fileId || !file) return;
     await dispatch(updateFile({
-      id:           fileId,
-      name:         file.name,
+      id: fileId,
+      name: file.name,
       renderedHtml: content,
-      metadata:     file.metadata || {},
+      metadata: file.metadata || {},
     }));
     setIsEditing(false);
   };
@@ -106,10 +118,10 @@ export default function FileEditorPage() {
     const name = newFileName.trim();
     if (!name || !fileId || !file) return;
     await dispatch(updateFile({
-      id:           fileId,
+      id: fileId,
       name,
       renderedHtml: content,
-      metadata:     file.metadata || {},
+      metadata: file.metadata || {},
     }));
     setRenameOpen(false);
   };
@@ -121,49 +133,49 @@ export default function FileEditorPage() {
   };
 
 
-  // const handleDownloadPDF = () => {
+  const handleDownloadPDF = () => {
 
-  //   if (!renderedContent || !file) {
-  //     alert("Nothing to download");
-  //     return;
-  //   }
+    if (!renderedContent || !file) {
+      alert("Nothing to download");
+      return;
+    }
 
-  //   // Create a temporary container with the exact rendered HTML (including <style>)
-  //   const tempDiv = document.createElement("div");
-  //   tempDiv.innerHTML = renderedContent;
-  //   tempDiv.style.padding = "40px";           // nice margins for PDF
-  //   tempDiv.style.backgroundColor = "#fff";
-  //   tempDiv.style.maxWidth = "800px";
-  //   tempDiv.style.margin = "0 auto";
+    // Create a temporary container with the exact rendered HTML (including <style>)
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = renderedContent;
+    tempDiv.style.padding = "40px";           // nice margins for PDF
+    tempDiv.style.backgroundColor = "#fff";
+    tempDiv.style.maxWidth = "800px";
+    tempDiv.style.margin = "0 auto";
 
-  //   // Optional: hide any UI elements you don't want in the PDF
-  //   // tempDiv.querySelectorAll('button, .no-print').forEach(el => el.remove());
+    // Optional: hide any UI elements you don't want in the PDF
+    // tempDiv.querySelectorAll('button, .no-print').forEach(el => el.remove());
 
-  //   const opt = {
-  //     margin: [10, 10, 10, 10],   // top, right, bottom, left (mm)
-  //     filename: `${file.name || "document"}.pdf`,
-  //     image: { type: "jpeg", quality: 0.98 },
-  //     html2canvas: {
-  //       scale: 2,                   // higher quality
-  //       useCORS: true,
-  //       letterRendering: true,
-  //     },
-  //     jsPDF: {
-  //       unit: "mm",
-  //       format: "a4",
-  //       orientation: "portrait",
-  //     },
-  //   };
+    const opt = {
+      margin: [10, 10, 10, 10],   // top, right, bottom, left (mm)
+      filename: `${file.name || "document"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,                   // higher quality
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
+      },
+    };
 
-  //   html2pdf()
-  //     .set(opt)
-  //     .from(tempDiv)
-  //     .save()
-  //     .finally(() => {
-  //       // cleanup
-  //       tempDiv.remove();
-  //     });
-  // };
+    html2pdf()
+      .set(opt)
+      .from(tempDiv)
+      .save()
+      .finally(() => {
+        // cleanup
+        tempDiv.remove();
+      });
+  };
 
   const isEmpty = !renderedContent || renderedContent.trim() === '';
 
@@ -186,6 +198,7 @@ export default function FileEditorPage() {
         onRenameClick={() => { setAnchorEl(null); setRenameOpen(true); }}
         onDeleteClick={() => { setAnchorEl(null); setDeleteOpen(true); }}
         onEditMetadataClick={() => { setAnchorEl(null); setEditDataOpen(true); }}
+        onPDFDownload={handleDownloadPDF}
       />
 
       {isEditing ? (

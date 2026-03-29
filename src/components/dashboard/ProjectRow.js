@@ -35,10 +35,13 @@ export default function ProjectRow({ project, isLast, onClick, onRename, onDelet
       onClick={onClick}
       sx={{
         display: 'grid',
-        gridTemplateColumns: '1fr 80px 120px 40px',
+        gridTemplateColumns: {
+          xs: '1fr 40px',            // mobile:  name+meta stacked | actions
+          sm: '1fr 80px 120px 40px', // desktop: name | folders | updated | actions
+        },
         alignItems: 'center',
         px: { xs: 2, sm: 2.5 },
-        py: 1.25,
+        py: { xs: 1.5, sm: 1.25 },
         cursor: 'pointer',
         borderBottom: isLast ? 'none' : '1px solid',
         borderColor: 'divider',
@@ -48,48 +51,55 @@ export default function ProjectRow({ project, isLast, onClick, onRename, onDelet
       }}
     >
       {/* Name + icon */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0 }} />
-        <Typography
-          variant="body2"
-          fontWeight={600}
-          noWrap
-          sx={{
-            color: 'text.primary',
-            '&:hover': { color: 'primary.main', textDecoration: 'underline' },
-          }}
-        >
-          {project.name}
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, minWidth: 0 }}>
+        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
+
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="body2" fontWeight={600} noWrap
+            sx={{ color: 'text.primary', '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
+          >
+            {project.name}
+          </Typography>
+
+          {/* Mobile-only: folder count + time stacked below name */}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1, mt: 0.4 }}>
+            {(project.folderCount ?? 0) > 0 ? (
+              <Chip
+                label={`${project.folderCount} folder${project.folderCount === 1 ? '' : 's'}`}
+                size="small" variant="outlined"
+                sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }}
+              />
+            ) : (
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>No folders</Typography>
+            )}
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
+              {timeAgo(project.updatedAt)}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
-      {/* Folder count */}
+      {/* Folder count — desktop only */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}>
-        {project.folderCount > 0 ? (
-          <Chip
-            label={project.folderCount}
-            size="small"
-            variant="outlined"
-            sx={{ height: 20, fontSize: '0.7rem', borderRadius: 1 }}
-          />
+        {(project.folderCount ?? 0) > 0 ? (
+          <Chip label={project.folderCount} size="small" variant="outlined"
+            sx={{ height: 20, fontSize: '0.7rem', borderRadius: 1 }} />
         ) : (
           <Typography variant="caption" color="text.disabled">—</Typography>
         )}
       </Box>
 
-      {/* Updated time */}
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1 }}
-      >
+      {/* Updated time — desktop only */}
+      <Typography variant="caption" color="text.secondary"
+        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1 }}>
         {timeAgo(project.updatedAt)}
       </Typography>
 
-      {/* Actions — fade in on row hover */}
+      {/* Actions — always visible on mobile, hover-only on desktop */}
       <Box
         className="row-actions"
-        sx={{ opacity: 0, transition: 'opacity 0.15s', display: 'flex', justifyContent: 'flex-end' }}
+        sx={{ opacity: { xs: 1, sm: 0 }, transition: 'opacity 0.15s', display: 'flex', justifyContent: 'flex-end' }}
         onClick={(e) => e.stopPropagation()}
       >
         <IconButton size="small" onClick={handleMenuClick} sx={{ color: 'text.secondary' }}>

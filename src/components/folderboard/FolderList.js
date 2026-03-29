@@ -19,21 +19,36 @@ export default function FolderList({ folders, onFolderClick, onRenameClick, onDe
   }
 
   return (
-    <Box sx={{ mx: { xs: 2, sm: 3 }, mt: 2, pb: 4 }}>
+    <Box sx={{ mx: { xs: 1, sm: 3 }, mt: 2, pb: 4 }}>
       <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
 
         {/* Header row */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: '1fr 80px 80px 120px 40px',
+          gridTemplateColumns: {
+            xs: '1fr 40px',                    // mobile:  name | actions
+            sm: '1fr 80px 80px 120px 40px',    // desktop: name | files | schema | updated | actions
+          },
           px: { xs: 2, sm: 2.5 }, py: 1,
           bgcolor: 'action.hover',
           borderBottom: '1px solid', borderColor: 'divider',
         }}>
-          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name</Typography>
-          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', display: { xs: 'none', sm: 'block' } }}>Files</Typography>
-          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', display: { xs: 'none', sm: 'block' } }}>Schema</Typography>
-          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>Updated</Typography>
+          <Typography variant="caption" fontWeight={600} color="text.secondary"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Name
+          </Typography>
+          <Typography variant="caption" fontWeight={600} color="text.secondary"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', display: { xs: 'none', sm: 'block' } }}>
+            Files
+          </Typography>
+          <Typography variant="caption" fontWeight={600} color="text.secondary"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', display: { xs: 'none', sm: 'block' } }}>
+            Schema
+          </Typography>
+          <Typography variant="caption" fontWeight={600} color="text.secondary"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+            Updated
+          </Typography>
           <Box />
         </Box>
 

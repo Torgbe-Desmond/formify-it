@@ -22,15 +22,15 @@ const stripCssBlock = (str) => {
 
 export default function EditFileDataDialog({ open, onClose, file, folderId, onSaved }) {
   const dispatch = useDispatch();
-  const schema   = useSelector(selectSchemaByFolder(folderId));
+  const schema = useSelector(selectSchemaByFolder(folderId));
 
-  const [fields,         setFields]         = useState({});
-  const [template,       setTemplate]       = useState('');
-  const [frontMatter,    setFrontMatter]    = useState({});
-  const [formData,       setFormData]       = useState({});
-  const [loading,        setLoading]        = useState(false);
-  const [loaded,         setLoaded]         = useState(false);
-  const [errors,         setErrors]         = useState({});
+  const [fields, setFields] = useState({});
+  const [template, setTemplate] = useState('');
+  const [frontMatter, setFrontMatter] = useState({});
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [errors, setErrors] = useState({});
   const [expandedArrays, setExpandedArrays] = useState({});
 
   useEffect(() => {
@@ -42,47 +42,51 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open || !file || !schema) return;
+ useEffect(() => {
+  if (!open || !file || !schema) return;
 
-    try {
-      const parsed = yaml.load(schema.schemaYaml || '');
-      if (!parsed) return;
+  try {
+    const parsed = yaml.load(schema.schemaYaml || '');
+    if (!parsed) return;
 
-      setFields(parsed.fields || {});
-      setTemplate(stripCssBlock(schema.templateHtml || ''));
-      setFrontMatter(parsed);
+    setFields(parsed.fields || {});
+    setTemplate(stripCssBlock(schema.templateHtml || ''));
+    setFrontMatter(parsed);
 
-      // Pre-fill form with existing metadata
-      const existingMeta = file.metadata || {};
-      const initialData  = {};
+    // --- STEP 1: CONVERT ARRAY TO OBJECT ---
+    const metadataArray = Array.isArray(file.metadata) ? file.metadata : [];
+    const existingMetaMap = {};
+    
+    metadataArray.forEach(item => {
+      existingMetaMap[item.key] = item.value;
+    });
 
-      Object.entries(parsed.fields || {}).forEach(([key, config]) => {
-        if (key in existingMeta) {
-          // Metadata values are JSON strings from backend
-          try {
-            initialData[key] = JSON.parse(existingMeta[key]);
-          } catch {
-            initialData[key] = existingMeta[key];
-          }
-        } else if (config.default !== undefined) {
-          initialData[key] = config.default;
-        } else if (config.type === 'checkbox') {
-          initialData[key] = false;
-        } else if (config.type === 'array') {
-          initialData[key] = [];
-        } else {
-          initialData[key] = '';
+    const initialData = {};
+
+    // --- STEP 2: MAP TO FORM FIELDS ---
+    Object.entries(parsed.fields || {}).forEach(([key, config]) => {
+      if (key in existingMetaMap) {
+        const rawValue = existingMetaMap[key];
+        try {
+          // This handles the stringified JSON like '"12"' or '[]'
+          initialData[key] = JSON.parse(rawValue);
+        } catch {
+          initialData[key] = rawValue;
         }
-      });
+      } else {
+        // Fallbacks for missing keys
+        initialData[key] = config.default !== undefined ? config.default : 
+                          (config.type === 'checkbox' ? false : 
+                          (config.type === 'array' ? [] : ''));
+      }
+    });
 
-      setFormData(initialData);
-      setErrors({});
-      setLoaded(true);
-    } catch (err) {
-      console.error('Schema parse error:', err);
-    }
-  }, [open, file, schema]);
+    setFormData(initialData);
+    setLoaded(true);
+  } catch (err) {
+    console.error('Schema parse error:', err);
+  }
+}, [open, file, schema]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -90,7 +94,7 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
       const value = formData[key];
       if (config.required) {
         if (value === undefined || value === null || value === '' ||
-            (Array.isArray(value) && value.length === 0)) {
+          (Array.isArray(value) && value.length === 0)) {
           newErrors[key] = `${config.label || key} is required`;
         }
       }
@@ -130,9 +134,9 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
       );
 
       await dispatch(updateFile({
-        id:          file.id,
-        name:        fileName,
-        renderedHtml,
+        id: file._id,
+        name: fileName,
+        content: renderedHtml,
         metadata,
       }));
 

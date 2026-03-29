@@ -1,5 +1,5 @@
 import {
-  Box, Typography, Button, TextField,
+  Box, Button, TextField,
   InputAdornment,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -24,7 +24,6 @@ export default function FolderBoardHeader({
     const fetchBreadcrumb = async () => {
       try {
         const res = await breadcrumbApi.get('project', projectId);
-        console.log("res", res)
         setCrumbs(res.data);
       } catch (error) {
         console.error(error);
@@ -47,9 +46,9 @@ export default function FolderBoardHeader({
         alignItems: { xs: 'stretch', sm: 'center' },
         gap: 1.5,
       }}>
-        <Typography variant="h5" fontWeight={700} sx={{ flexShrink: 0 }}>
+        {/* <Typography variant="h5" fontWeight={700} sx={{ flexShrink: 0 }}>
           {projectName || 'Project'}
-        </Typography>
+        </Typography> */}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, maxWidth: { sm: 480 }, ml: { sm: 'auto' } }}>
           <TextField

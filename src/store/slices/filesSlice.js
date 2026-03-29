@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { filesApi } from '../api/apiClient';
 
 // ── Thunks ────────────────────────────────────────────────────────
-
 export const loadFilesFromServer = createAsyncThunk(
   'files/loadFromServer',
   async ({ folderId }, { rejectWithValue }) => {
@@ -28,7 +27,7 @@ export const loadFileById = createAsyncThunk(
       return { file, content };
     } catch (err) {
       return rejectWithValue(err.message);
-    }
+    } 
   }
 );
 
@@ -42,8 +41,8 @@ export const createFile = createAsyncThunk(
 
 export const updateFile = createAsyncThunk(
   'files/update',
-  async ({ id, name, renderedHtml, metadata }) => {
-    const res = await filesApi.update(id, { name, renderedHtml, metadata });
+  async ({ id, name, content, metadata }) => {
+    const res = await filesApi.update(id, { name, content, metadata });
     return res.data;
   }
 );
@@ -60,11 +59,11 @@ export const deleteFile = createAsyncThunk(
 const filesSlice = createSlice({
   name: 'files',
   initialState: {
-    byFolder:       {},
-    currentFile:    null,
+    byFolder: {},
+    currentFile: null,
     currentContent: '',
-    loading:        false,
-    error:          null,
+    loading: false,
+    error: null,
   },
   reducers: {
     clearCurrentFile(state) {

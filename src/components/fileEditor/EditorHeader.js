@@ -2,17 +2,18 @@ import {
   Box, Typography, IconButton, Menu,
   MenuItem, ListItemIcon, ListItemText,
 } from '@mui/material';
-import ArrowBackIosIcon                 from '@mui/icons-material/ArrowBackIos';
-import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
-import EditRoundedIcon                  from '@mui/icons-material/EditRounded';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import DeleteOutlineRoundedIcon         from '@mui/icons-material/DeleteOutlineRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useNavigate } from 'react-router-dom';
 
 export default function EditorHeader({
   fileName, anchorEl, open,
   onMenuClick, onMenuClose,
-  onRenameClick, onDeleteClick, onEditMetadataClick,
+  onRenameClick, onDeleteClick, onEditMetadataClick, onPDFDownload
 }) {
   const navigate = useNavigate();
 
@@ -48,6 +49,12 @@ export default function EditorHeader({
             <DeleteOutlineRoundedIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Delete File</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={onPDFDownload} >
+          <ListItemIcon>
+            <PictureAsPdfIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Download PDF</ListItemText>
         </MenuItem>
       </Menu>
     </Box>

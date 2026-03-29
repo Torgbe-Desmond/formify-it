@@ -219,7 +219,7 @@ const Landing = () => {
   const features = [
     { icon: '◈', title: 'Schema Templates', desc: 'Define reusable form fields with YAML once, fill it forever.' },
     // { icon: '⬡', title: 'Offline First', desc: 'Every change is saved locally. Syncs automatically when back online.' },
-    // { icon: '◇', title: 'Structured Docs', desc: 'Project → Folder → File logic. Export any document to PDF.' },
+    { icon: '◇', title: 'Structured Docs', desc: 'Project → Folder → File logic. Export any document to PDF.' },
     { icon: '⬘', title: 'Rich Text', desc: 'Bold, italic, and lists — inline rich text via Tiptap.' },
     { icon: '○', title: 'Live Preview', desc: 'See your rendered HTML document update in real time.' },
     { icon: '△', title: 'Team Ready', desc: 'JWT-secured accounts with independent user projects.' },
@@ -229,7 +229,7 @@ const Landing = () => {
     <div style={S.root}>
       <nav style={S.nav}>
         <div style={S.brand}>
-          <div style={S.brandMark}/><span style={S.brandName}>FastTransfers</span>
+          <div style={S.brandMark}/><span style={S.brandName}>Formify</span>
         </div>
         <div style={S.navLinks}>
           <button style={{...S.navBtn, ...S.navBtnGhost}} onClick={() => navigate('/login')}>Sign in</button>
@@ -262,7 +262,7 @@ const Landing = () => {
       </section>
 
       <footer style={S.footer}>
-        <div style={S.footerBrand}><div style={S.footerMark}/><span style={{...S.footerText, marginLeft: 4}}>FastTransfers</span></div>
+        <div style={S.footerBrand}><div style={S.footerMark}/><span style={{...S.footerText, marginLeft: 4}}>Formify</span></div>
         <span style={S.footerText}>Document management for teams. © 2024</span>
       </footer>
     </div>
