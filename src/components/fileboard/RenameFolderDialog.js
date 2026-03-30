@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 export default function RenameFolderDialog({
-  open, onClose, folderName, onFolderNameChange, onSave,
+  open, onClose, folderName, onFolderNameChange, onSave, renameFolderLoading
 }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -23,8 +23,10 @@ export default function RenameFolderDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={onSave}>Save</Button>
+        <Button disabled={renameFolderLoading} onClick={onClose}>Cancel</Button>
+        <Button variant="contained" disabled={renameFolderLoading} onClick={onSave}>
+          {renameFolderLoading ? "Saving..." : "Save"}
+          </Button>
       </DialogActions>
     </Dialog>
   );

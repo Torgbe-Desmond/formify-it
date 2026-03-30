@@ -115,7 +115,9 @@ export default function TextareaField({ fieldKey, config, value = '', onChange, 
 
         <Box
           sx={{
-            p: 2,
+            pl: 2,
+            pr: 2,
+            pb: 2,
             '& .ProseMirror': {
               outline: 'none',
               minHeight: '120px',

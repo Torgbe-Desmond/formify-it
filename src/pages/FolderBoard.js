@@ -1,21 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  loadFolders,
-  createFolder,
-  renameFolder,
-  deleteFolder,
-  selectFoldersByProject,
-  selectFoldersLoading,
-} from '../store/slices/foldersSlice';
-
-import {
-  selectProjectById,
-  loadProjects,
-} from '../store/slices/projectsSlice';
+  useGetProjectsQuery,
+  useGetFoldersByProjectQuery,
+  useCreateFolderMutation,
+  useRenameFolderMutation,
+  useDeleteFolderMutation,
+} from '../store/api/apiSlice';
 
 import FolderBoardHeader from '../components/folderboard/FolderBoardHeader';
 import FolderList from '../components/folderboard/FolderList';
@@ -26,13 +19,17 @@ import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
 export default function FolderBoard() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const project = useSelector(selectProjectById(projectId));
-  const folders = useSelector(selectFoldersByProject(projectId));
-  const loading = useSelector(selectFoldersLoading);
+  // ── Queries & Mutations ─────────────────────────────
+  const { data: projects = [] } = useGetProjectsQuery();
+  const project = projects.find(p => p.id === projectId);
 
+  const { data: folders = [], isLoading: loading } = useGetFoldersByProjectQuery(projectId);
+  const [createFolder, { isLoading: createFolderLoading, }] = useCreateFolderMutation();
+  const [renameFolder, { isLoading: renameFolderLoading, }] = useRenameFolderMutation();
+  const [deleteFolder, { isLoading: deleteFolderLoading, }] = useDeleteFolderMutation();
 
+  // ── Local state ─────────────────────────────────────
   const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [targetFolder, setTargetFolder] = useState(null);
@@ -41,33 +38,30 @@ export default function FolderBoard() {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(loadFolders({ projectId }));
-    if (!project) dispatch(loadProjects());
-  }, [projectId, dispatch, project]);
-
+    if (targetFolder) setRenameName(targetFolder.name);
+  }, [targetFolder]);
 
   const filteredFolders = useMemo(() => {
     if (!searchQuery) return folders;
-    return folders.filter((f) =>
-      f.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return folders.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [folders, searchQuery]);
 
+  // ── Handlers ───────────────────────────────────────
   const handleCreateFolder = async (name) => {
-    await dispatch(createFolder({ name, projectId }));
+    if (!projectId) return;
+    await createFolder({ projectId, data: { name } }).unwrap();
     setNewFolderOpen(false);
   };
 
   const handleRenameOpen = (folder) => {
     setTargetFolder(folder);
-    setRenameName(folder.name);
     setRenameOpen(true);
   };
 
   const handleRenameSave = async () => {
     if (!targetFolder || !renameName.trim()) return;
-    await dispatch(renameFolder({ id: targetFolder.id, name: renameName.trim() }));
-    setRenameOpen(false);
+    await renameFolder({ id: targetFolder.id, data: { name: renameName.trim() } }).unwrap();
+    setRenameOpen(true);
     setTargetFolder(null);
   };
 
@@ -78,7 +72,7 @@ export default function FolderBoard() {
 
   const handleDeleteConfirm = async () => {
     if (!targetFolder) return;
-    await dispatch(deleteFolder({ id: targetFolder.id }));
+    await deleteFolder(targetFolder.id).unwrap();
     setDeleteOpen(false);
     setTargetFolder(null);
   };
@@ -102,6 +96,7 @@ export default function FolderBoard() {
 
       <NewFolderDialog
         open={newFolderOpen}
+        createFolderLoading={createFolderLoading}
         onClose={() => setNewFolderOpen(false)}
         onCreate={handleCreateFolder}
       />
@@ -109,6 +104,7 @@ export default function FolderBoard() {
       <RenameFolderDialog
         open={renameOpen}
         onClose={() => setRenameOpen(false)}
+        renameFolderLoading={renameFolderLoading}
         folderName={renameName}
         onFolderNameChange={setRenameName}
         onSave={handleRenameSave}
@@ -116,6 +112,7 @@ export default function FolderBoard() {
 
       <DeleteFolderDialog
         open={deleteOpen}
+        deleteFolderLoading={deleteFolderLoading}
         onClose={() => setDeleteOpen(false)}
         folderName={targetFolder?.name}
         onDelete={handleDeleteConfirm}

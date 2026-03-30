@@ -66,9 +66,13 @@ export default function FileEditorPage() {
 
   async function LoadSchema() {
     if (!fileId) return;
-    const res = await breadcrumbApi.get('file', fileId);
-    const folder = res?.data.filter((f) => f.type === "folder")[0]
-    dispatch(loadSchema({ folderId: folder.id }));
+    try {
+      const res = await breadcrumbApi.get('file', fileId);
+      const folder = res?.data.filter((f) => f.type === "folder")[0]
+      dispatch(loadSchema({ folderId: folder.id }));
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   useEffect(() => {

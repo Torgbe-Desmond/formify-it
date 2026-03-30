@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 export default function DeleteFolderDialog({
-  open, onClose, folderName, onDelete,
+  open, onClose, folderName, onDelete, deleteFolderLoading
 }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -16,8 +16,10 @@ export default function DeleteFolderDialog({
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" color="error" onClick={onDelete}>Delete</Button>
+        <Button disabled={deleteFolderLoading} onClick={onClose}>Cancel</Button>
+        <Button variant="contained" color="error" disabled={deleteFolderLoading} onClick={onDelete}>
+          {deleteFolderLoading ? "Deleting" : "Delete"}
+        </Button>
       </DialogActions>
     </Dialog>
   );

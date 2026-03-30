@@ -1,13 +1,9 @@
-import {
-  Box, Button, TextField,
-  InputAdornment,
-} from '@mui/material';
+import { Box, Button, TextField, InputAdornment } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { breadcrumbApi } from '../../store/api/apiClient';
 import Breadcrumbs from '../Breadcrumbs';
+import { useGetBreadcrumbQuery } from '../../store/api/apiSlice';
 
 export default function FolderBoardHeader({
   projectName,
@@ -16,49 +12,40 @@ export default function FolderBoardHeader({
   onSearchChange,
 }) {
   const { projectId } = useParams();
-  const [crumbs, setCrumbs] = useState([]);
-  const [loadingBreadcrumbs, setLoadingBreadcrumbs] = useState(false)
 
-  useEffect(() => {
-    if (!projectId) return;
-
-    const fetchBreadcrumb = async () => {
-      try {
-        setLoadingBreadcrumbs(true)
-        const res = await breadcrumbApi.get('project', projectId);
-        setCrumbs(res.data);
-      } catch (error) {
-        console.error(error);
-        setLoadingBreadcrumbs(false)
-      } finally {
-        setLoadingBreadcrumbs(false)
-
-      }
-    };
-
-    fetchBreadcrumb();
-  }, [projectId]);
+  // Use RTK Query to fetch breadcrumbs
+  const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery(
+    { type: 'project', id: projectId },
+    { skip: !projectId }
+  );
 
   return (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
       {/* Breadcrumb */}
-
       <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 
       {/* Title + search + button */}
-      <Box sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'stretch', sm: 'center' },
-        gap: 1.5,
-      }}>
-        {/* <Typography variant="h5" fontWeight={700} sx={{ flexShrink: 0 }}>
-          {projectName || 'Project'}
-        </Typography> */}
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, maxWidth: { sm: 480 }, ml: { sm: 'auto' } }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flex: 1,
+            maxWidth: { sm: 480 },
+            ml: { sm: 'auto' },
+          }}
+        >
           <TextField
-            fullWidth size="small"
+            fullWidth
+            size="small"
             placeholder="Find a folder..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}

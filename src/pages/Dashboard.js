@@ -1,43 +1,39 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  loadProjects,
-  createProject,
-  renameProject,
-  deleteProject,
-  selectProjects,
-  selectProjectsLoading,
-} from '../store/slices/projectsSlice';
+  useGetProjectsQuery,
+  useCreateProjectMutation,
+  useRenameProjectMutation,
+  useDeleteProjectMutation,
+} from '../store/api/apiSlice';
 
-import ProjectHeader    from '../components/dashboard/ProjectHeader';
-import ProjectList      from '../components/dashboard/ProjectList';
+import ProjectHeader from '../components/dashboard/ProjectHeader';
+import ProjectList from '../components/dashboard/ProjectList';
 import NewProjectDialog from '../components/dashboard/NewProjectDialog';
 import RenameProjectDialog from '../components/dashboard/RenameProjectDialog';
 import DeleteProjectDialog from '../components/dashboard/DeleteProjectDialog';
 
 export default function Dashboard() {
-  const navigate  = useNavigate();
-  const dispatch  = useDispatch();
-  const projects  = useSelector(selectProjects);
-  const loading   = useSelector(selectProjectsLoading);
+  const navigate = useNavigate();
+
+  // ✅ RTK Query hooks
+  const { data: projects = [], isLoading: loading } = useGetProjectsQuery();
+  const [createProject, { isLoading: createProjectLoading }] = useCreateProjectMutation();
+  const [renameProject, { isLoading: renameProjectLoading }] = useRenameProjectMutation();
+  const [deleteProject, { isLoading: deleteProjectLoading }] = useDeleteProjectMutation();
 
   const [newProjectOpen, setNewProjectOpen] = useState(false);
-  const [searchQuery,    setSearchQuery]    = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Rename state
-  const [targetProject,  setTargetProject]  = useState(null);
-  const [renameOpen,     setRenameOpen]     = useState(false);
-  const [renameName,     setRenameName]     = useState('');
+  const [targetProject, setTargetProject] = useState(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameName, setRenameName] = useState('');
 
   // Delete state
-  const [deleteOpen,     setDeleteOpen]     = useState(false);
-
-  useEffect(() => {
-    dispatch(loadProjects());
-  }, [dispatch]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const filteredProjects = useMemo(() => {
     if (!searchQuery) return projects;
@@ -48,7 +44,7 @@ export default function Dashboard() {
 
   // ── Create ────────────────────────────────────────────────────
   const handleCreate = async (name) => {
-    await dispatch(createProject({ name }));
+    await createProject({ name }).unwrap();
     setNewProjectOpen(false);
   };
 
@@ -61,7 +57,12 @@ export default function Dashboard() {
 
   const handleRenameSave = async () => {
     if (!targetProject || !renameName.trim()) return;
-    await dispatch(renameProject({ id: targetProject.id, name: renameName.trim() }));
+
+    await renameProject({
+      id: targetProject.id,
+      data: { name: renameName.trim() }, // ✅ matches your API slice
+    }).unwrap();
+
     setRenameOpen(false);
     setTargetProject(null);
   };
@@ -74,7 +75,9 @@ export default function Dashboard() {
 
   const handleDeleteConfirm = async () => {
     if (!targetProject) return;
-    await dispatch(deleteProject({ id: targetProject.id }));
+
+    await deleteProject(targetProject.id).unwrap();
+
     setDeleteOpen(false);
     setTargetProject(null);
   };
@@ -96,12 +99,14 @@ export default function Dashboard() {
       />
 
       <NewProjectDialog
+        createProjectLoading={createProjectLoading}
         open={newProjectOpen}
         onClose={() => setNewProjectOpen(false)}
         onCreate={handleCreate}
       />
 
       <RenameProjectDialog
+        renameProjectLoading={renameProjectLoading}
         open={renameOpen}
         onClose={() => { setRenameOpen(false); setTargetProject(null); }}
         projectName={renameName}
@@ -110,6 +115,7 @@ export default function Dashboard() {
       />
 
       <DeleteProjectDialog
+        deleteProjectLoading={deleteProjectLoading}
         open={deleteOpen}
         onClose={() => { setDeleteOpen(false); setTargetProject(null); }}
         projectName={targetProject?.name}

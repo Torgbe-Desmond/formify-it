@@ -86,16 +86,18 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
                 sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }}
               />
             ) : (
-              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
-                No files
-              </Typography>
+              // <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
+              //   No files
+              // </Typography>
+
+              <></>
             )}
 
-            {/* Schema dot */}
+            {/* Schema dot
             {folder.hasSchema
               ? <CheckCircleOutlineRoundedIcon sx={{ fontSize: 13, color: 'success.main' }} />
               : <RemoveRoundedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
-            }
+            } */}
 
             {/* Updated time */}
             <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>

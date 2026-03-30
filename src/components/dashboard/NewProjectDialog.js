@@ -4,7 +4,7 @@ import {
   DialogActions, TextField, Button,
 } from '@mui/material';
 
-export default function NewProjectDialog({ open, onClose, onCreate }) {
+export default function NewProjectDialog({ open, onClose, onCreate, createProjectLoading }) {
   const [name, setName] = useState('');
 
   const handleCreate = async () => {
@@ -24,6 +24,7 @@ export default function NewProjectDialog({ open, onClose, onCreate }) {
       <DialogTitle>New Project</DialogTitle>
       <DialogContent>
         <TextField
+          disabled={createProjectLoading}
           autoFocus fullWidth
           label="Project name"
           value={name}
@@ -36,9 +37,9 @@ export default function NewProjectDialog({ open, onClose, onCreate }) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button variant="contained" disabled={!name.trim()} onClick={handleCreate}>
-          Create
+        <Button disabled={createProjectLoading} onClick={handleClose}>Cancel</Button>
+        <Button variant="contained" disabled={createProjectLoading} onClick={handleCreate}>
+          {createProjectLoading ? "Creating" : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

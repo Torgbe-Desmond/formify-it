@@ -4,7 +4,7 @@ import {
   DialogActions, TextField, Button,
 } from '@mui/material';
 
-export default function NewFolderDialog({ open, onClose, onCreate }) {
+export default function NewFolderDialog({ open, createFolderLoading, onClose, onCreate }) {
   const [name, setName] = useState('');
 
   const handleCreate = async () => {
@@ -24,6 +24,7 @@ export default function NewFolderDialog({ open, onClose, onCreate }) {
       <DialogTitle>New Folder</DialogTitle>
       <DialogContent>
         <TextField
+          disabled={createFolderLoading}
           autoFocus fullWidth
           label="Folder name"
           value={name}
@@ -36,9 +37,9 @@ export default function NewFolderDialog({ open, onClose, onCreate }) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button variant="contained" disabled={!name.trim()} onClick={handleCreate}>
-          Create
+        <Button disabled={createFolderLoading} onClick={handleClose}>Cancel</Button>
+        <Button variant="contained" disabled={createFolderLoading} onClick={handleCreate}>
+          {createFolderLoading ? "Creating.." : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

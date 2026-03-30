@@ -10,8 +10,7 @@ import FolderDeleteRoundedIcon from '@mui/icons-material/FolderDeleteRounded';
 import SchemaRoundedIcon from '@mui/icons-material/SchemaRounded';
 import { useParams } from 'react-router-dom';
 import Breadcrumbs from '../Breadcrumbs';
-import { useEffect, useState } from 'react';
-import { breadcrumbApi } from '../../store/api/apiClient';
+import { useGetBreadcrumbQuery } from '../../store/api/apiSlice';
 
 export default function FileBoardHeader({
   folderName,
@@ -27,27 +26,13 @@ export default function FileBoardHeader({
   onSearchChange,
 }) {
   const { folderId } = useParams();
-  const [crumbs, setCrumbs] = useState([]);
-  const [loadingBreadcrumbs, setLoadingBreadcrumbs] = useState(false)
 
-  useEffect(() => {
-    if (!folderId) return;
+  // Use RTK Query to fetch breadcrumbs
+  const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery(
+    { type: 'folder', id: folderId },
+    { skip: !folderId }
+  );
 
-    const fetchBreadcrumb = async () => {
-      try {
-        setLoadingBreadcrumbs(true)
-        const res = await breadcrumbApi.get('folder', folderId);
-        setCrumbs(res.data);
-      } catch (error) {
-        console.error(error);
-        setLoadingBreadcrumbs(false)
-      } finally {
-        setLoadingBreadcrumbs(false)
-      }
-    };
-
-    fetchBreadcrumb();
-  }, [folderId]);
 
   return (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>

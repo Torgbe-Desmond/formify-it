@@ -4,13 +4,14 @@ import {
 } from '@mui/material';
 
 export default function RenameProjectDialog({
-  open, onClose, projectName, onProjectNameChange, onSave,
+  open, onClose, projectName, onProjectNameChange, onSave, renameProjectLoading
 }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>Rename Project</DialogTitle>
       <DialogContent>
         <TextField
+          disabled={renameProjectLoading}
           autoFocus fullWidth
           label="Project Name"
           value={projectName}
@@ -23,9 +24,9 @@ export default function RenameProjectDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" disabled={!projectName?.trim()} onClick={onSave}>
-          Save
+        <Button disabled={renameProjectLoading} onClick={onClose}>Cancel</Button>
+        <Button disabled={renameProjectLoading} variant="contained" onClick={onSave}>
+          {renameProjectLoading ? "Saving" : "Save"}
         </Button>
       </DialogActions>
     </Dialog>

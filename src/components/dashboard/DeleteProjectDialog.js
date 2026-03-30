@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 export default function DeleteProjectDialog({
-  open, onClose, projectName, onDelete,
+  open, onClose, projectName, onDelete, deleteProjectLoading
 }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -16,9 +16,9 @@ export default function DeleteProjectDialog({
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" color="error" onClick={onDelete}>
-          Delete
+        <Button disabled={deleteProjectLoading} onClick={onClose}>Cancel</Button>
+        <Button disabled={deleteProjectLoading} variant="contained" color="error" onClick={onDelete}>
+          {deleteProjectLoading ? "Deleting" : "Delete"}
         </Button>
       </DialogActions>
     </Dialog>

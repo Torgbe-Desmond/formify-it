@@ -71,7 +71,8 @@ export default function ProjectRow({ project, isLast, onClick, onRename, onDelet
                 sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }}
               />
             ) : (
-              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>No folders</Typography>
+            <></>
+              // <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>No folders</Typography>
             )}
             <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
               {timeAgo(project.updatedAt)}
