@@ -33,21 +33,11 @@ const FolderSkeleton = ({ isLast }) => (
 );
 
 
-export default function FolderList({ folders, loading, onFolderClick, onRenameClick, onDeleteClick }) {
-  if (!folders?.length) {
-    return (
-      <Box sx={{
-        mx: { xs: 2, sm: 3 }, mt: 2,
-        border: '1px solid', borderColor: 'divider',
-        borderRadius: 2, py: 10,
-        textAlign: 'center', color: 'text.secondary',
-      }}>
-        <CreateNewFolderRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
-        <Typography variant="body1" gutterBottom fontWeight={500}>No folders yet</Typography>
-        <Typography variant="body2">Use the "New Folder" button above to get started</Typography>
-      </Box>
-    );
-  }
+export default function FolderList({ folders, loading, isSuccess, onFolderClick, onRenameClick, onDeleteClick }) {
+  console.log("isSuccess",isSuccess)
+  const isEmpty = isSuccess && (folders?.length === 0);
+
+  console.log("isEmpty", isEmpty)
 
   return (
     <Box sx={{ mx: { xs: 1, sm: 3 }, mt: 2, pb: 4 }}>
@@ -57,8 +47,8 @@ export default function FolderList({ folders, loading, onFolderClick, onRenameCl
         <Box sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr 40px',                    // mobile:  name | actions
-            sm: '1fr 80px 80px 120px 40px',    // desktop: name | files | schema | updated | actions
+            xs: '1fr 40px',
+            sm: '1fr 80px 80px 120px 40px',
           },
           px: { xs: 2, sm: 2.5 }, py: 1,
           bgcolor: 'action.hover',
@@ -84,13 +74,21 @@ export default function FolderList({ folders, loading, onFolderClick, onRenameCl
         </Box>
 
 
-        {/* Loading Rows */}
         {loading && (
           <>
             <FolderSkeleton />
             <FolderSkeleton />
             <FolderSkeleton isLast={true} />
           </>
+        )}
+
+        {/* Empty state — only shown after a successful fetch with no results */}
+        {isEmpty && (
+          <Box sx={{ py: 10, textAlign: 'center', color: 'text.secondary' }}>
+            <CreateNewFolderRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
+            <Typography variant="body1" gutterBottom fontWeight={500}>No folders yet</Typography>
+            <Typography variant="body2">Use the "New Folder" button above to get started</Typography>
+          </Box>
         )}
 
         {/* Data rows */}

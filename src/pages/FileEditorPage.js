@@ -17,12 +17,13 @@ import {
 import { loadSchema, selectSchemaByFolder } from '../store/slices/schemaSlice';
 
 import EditorHeader from '../components/fileEditor/EditorHeader';
-import MarkdownViewer from '../components/fileEditor/MarkdownViewer';
 import MarkdownEditor from '../components/fileEditor/MarkdownEditor';
 import EditorActions from '../components/fileEditor/EditorActions';
 import RenameFileDialog from '../components/fileEditor/RenameFileDialog';
 import DeleteFileDialog from '../components/fileEditor/DeleteFileDialog';
 import EditFileDataDialog from '../components/EditFileDataDialog';
+import PaginationPreview from '../components/fileEditor/PaginationPreview'; // NEW
+
 import { breadcrumbApi } from '../store/api/apiClient';
 
 function stripCssBlock(content) {
@@ -51,6 +52,7 @@ export default function FileEditorPage() {
   const [newFileName, setNewFileName] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editDataOpen, setEditDataOpen] = useState(false);
+  const [previewMargins, setPreviewMargins] = useState(60); 
 
   const open = Boolean(anchorEl);
 
@@ -58,22 +60,26 @@ export default function FileEditorPage() {
     if (!fileId) return;
     dispatch(loadFileById({ id: fileId }));
     return () => {
-      dispatch(clearCurrentFile())
-      LoadSchema()
-    }
+      dispatch(clearCurrentFile());
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileId, dispatch, loadSchema]);
+  }, [fileId, dispatch]);
 
-  async function LoadSchema() {
+  useEffect(() => {
     if (!fileId) return;
-    try {
-      const res = await breadcrumbApi.get('file', fileId);
-      const folder = res?.data.filter((f) => f.type === "folder")[0]
-      dispatch(loadSchema({ folderId: folder.id }));
-    } catch (err) {
-      console.log(err)
-    }
-  }
+    const loadFolderSchema = async () => {
+      try {
+        const res = await breadcrumbApi.get('file', fileId);
+        const folder = res?.data.filter((f) => f.type === "folder")[0];
+        if (folder) {
+          dispatch(loadSchema({ folderId: folder.id }));
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    loadFolderSchema();
+  }, [fileId, dispatch]);
 
   useEffect(() => {
     if (storedContent) setContent(stripCssBlock(storedContent));
@@ -81,7 +87,10 @@ export default function FileEditorPage() {
   }, [storedContent, file]);
 
   useEffect(() => {
-    if (!content || !file) { setRenderedContent(''); return; }
+    if (!content || !file) {
+      setRenderedContent('');
+      return;
+    }
 
     const engine = new Liquid();
     const css = schema?.templateCss || '';
@@ -91,14 +100,19 @@ export default function FileEditorPage() {
       updatedAt: file.updatedAt || '',
       ...(file.metadata
         ? Object.fromEntries(
-          Object.entries(file.metadata).map(([k, v]) => {
-            try { return [k, JSON.parse(v)]; } catch { return [k, v]; }
-          })
-        )
+            Object.entries(file.metadata).map(([k, v]) => {
+              try {
+                return [k, JSON.parse(v)];
+              } catch {
+                return [k, v];
+              }
+            })
+          )
         : {}),
     };
 
-    engine.parseAndRender(content, context)
+    engine
+      .parseAndRender(content, context)
       .then((html) => {
         setRenderedContent(css.trim() ? `<style>${css}</style>\n${html}` : html);
       })
@@ -109,24 +123,28 @@ export default function FileEditorPage() {
 
   const handleSave = async () => {
     if (!fileId || !file) return;
-    await dispatch(updateFile({
-      id: fileId,
-      name: file.name,
-      renderedHtml: content,
-      metadata: file.metadata || {},
-    }));
+    await dispatch(
+      updateFile({
+        id: fileId,
+        name: file.name,
+        renderedHtml: content,
+        metadata: file.metadata || {},
+      })
+    );
     setIsEditing(false);
   };
 
   const handleRenameSave = async () => {
     const name = newFileName.trim();
     if (!name || !fileId || !file) return;
-    await dispatch(updateFile({
-      id: fileId,
-      name,
-      renderedHtml: content,
-      metadata: file.metadata || {},
-    }));
+    await dispatch(
+      updateFile({
+        id: fileId,
+        name,
+        renderedHtml: content,
+        metadata: file.metadata || {},
+      })
+    );
     setRenameOpen(false);
   };
 
@@ -136,31 +154,25 @@ export default function FileEditorPage() {
     navigate(-1);
   };
 
-
   const handleDownloadPDF = () => {
-
     if (!renderedContent || !file) {
       alert("Nothing to download");
       return;
     }
 
-    // Create a temporary container with the exact rendered HTML (including <style>)
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = renderedContent;
-    tempDiv.style.padding = "40px";           // nice margins for PDF
+    tempDiv.style.padding = `${previewMargins}px`;
     tempDiv.style.backgroundColor = "#fff";
     tempDiv.style.maxWidth = "800px";
     tempDiv.style.margin = "0 auto";
 
-    // Optional: hide any UI elements you don't want in the PDF
-    // tempDiv.querySelectorAll('button, .no-print').forEach(el => el.remove());
-
     const opt = {
-      margin: [10, 10, 10, 10],   // top, right, bottom, left (mm)
+      margin: [10, 10, 10, 10],
       filename: `${file.name || "document"}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: {
-        scale: 2,                   // higher quality
+        scale: 2,
         useCORS: true,
         letterRendering: true,
       },
@@ -176,12 +188,9 @@ export default function FileEditorPage() {
       .from(tempDiv)
       .save()
       .finally(() => {
-        // cleanup
         tempDiv.remove();
       });
   };
-
-  const isEmpty = !renderedContent || renderedContent.trim() === '';
 
   if (!file) {
     return (
@@ -197,11 +206,23 @@ export default function FileEditorPage() {
         fileName={file.name}
         anchorEl={anchorEl}
         open={open}
-        onMenuClick={(e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); }}
+        onMenuClick={(e) => {
+          e.stopPropagation();
+          setAnchorEl(e.currentTarget);
+        }}
         onMenuClose={() => setAnchorEl(null)}
-        onRenameClick={() => { setAnchorEl(null); setRenameOpen(true); }}
-        onDeleteClick={() => { setAnchorEl(null); setDeleteOpen(true); }}
-        onEditMetadataClick={() => { setAnchorEl(null); setEditDataOpen(true); }}
+        onRenameClick={() => {
+          setAnchorEl(null);
+          setRenameOpen(true);
+        }}
+        onDeleteClick={() => {
+          setAnchorEl(null);
+          setDeleteOpen(true);
+        }}
+        onEditMetadataClick={() => {
+          setAnchorEl(null);
+          setEditDataOpen(true);
+        }}
         onPDFDownload={handleDownloadPDF}
       />
 
@@ -222,7 +243,11 @@ export default function FileEditorPage() {
           />
         </>
       ) : (
-        <MarkdownViewer content={renderedContent} isEmpty={isEmpty} />
+        <PaginationPreview
+          content={renderedContent}
+          margins={previewMargins}
+          onMarginChange={setPreviewMargins}
+        />
       )}
 
       <RenameFileDialog

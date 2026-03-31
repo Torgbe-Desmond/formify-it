@@ -33,21 +33,9 @@ const FileSkeleton = ({ isLast }) => (
 
 
 
-export default function FileList({ files, loading, onFileClick }) {
-  if (!files?.length) {
-    return (
-      <Box sx={{
-        mx: { xs: 2, sm: 3 }, mt: 2,
-        border: '1px solid', borderColor: 'divider',
-        borderRadius: 2, py: 10,
-        textAlign: 'center', color: 'text.secondary',
-      }}>
-        <InsertDriveFileRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
-        <Typography variant="body1" gutterBottom fontWeight={500}>No files yet</Typography>
-        <Typography variant="body2">Click "Add File" above to create your first file</Typography>
-      </Box>
-    );
-  }
+export default function FileList({ files, loading, isSuccess, onFileClick }) {
+
+  const isEmpty = isSuccess && files?.length === 0;
 
   return (
     <Box sx={{ mx: { xs: 2, sm: 3 }, mt: 2, pb: 4 }}>
@@ -74,6 +62,17 @@ export default function FileList({ files, loading, onFileClick }) {
             <FileSkeleton isLast={true} />
           </>
         )}
+
+        {isEmpty && <Box sx={{
+          mx: { xs: 2, sm: 3 }, mt: 2,
+          border: '1px solid', borderColor: 'divider',
+          borderRadius: 2, py: 10,
+          textAlign: 'center', color: 'text.secondary',
+        }}>
+          <InsertDriveFileRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
+          <Typography variant="body1" gutterBottom fontWeight={500}>No files yet</Typography>
+          <Typography variant="body2">Click "Add File" above to create your first file</Typography>
+        </Box>}
 
         {/* Data rows */}
         {!loading && files.map((file, idx) => (

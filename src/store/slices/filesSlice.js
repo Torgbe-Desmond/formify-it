@@ -63,6 +63,7 @@ const filesSlice = createSlice({
     currentFile: null,
     currentContent: '',
     loading: false,
+    isSuccess: false,
     error: null,
   },
   reducers: {
@@ -76,6 +77,7 @@ const filesSlice = createSlice({
       // Load files by folder
       .addCase(loadFilesFromServer.pending, (state, action) => {
         state.loading = true;
+        state.isSuccess = false;
       })
       .addCase(loadFilesFromServer.fulfilled, (state, action) => {
         const { folderId, files } = action.payload;
@@ -83,10 +85,13 @@ const filesSlice = createSlice({
           (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
         );
         state.loading = false;
+        state.isSuccess = true;
+
       })
       .addCase(loadFilesFromServer.rejected, (state, action) => {
         state.error = action.payload;
         state.loading = false;
+        state.isSuccess = false;
       })
 
       // Load single file
@@ -159,3 +164,4 @@ export const selectFilesByFolder = (folderId) => (state) =>
 export const selectCurrentFile = (state) => state.files.currentFile;
 export const selectCurrentContent = (state) => state.files.currentContent;
 export const selectFilesLoading = (state) => state.files.loading;
+export const selectFilesSuccess = (state) => state.files.isSuccess;

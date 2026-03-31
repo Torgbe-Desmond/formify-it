@@ -7,6 +7,7 @@ import {
   loadFiles,
   selectFilesByFolder,
   selectFilesLoading,
+  selectFilesSuccess,
 } from '../store/slices/filesSlice';
 
 import {
@@ -34,6 +35,7 @@ export default function FileBoard() {
   const folder = useSelector(selectFolderById(folderId));
   const files = useSelector(selectFilesByFolder(folderId));
   const loading = useSelector(selectFilesLoading);
+  const isSuccess = useSelector(selectFilesSuccess)
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -103,6 +105,7 @@ export default function FileBoard() {
       <FileList
         files={filteredFiles}
         loading={loading}
+        isSuccess={isSuccess}
         onFileClick={(id) => navigate(`/file/${id}`)}
       />
 

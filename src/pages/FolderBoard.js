@@ -24,7 +24,7 @@ export default function FolderBoard() {
   const { data: projects = [] } = useGetProjectsQuery();
   const project = projects.find(p => p.id === projectId);
 
-  const { data: folders = [], isLoading: loading } = useGetFoldersByProjectQuery(projectId);
+  const { data: folders = [], isLoading: loading, isSuccess } = useGetFoldersByProjectQuery(projectId);
   const [createFolder, { isLoading: createFolderLoading, }] = useCreateFolderMutation();
   const [renameFolder, { isLoading: renameFolderLoading, }] = useRenameFolderMutation();
   const [deleteFolder, { isLoading: deleteFolderLoading, }] = useDeleteFolderMutation();
@@ -36,6 +36,8 @@ export default function FolderBoard() {
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameName, setRenameName] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  console.log("isSuccess",isSuccess)
 
   useEffect(() => {
     if (targetFolder) setRenameName(targetFolder.name);
@@ -89,6 +91,7 @@ export default function FolderBoard() {
       <FolderList
         folders={filteredFolders}
         loading={loading}
+        isSuccess={isSuccess}
         onFolderClick={(id) => navigate(`/folder/${id}`)}
         onRenameClick={handleRenameOpen}
         onDeleteClick={handleDeleteOpen}

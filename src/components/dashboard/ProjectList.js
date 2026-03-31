@@ -32,24 +32,10 @@ const ProjectSkeleton = ({ isLast }) => (
   </Box>
 );
 
-export default function ProjectList({ projects, loading, onProjectClick, onRenameClick, onDeleteClick }) {
-  
-  // Empty State (Only show if not loading and no projects)
-  if (!loading && !projects?.length) {
-    return (
-      <Box sx={{
-        mx: { xs: 2, sm: 3 }, mt: 2,
-        border: '1px solid', borderColor: 'divider',
-        borderRadius: 2, py: 10,
-        textAlign: 'center', color: 'text.secondary',
-      }}>
-        <FolderRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
-        <Typography variant="body1" gutterBottom fontWeight={500}>No projects yet</Typography>
-        <Typography variant="body2">Use the menu (⋯) above and select "Add Project" to get started</Typography>
-      </Box>
-    );
-  }
+export default function ProjectList({ projects, loading, isSuccess, onProjectClick, onRenameClick, onDeleteClick }) {
 
+  const isEmpty = isSuccess && projects?.length === 0;
+  
   return (
     <Box sx={{ mx: { xs: 1, sm: 3 }, mt: 2, pb: 4 }}>
       <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
@@ -79,6 +65,18 @@ export default function ProjectList({ projects, loading, onProjectClick, onRenam
             <ProjectSkeleton isLast={true} />
           </>
         )}
+
+        {isEmpty && <Box sx={{
+          mx: { xs: 2, sm: 3 }, mt: 2,
+          border: '1px solid', borderColor: 'divider',
+          borderRadius: 2, py: 10,
+          textAlign: 'center', color: 'text.secondary',
+        }}>
+          <FolderRoundedIcon sx={{ fontSize: 48, opacity: 0.3, mb: 2 }} />
+          <Typography variant="body1" gutterBottom fontWeight={500}>No projects yet</Typography>
+          <Typography variant="body2">Use the menu (⋯) above and select "Add Project" to get started</Typography>
+        </Box>}
+
 
         {/* Real Data Rows */}
         {!loading && projects.map((project, idx) => (

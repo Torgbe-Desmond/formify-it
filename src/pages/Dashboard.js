@@ -19,7 +19,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   // ✅ RTK Query hooks
-  const { data: projects = [], isLoading: loading } = useGetProjectsQuery();
+  const { data: projects = [], isLoading: loading, isSuccess } = useGetProjectsQuery();
   const [createProject, { isLoading: createProjectLoading }] = useCreateProjectMutation();
   const [renameProject, { isLoading: renameProjectLoading }] = useRenameProjectMutation();
   const [deleteProject, { isLoading: deleteProjectLoading }] = useDeleteProjectMutation();
@@ -93,6 +93,7 @@ export default function Dashboard() {
       <ProjectList
         projects={filteredProjects}
         loading={loading}
+        isSuccess={isSuccess}
         onProjectClick={(id) => navigate(`/project/${id}`)}
         onRenameClick={handleRenameOpen}
         onDeleteClick={handleDeleteOpen}
