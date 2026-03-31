@@ -88,7 +88,7 @@ const filesSlice = createSlice({
         state.error = action.payload;
         state.loading = false;
       })
-      
+
       // Load single file
       .addCase(loadFileById.pending, (state) => { state.loading = true; })
       .addCase(loadFileById.fulfilled, (state, action) => {
@@ -108,6 +108,9 @@ const filesSlice = createSlice({
       })
 
       // Update file
+      .addCase(updateFile.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(updateFile.fulfilled, (state, action) => {
         const file = action.payload;
         if (state.currentFile?.id === file.id) {
@@ -120,8 +123,15 @@ const filesSlice = createSlice({
           }
         });
       })
+      .addCase(updateFile.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
+      })
 
       // Delete file
+      .addCase(deleteFile.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(deleteFile.fulfilled, (state, action) => {
         const id = action.payload;
         Object.keys(state.byFolder).forEach((fid) => {
@@ -131,6 +141,10 @@ const filesSlice = createSlice({
           state.currentFile = null;
           state.currentContent = '';
         }
+      })
+      .addCase(deleteFile.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
       });
   },
 });

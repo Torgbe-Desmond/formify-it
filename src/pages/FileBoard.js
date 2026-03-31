@@ -1,13 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  useGetFoldersByProjectQuery,
-  useRenameFolderMutation,
-  useDeleteFolderMutation,
-  useGetFilesByFolderQuery,
-} from '../store/api/apiSlice';
+  loadFiles,
+  selectFilesByFolder,
+  selectFilesLoading,
+} from '../store/slices/filesSlice';
+
+import {
+  renameFolder,
+  deleteFolder,
+  selectFolderById,
+  loadFolders,
+} from '../store/slices/foldersSlice';
+
+import {
+  loadSchema,
+} from '../store/slices/schemaSlice';
 
 import AddFile from '../components/AddFile';
 import FileBoardHeader from '../components/fileboard/FileBoardHeader';
@@ -18,16 +29,12 @@ import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
 export default function FileBoard() {
   const { folderId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // ── Queries & Mutations ─────────────────────────────
-  const { data: files = [], isLoading: loading } = useGetFilesByFolderQuery(folderId);
-  const { data: folders = [] } = useGetFoldersByProjectQuery(null); // fallback for folder
-  const folder = folders.find(f => f.id === folderId);
+  const folder = useSelector(selectFolderById(folderId));
+  const files = useSelector(selectFilesByFolder(folderId));
+  const loading = useSelector(selectFilesLoading);
 
-  const [renameFolder, { isLoading: renameFolderLoading }] = useRenameFolderMutation();
-  const [deleteFolder, { isLoading: deleteFolderLoading }] = useDeleteFolderMutation();
-
-  // ── Local state ─────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [renameOpen, setRenameOpen] = useState(false);
@@ -38,12 +45,22 @@ export default function FileBoard() {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
+    if (!folderId) return;
+    dispatch(loadFiles({ folderId }));
+    dispatch(loadSchema({ folderId }));
+    // Load folder data in case of direct navigation
+    if (!folder) dispatch(loadFolders({ projectId: null }));
+  }, [folderId, dispatch, folder]);
+
+  useEffect(() => {
     if (folder) setNewFolderName(folder.name);
   }, [folder]);
 
   const filteredFiles = useMemo(() => {
     if (!searchQuery) return files;
-    return files.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return files.filter((f) =>
+      f.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   }, [files, searchQuery]);
 
   const handleMenuClick = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
@@ -51,13 +68,13 @@ export default function FileBoard() {
 
   const handleRenameSave = async () => {
     if (!folderId || !newFolderName.trim()) return;
-    await renameFolder({ id: folderId, data: { name: newFolderName.trim() } }).unwrap();
+    await dispatch(renameFolder({ id: folderId, name: newFolderName.trim() }));
     setRenameOpen(false);
   };
 
-  const handleDeleteFolderConfirm = async () => {
+  const handleDeleteFolder = async () => {
     if (!folderId) return;
-    await deleteFolder(folderId).unwrap();
+    await dispatch(deleteFolder({ id: folderId }));
     setDeleteConfirmOpen(false);
     navigate(-1);
   };
@@ -98,7 +115,6 @@ export default function FileBoard() {
 
       <RenameFolderDialog
         open={renameOpen}
-        renameFolderLoading={renameFolderLoading}
         onClose={() => setRenameOpen(false)}
         folderName={newFolderName}
         onFolderNameChange={setNewFolderName}
@@ -106,11 +122,10 @@ export default function FileBoard() {
       />
 
       <DeleteFolderDialog
-        deleteFolderLoading={deleteFolderLoading}
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         folderName={folder?.name}
-        onDelete={handleDeleteFolderConfirm}
+        onDelete={handleDeleteFolder}
       />
     </Container>
   );
