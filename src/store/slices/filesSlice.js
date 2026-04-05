@@ -95,13 +95,18 @@ const filesSlice = createSlice({
       })
 
       // Load single file
-      .addCase(loadFileById.pending, (state) => { state.loading = true; })
+      .addCase(loadFileById.pending, (state) => {
+        state.loading = true; state.isSuccess = false
+      })
       .addCase(loadFileById.fulfilled, (state, action) => {
         state.loading = false;
         state.currentFile = action.payload.file;
         state.currentContent = action.payload.content;
+        state.isSuccess = true
       })
-      .addCase(loadFileById.rejected, (state) => { state.loading = false; })
+      .addCase(loadFileById.rejected, (state) => {
+        state.loading = false; state.isSuccess = false
+      })
 
       // Create file
       .addCase(createFile.fulfilled, (state, action) => {
@@ -110,11 +115,14 @@ const filesSlice = createSlice({
         state.byFolder[folderId] = [serverFile, ...list].sort(
           (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
         );
+        state.loading = false;
+        state.isSuccess = true
       })
 
       // Update file
       .addCase(updateFile.pending, (state, action) => {
         state.loading = true;
+        state.isSuccess = false;
       })
       .addCase(updateFile.fulfilled, (state, action) => {
         const file = action.payload;
@@ -127,15 +135,20 @@ const filesSlice = createSlice({
             state.byFolder[fid][idx] = { ...state.byFolder[fid][idx], ...file };
           }
         });
+        state.isSuccess = true;
+        state.loading = false;
       })
       .addCase(updateFile.rejected, (state, action) => {
         state.error = action.payload;
         state.loading = false;
+        state.isSuccess = false;
       })
 
       // Delete file
       .addCase(deleteFile.pending, (state, action) => {
         state.loading = true;
+        state.isSuccess = false;
+
       })
       .addCase(deleteFile.fulfilled, (state, action) => {
         const id = action.payload;
@@ -146,10 +159,13 @@ const filesSlice = createSlice({
           state.currentFile = null;
           state.currentContent = '';
         }
+        state.isSuccess = true;
+        state.loading = false;
       })
       .addCase(deleteFile.rejected, (state, action) => {
         state.error = action.payload;
         state.loading = false;
+        state.isSuccess = false;
       });
   },
 });

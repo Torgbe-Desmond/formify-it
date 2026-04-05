@@ -42,51 +42,51 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
     }
   }, [open]);
 
- useEffect(() => {
-  if (!open || !file || !schema) return;
+  useEffect(() => {
+    if (!open || !file || !schema) return;
 
-  try {
-    const parsed = yaml.load(schema.schemaYaml || '');
-    if (!parsed) return;
+    try {
+      const parsed = yaml.load(schema.schemaYaml || '');
+      if (!parsed) return;
 
-    setFields(parsed.fields || {});
-    setTemplate(stripCssBlock(schema.templateHtml || ''));
-    setFrontMatter(parsed);
+      setFields(parsed.fields || {});
+      setTemplate(stripCssBlock(schema.templateHtml || ''));
+      setFrontMatter(parsed);
 
-    // --- STEP 1: CONVERT ARRAY TO OBJECT ---
-    const metadataArray = Array.isArray(file.metadata) ? file.metadata : [];
-    const existingMetaMap = {};
-    
-    metadataArray.forEach(item => {
-      existingMetaMap[item.key] = item.value;
-    });
+      // --- STEP 1: CONVERT ARRAY TO OBJECT ---
+      const metadataArray = Array.isArray(file.metadata) ? file.metadata : [];
+      const existingMetaMap = {};
 
-    const initialData = {};
+      metadataArray.forEach(item => {
+        existingMetaMap[item.key] = item.value;
+      });
 
-    // --- STEP 2: MAP TO FORM FIELDS ---
-    Object.entries(parsed.fields || {}).forEach(([key, config]) => {
-      if (key in existingMetaMap) {
-        const rawValue = existingMetaMap[key];
-        try {
-          // This handles the stringified JSON like '"12"' or '[]'
-          initialData[key] = JSON.parse(rawValue);
-        } catch {
-          initialData[key] = rawValue;
+      const initialData = {};
+
+      // --- STEP 2: MAP TO FORM FIELDS ---
+      Object.entries(parsed.fields || {}).forEach(([key, config]) => {
+        if (key in existingMetaMap) {
+          const rawValue = existingMetaMap[key];
+          try {
+            // This handles the stringified JSON like '"12"' or '[]'
+            initialData[key] = JSON.parse(rawValue);
+          } catch {
+            initialData[key] = rawValue;
+          }
+        } else {
+          // Fallbacks for missing keys
+          initialData[key] = config.default !== undefined ? config.default :
+            (config.type === 'checkbox' ? false :
+              (config.type === 'array' ? [] : ''));
         }
-      } else {
-        // Fallbacks for missing keys
-        initialData[key] = config.default !== undefined ? config.default : 
-                          (config.type === 'checkbox' ? false : 
-                          (config.type === 'array' ? [] : ''));
-      }
-    });
+      });
 
-    setFormData(initialData);
-    setLoaded(true);
-  } catch (err) {
-    console.error('Schema parse error:', err);
-  }
-}, [open, file, schema]);
+      setFormData(initialData);
+      setLoaded(true);
+    } catch (err) {
+      console.error('Schema parse error:', err);
+    }
+  }, [open, file, schema]);
 
   const validateForm = () => {
     const newErrors = {};

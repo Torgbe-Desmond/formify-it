@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 export default function RenameFileDialog({
-  open, onClose, fileName, onFileNameChange, onSave,
+  open, onClose, fileName, onFileNameChange, onSave, renameFileLoading
 }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -22,8 +22,8 @@ export default function RenameFileDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={onSave}>Save</Button>
+        <Button disabled={renameFileLoading} onClick={onClose}>Cancel</Button>
+        <Button disabled={renameFileLoading} variant="contained" onClick={onSave}> {renameFileLoading ? "Saving" : "Save"}</Button>
       </DialogActions>
     </Dialog>
   );

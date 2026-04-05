@@ -12,6 +12,7 @@ import {
   selectCurrentFile,
   selectCurrentContent,
   clearCurrentFile,
+  selectFilesLoading,
 } from '../store/slices/filesSlice';
 
 import { loadSchema, selectSchemaByFolder } from '../store/slices/schemaSlice';
@@ -43,6 +44,7 @@ export default function FileEditorPage() {
   const file = useSelector(selectCurrentFile);
   const storedContent = useSelector(selectCurrentContent);
   const schema = useSelector(selectSchemaByFolder(file?.folderId));
+  const isLoading = useSelector(selectFilesLoading);
 
   const [content, setContent] = useState('');
   const [renderedContent, setRenderedContent] = useState('');
@@ -52,7 +54,7 @@ export default function FileEditorPage() {
   const [newFileName, setNewFileName] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editDataOpen, setEditDataOpen] = useState(false);
-  const [previewMargins, setPreviewMargins] = useState(60); 
+  const [previewMargins, setPreviewMargins] = useState(60);
 
   const open = Boolean(anchorEl);
 
@@ -100,14 +102,14 @@ export default function FileEditorPage() {
       updatedAt: file.updatedAt || '',
       ...(file.metadata
         ? Object.fromEntries(
-            Object.entries(file.metadata).map(([k, v]) => {
-              try {
-                return [k, JSON.parse(v)];
-              } catch {
-                return [k, v];
-              }
-            })
-          )
+          Object.entries(file.metadata).map(([k, v]) => {
+            try {
+              return [k, JSON.parse(v)];
+            } catch {
+              return [k, v];
+            }
+          })
+        )
         : {}),
     };
 
@@ -137,15 +139,20 @@ export default function FileEditorPage() {
   const handleRenameSave = async () => {
     const name = newFileName.trim();
     if (!name || !fileId || !file) return;
-    await dispatch(
-      updateFile({
-        id: fileId,
-        name,
-        renderedHtml: content,
-        metadata: file.metadata || {},
-      })
-    );
-    setRenameOpen(false);
+    try {
+      await dispatch(
+        updateFile({
+          id: fileId,
+          name,
+          renderedHtml: content,
+          metadata: file.metadata || {},
+        })
+      );
+      setRenameOpen(false);
+      window.location.reload()
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -252,6 +259,7 @@ export default function FileEditorPage() {
 
       <RenameFileDialog
         open={renameOpen}
+        renameFileLoading={isLoading}
         onClose={() => setRenameOpen(false)}
         fileName={newFileName}
         onFileNameChange={setNewFileName}
@@ -260,6 +268,7 @@ export default function FileEditorPage() {
 
       <DeleteFileDialog
         open={deleteOpen}
+        deleteFileLoading={isLoading}
         onClose={() => setDeleteOpen(false)}
         fileName={file.name}
         onDelete={handleDeleteConfirm}

@@ -113,11 +113,15 @@ export default function FileBoard() {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         folderId={folderId}
+        isLoading={loading}
+        isSuccess={isSuccess}
         onFileAdded={() => setIsModalOpen(false)}
       />
 
       <RenameFolderDialog
         open={renameOpen}
+        isSuccess={isSuccess}
+        renameFolderLoading={loading}
         onClose={() => setRenameOpen(false)}
         folderName={newFolderName}
         onFolderNameChange={setNewFolderName}
@@ -125,7 +129,9 @@ export default function FileBoard() {
       />
 
       <DeleteFolderDialog
+        isSuccess={isSuccess}
         open={deleteConfirmOpen}
+        deleteFolderLoading={loading}
         onClose={() => setDeleteConfirmOpen(false)}
         folderName={folder?.name}
         onDelete={handleDeleteFolder}

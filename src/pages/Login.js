@@ -116,7 +116,7 @@ const Login = () => {
   return (
     <div style={styles.root}>
       <div style={styles.leftPanel}>
-        <div style={styles.brand}><div style={styles.brandMark}/><span style={styles.brandName}>FastTransfers</span></div>
+        <div style={styles.brand}><div style={styles.brandMark}/><span style={styles.brandName}>Formify</span></div>
         <h1 style={styles.heading}>Welcome back.</h1>
         <p style={styles.subheading}>Sign in to access your documents.</p>
         <form onSubmit={handleSubmit}>
