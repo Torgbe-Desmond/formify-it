@@ -20,7 +20,6 @@ const DEFAULT_MARGIN = 60;
  */
 function usePageSplitter(content, margin) {
   const [pages, setPages] = useState([]);
-  const hiddenRef = useRef(null);
 
   const split = useCallback(() => {
     if (!content) {
