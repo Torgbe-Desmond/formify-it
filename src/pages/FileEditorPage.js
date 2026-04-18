@@ -23,7 +23,7 @@ import EditorActions from '../components/fileEditor/EditorActions';
 import RenameFileDialog from '../components/fileEditor/RenameFileDialog';
 import DeleteFileDialog from '../components/fileEditor/DeleteFileDialog';
 import EditFileDataDialog from '../components/EditFileDataDialog';
-import PaginationPreview from '../components/fileEditor/PaginationPreview'; // NEW
+import PaginationPreview from '../components/fileEditor/PaginationPreview';
 
 import { breadcrumbApi } from '../store/api/apiClient';
 
@@ -58,6 +58,7 @@ export default function FileEditorPage() {
 
   const open = Boolean(anchorEl);
 
+  // Load file on mount
   useEffect(() => {
     if (!fileId) return;
     dispatch(loadFileById({ id: fileId }));
@@ -67,12 +68,13 @@ export default function FileEditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileId, dispatch]);
 
+  // Load folder schema for template rendering
   useEffect(() => {
     if (!fileId) return;
     const loadFolderSchema = async () => {
       try {
         const res = await breadcrumbApi.get('file', fileId);
-        const folder = res?.data.filter((f) => f.type === "folder")[0];
+        const folder = res?.data.filter((f) => f.type === 'folder')[0];
         if (folder) {
           dispatch(loadSchema({ folderId: folder.id }));
         }
@@ -83,11 +85,13 @@ export default function FileEditorPage() {
     loadFolderSchema();
   }, [fileId, dispatch]);
 
+  // Sync local state when store updates
   useEffect(() => {
     if (storedContent) setContent(stripCssBlock(storedContent));
     if (file) setNewFileName(file.name || '');
   }, [storedContent, file]);
 
+  // Render Liquid template + inject schema CSS
   useEffect(() => {
     if (!content || !file) {
       setRenderedContent('');
@@ -102,14 +106,14 @@ export default function FileEditorPage() {
       updatedAt: file.updatedAt || '',
       ...(file.metadata
         ? Object.fromEntries(
-          Object.entries(file.metadata).map(([k, v]) => {
-            try {
-              return [k, JSON.parse(v)];
-            } catch {
-              return [k, v];
-            }
-          })
-        )
+            Object.entries(file.metadata).map(([k, v]) => {
+              try {
+                return [k, JSON.parse(v)];
+              } catch {
+                return [k, v];
+              }
+            })
+          )
         : {}),
     };
 
@@ -149,9 +153,9 @@ export default function FileEditorPage() {
         })
       );
       setRenameOpen(false);
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -163,39 +167,53 @@ export default function FileEditorPage() {
 
   const handleDownloadPDF = () => {
     if (!renderedContent || !file) {
-      alert("Nothing to download");
+      alert('Nothing to download');
       return;
     }
 
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = renderedContent;
-    tempDiv.style.padding = `${previewMargins}px`;
-    tempDiv.style.backgroundColor = "#fff";
-    tempDiv.style.maxWidth = "800px";
-    tempDiv.style.margin = "0 auto";
+    // Wrap rendered content in a container that matches the preview margins.
+    // This ensures the downloaded PDF looks exactly like the on-screen preview.
+    const inner = document.createElement('div');
+    inner.innerHTML = renderedContent;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+      width: 794px;
+      padding: ${previewMargins}px;
+      box-sizing: border-box;
+      background: #fff;
+    `;
+    wrapper.appendChild(inner);
 
     const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `${file.name || "document"}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
+      margin: 0,
+      filename: `${file.name || 'document'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
         scale: 2,
         useCORS: true,
         letterRendering: true,
+        // Lock render width to A4 so content matches preview exactly
+        width: 794,
+        windowWidth: 794,
       },
       jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
+      },
+      pagebreak: {
+        // Respect natural content flow; avoid cutting mid-element where possible
+        mode: ['avoid-all', 'css', 'legacy'],
       },
     };
 
     html2pdf()
       .set(opt)
-      .from(tempDiv)
+      .from(wrapper)
       .save()
       .finally(() => {
-        tempDiv.remove();
+        wrapper.remove();
       });
   };
 
@@ -254,6 +272,7 @@ export default function FileEditorPage() {
           content={renderedContent}
           margins={previewMargins}
           onMarginChange={setPreviewMargins}
+          onEdit={() => setIsEditing(true)}
         />
       )}
 

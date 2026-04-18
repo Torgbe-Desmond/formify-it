@@ -65,7 +65,7 @@ const Register = () => {
   return (
     <div style={styles.root}>
       <div style={styles.leftPanel}>
-        <div style={styles.brand}><div style={styles.brandMark}/><span style={styles.brandName}>FastTransfers</span></div>
+        <div style={styles.brand}><div style={styles.brandMark}/><span style={styles.brandName}>Formify</span></div>
         <h1 style={styles.heading}>Create account.</h1>
         <p style={{color: '#5f6368', marginBottom: '32px', textAlign: isMobile ? 'center' : 'left'}}>Start organizing your documents today.</p>
         <form onSubmit={handleSubmit}>
