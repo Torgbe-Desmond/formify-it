@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Stack, Typography, Alert,
@@ -9,17 +9,17 @@ import { Buffer } from 'buffer';
 import yaml from 'js-yaml';
 
 import { createFile } from '../store/slices/filesSlice';
-import { selectSchemaByFolder } from '../store/slices/schemaSlice';
+import {
+  selectSchemaByFolder,
+  selectSchemasMap,
+  selectEntrySchemaName,
+} from '../store/slices/schemaSlice';
 import FieldRenderer from './fields/FieldRenderer';
 
 window.Buffer = Buffer;
 
 const engine = new Liquid();
 
-/**
- * Strip the <!-- CSS --> ... <!-- /CSS --> block from a template string
- * so it never gets saved into rendered file content.
- */
 const stripCssBlock = (str) => {
   if (!str) return str;
   return str
@@ -27,59 +27,107 @@ const stripCssBlock = (str) => {
     .replace(/<!-- \/CSS -->\n?/g, '');
 };
 
+/**
+ * Build initial empty form data from a fields map.
+ * Handles $SchemaRef types by recursively building nested objects.
+ */
+function buildInitialData(fieldsMap, schemasMap, parsedCache, depth = 0) {
+  if (!fieldsMap || depth > 10) return {};
+  const result = {};
+
+  Object.entries(fieldsMap).forEach(([key, cfg]) => {
+    if (cfg.type === 'array') {
+      result[key] = cfg.default ?? [];
+      return;
+    }
+
+    if (cfg.type?.startsWith('$')) {
+      const refName = cfg.type.replace(/^\$/, '');
+      const nestedFields = getFieldsFromRef(refName, schemasMap, parsedCache);
+      result[key] = nestedFields
+        ? buildInitialData(nestedFields, schemasMap, parsedCache, depth + 1)
+        : {};
+      return;
+    }
+
+    result[key] = cfg.default !== undefined ? cfg.default
+      : cfg.type === 'checkbox' ? false
+      : '';
+  });
+
+  return result;
+}
+
+function getFieldsFromRef(refName, schemasMap, parsedCache) {
+  if (parsedCache[refName]) return parsedCache[refName];
+  const raw = schemasMap?.[refName];
+  if (!raw?.schemaYaml) return null;
+  try {
+    const parsed = yaml.load(raw.schemaYaml);
+    parsedCache[refName] = parsed?.fields || {};
+    return parsedCache[refName];
+  } catch { return null; }
+}
+
 export default function AddFile({ open, onClose, folderId, onFileAdded }) {
-  const dispatch = useDispatch();
-  const schema   = useSelector(selectSchemaByFolder(folderId));
+  const dispatch        = useDispatch();
+  const folderSchema    = useSelector(selectSchemaByFolder(folderId));
+  const schemasMap      = useSelector(selectSchemasMap(folderId));
+  const entrySchemaName = useSelector(selectEntrySchemaName(folderId));
 
-  const [fields,          setFields]          = useState({});
-  const [template,        setTemplate]        = useState('');
-  const [frontMatter,     setFrontMatter]     = useState({});
-  const [formData,        setFormData]        = useState({});
-  const [errors,          setErrors]          = useState({});
-  const [loading,         setLoading]         = useState(false);
-  const [expandedArrays,  setExpandedArrays]  = useState({});
+  // Mutable YAML parse cache — stable across renders
+  const parsedCache = useRef({});
 
-  // Populate form from Redux schema
+  const [fields,         setFields]         = useState({});
+  const [template,       setTemplate]       = useState('');
+  const [frontMatter,    setFrontMatter]    = useState({});
+  const [formData,       setFormData]       = useState({});
+  const [errors,         setErrors]         = useState({});
+  const [loading,        setLoading]        = useState(false);
+  const [expandedArrays, setExpandedArrays] = useState({});
+
+  // Reset on close
   useEffect(() => {
-    if (!open || !schema) return;
+    if (!open) {
+      setFormData({});
+      setErrors({});
+      setExpandedArrays({});
+      parsedCache.current = {};
+    }
+  }, [open]);
+
+  // Populate form from entry schema
+  useEffect(() => {
+    if (!open || !folderSchema) return;
 
     try {
-      const parsed = yaml.load(schema.schemaYaml || '');
+      const entryData = folderSchema.schemas?.[entrySchemaName || folderSchema.entrySchema];
+      if (!entryData) return;
+
+      const parsed = yaml.load(entryData.schemaYaml || '');
       if (!parsed) return;
 
-      const templateHtml = stripCssBlock(schema.templateHtml || '');
-
       setFields(parsed.fields || {});
-      setTemplate(templateHtml);
+      setTemplate(stripCssBlock(entryData.templateHtml || ''));
       setFrontMatter(parsed);
 
-      const initialData = {};
-      Object.entries(parsed.fields || {}).forEach(([key, config]) => {
-        if (config.default !== undefined)    initialData[key] = config.default;
-        else if (config.type === 'checkbox') initialData[key] = false;
-        else if (config.type === 'array')    initialData[key] = [];
-        else                                 initialData[key] = '';
-      });
+      const initialData = buildInitialData(
+        parsed.fields || {},
+        schemasMap,
+        parsedCache.current,
+        0
+      );
 
       setFormData(initialData);
       setErrors({});
     } catch (err) {
       console.error('Failed to parse schema:', err);
     }
-  }, [open, schema]);
-
-  useEffect(() => {
-    if (!open) {
-      setFormData({});
-      setErrors({});
-      setExpandedArrays({});
-    }
-  }, [open]);
+  }, [open, folderSchema, schemasMap, entrySchemaName]);
 
   const renderTemplate = async (tmpl, values, fm) => {
-    const context = { ...values, frontmatter: fm };
     try {
-      return await engine.parseAndRender(stripCssBlock(tmpl), context);
+      return await engine.parseAndRender(stripCssBlock(tmpl), { ...values, frontmatter: fm });
     } catch (err) {
       console.error('Liquid render error:', err);
       return stripCssBlock(tmpl);
@@ -113,12 +161,13 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
         fileName = await renderTemplate(frontMatter.filename, formData, frontMatter);
       }
 
-      // Convert metadata values to strings for the backend
+      // Metadata: JSON-stringify each top-level value
+      // Nested objects/arrays are preserved as JSON strings
       const metadata = Object.fromEntries(
         Object.entries(formData).map(([k, v]) => [k, JSON.stringify(v)])
       );
 
-      await dispatch(createFile({ name: fileName, folderId, content:renderedHtml, metadata }));
+      await dispatch(createFile({ name: fileName, folderId, content: renderedHtml, metadata }));
 
       setFormData({});
       setErrors({});
@@ -131,7 +180,7 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
     }
   };
 
-  if (!schema || Object.keys(fields).length === 0) {
+  if (!folderSchema || Object.keys(fields).length === 0) {
     return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
         <DialogTitle>New File</DialogTitle>
@@ -163,12 +212,18 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
         <Stack spacing={2.5} sx={{ mt: 0.5 }}>
           {Object.entries(fields).map(([key, config]) => (
             <FieldRenderer
-              key={key} fieldKey={key} config={config}
-              value={formData} error={errors}
-              onChange={setFormData} disabled={loading}
+              key={key}
+              fieldKey={key}
+              config={config}
+              value={formData}
+              error={errors}
+              onChange={setFormData}
+              disabled={loading}
               expandedArrays={expandedArrays}
               onToggleArrayExpand={(k, expanded) =>
                 setExpandedArrays((prev) => ({ ...prev, [k]: expanded }))}
+              schemasMap={schemasMap}
+              parsedCache={parsedCache}
             />
           ))}
         </Stack>

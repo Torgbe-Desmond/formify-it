@@ -102,10 +102,10 @@ async function processOperation(op) {
 
     // ── Schema ─────────────────────────────────────────────
     case 'schema': {
+      // payload carries the new multi-schema shape: { schemas, entrySchema }
       const res = await schemaApi.upsert(op.entityId, {
-        schemaYaml:   payload.schemaYaml,
-        templateHtml: payload.templateHtml,
-        templateCss:  payload.templateCss,
+        schemas:     payload.schemas,
+        entrySchema: payload.entrySchema,
       });
       const existing = await db.schemas.where('folderId').equals(op.entityId).first();
       if (existing) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Stack, Alert,
@@ -8,7 +8,11 @@ import yaml from 'js-yaml';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { updateFile } from '../store/slices/filesSlice';
-import { selectSchemaByFolder } from '../store/slices/schemaSlice';
+import {
+  selectSchemaByFolder,
+  selectSchemasMap,
+  selectEntrySchemaName,
+} from '../store/slices/schemaSlice';
 import FieldRenderer from './fields/FieldRenderer';
 
 const engine = new Liquid();
@@ -20,18 +24,93 @@ const stripCssBlock = (str) => {
     .replace(/<!-- \/CSS -->\n?/g, '');
 };
 
-export default function EditFileDataDialog({ open, onClose, file, folderId, onSaved }) {
-  const dispatch = useDispatch();
-  const schema = useSelector(selectSchemaByFolder(folderId));
+/**
+ * Recursively flatten formData into the metadata shape the server expects.
+ * Nested objects and arrays are JSON-stringified at their leaf level.
+ */
+function flattenMetadata(data) {
+  return Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)])
+  );
+}
 
-  const [fields, setFields] = useState({});
-  const [template, setTemplate] = useState('');
-  const [frontMatter, setFrontMatter] = useState({});
-  const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [expandedArrays, setExpandedArrays] = useState({});
+/**
+ * Recursively parse existing metadata back into rich JS values.
+ * Arrays and objects stored as JSON strings are parsed back out.
+ */
+function parseMetadata(metadataArray) {
+  const map = {};
+  (Array.isArray(metadataArray) ? metadataArray : []).forEach((item) => {
+    try { map[item.key] = JSON.parse(item.value); }
+    catch { map[item.key] = item.value; }
+  });
+  return map;
+}
+
+/**
+ * Build initial form data from field definitions + existing metadata.
+ * Handles $SchemaRef types by recursively building nested objects.
+ */
+function buildInitialData(fieldsMap, existingMap, schemasMap, parsedCache, depth = 0) {
+  if (!fieldsMap || depth > 10) return {};
+  const result = {};
+
+  Object.entries(fieldsMap).forEach(([key, cfg]) => {
+    const existing = existingMap?.[key];
+
+    if (cfg.type === 'array') {
+      result[key] = Array.isArray(existing) ? existing : (cfg.default ?? []);
+      return;
+    }
+
+    if (cfg.type?.startsWith('$')) {
+      const refName = cfg.type.replace(/^\$/, '');
+      const nestedFields = getFieldsFromRef(refName, schemasMap, parsedCache);
+      const nestedExisting = (typeof existing === 'object' && existing !== null) ? existing : {};
+      result[key] = nestedFields
+        ? buildInitialData(nestedFields, nestedExisting, schemasMap, parsedCache, depth + 1)
+        : nestedExisting;
+      return;
+    }
+
+    if (existing !== undefined) { result[key] = existing; return; }
+    result[key] = cfg.default !== undefined ? cfg.default
+      : cfg.type === 'checkbox' ? false
+      : cfg.type === 'array'    ? []
+      : '';
+  });
+
+  return result;
+}
+
+function getFieldsFromRef(refName, schemasMap, parsedCache) {
+  if (parsedCache.current[refName]) return parsedCache.current[refName];
+  const raw = schemasMap?.[refName];
+  if (!raw?.schemaYaml) return null;
+  try {
+    const parsed = yaml.load(raw.schemaYaml);
+    parsedCache.current[refName] = parsed?.fields || {};
+    return parsedCache.current[refName];
+  } catch { return null; }
+}
+
+export default function EditFileDataDialog({ open, onClose, file, folderId, onSaved }) {
+  const dispatch      = useDispatch();
+  const folderSchema  = useSelector(selectSchemaByFolder(folderId));
+  const schemasMap    = useSelector(selectSchemasMap(folderId));
+  const entrySchemaName = useSelector(selectEntrySchemaName(folderId));
+
+  // Stable mutable cache for parsed YAML across renders
+  const parsedCache = useRef({});
+
+  const [fields,          setFields]          = useState({});
+  const [template,        setTemplate]        = useState('');
+  const [frontMatter,     setFrontMatter]     = useState({});
+  const [formData,        setFormData]        = useState({});
+  const [loading,         setLoading]         = useState(false);
+  const [loaded,          setLoaded]          = useState(false);
+  const [errors,          setErrors]          = useState({});
+  const [expandedArrays,  setExpandedArrays]  = useState({});
 
   useEffect(() => {
     if (!open) {
@@ -39,54 +118,40 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
       setErrors({});
       setExpandedArrays({});
       setLoaded(false);
+      parsedCache.current = {};
     }
   }, [open]);
 
   useEffect(() => {
-    if (!open || !file || !schema) return;
+    if (!open || !file || !folderSchema) return;
 
     try {
-      const parsed = yaml.load(schema.schemaYaml || '');
+      // Use entry schema for the top-level fields + template
+      const entryData = folderSchema.schemas?.[entrySchemaName || folderSchema.entrySchema];
+      if (!entryData) return;
+
+      const parsed = yaml.load(entryData.schemaYaml || '');
       if (!parsed) return;
 
       setFields(parsed.fields || {});
-      setTemplate(stripCssBlock(schema.templateHtml || ''));
+      setTemplate(stripCssBlock(entryData.templateHtml || ''));
       setFrontMatter(parsed);
 
-      // --- STEP 1: CONVERT ARRAY TO OBJECT ---
-      const metadataArray = Array.isArray(file.metadata) ? file.metadata : [];
-      const existingMetaMap = {};
-
-      metadataArray.forEach(item => {
-        existingMetaMap[item.key] = item.value;
-      });
-
-      const initialData = {};
-
-      // --- STEP 2: MAP TO FORM FIELDS ---
-      Object.entries(parsed.fields || {}).forEach(([key, config]) => {
-        if (key in existingMetaMap) {
-          const rawValue = existingMetaMap[key];
-          try {
-            // This handles the stringified JSON like '"12"' or '[]'
-            initialData[key] = JSON.parse(rawValue);
-          } catch {
-            initialData[key] = rawValue;
-          }
-        } else {
-          // Fallbacks for missing keys
-          initialData[key] = config.default !== undefined ? config.default :
-            (config.type === 'checkbox' ? false :
-              (config.type === 'array' ? [] : ''));
-        }
-      });
+      const existingMap = parseMetadata(file.metadata);
+      const initialData = buildInitialData(
+        parsed.fields || {},
+        existingMap,
+        schemasMap,
+        parsedCache,
+        0
+      );
 
       setFormData(initialData);
       setLoaded(true);
     } catch (err) {
       console.error('Schema parse error:', err);
     }
-  }, [open, file, schema]);
+  }, [open, file, folderSchema, schemasMap, entrySchemaName]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -118,7 +183,6 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
   const handleSave = async () => {
     if (!validateForm()) return;
     setLoading(true);
-
     try {
       const renderedHtml = await renderTemplate();
 
@@ -129,14 +193,12 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
         });
       }
 
-      const metadata = Object.fromEntries(
-        Object.entries(formData).map(([k, v]) => [k, JSON.stringify(v)])
-      );
+      const metadata = flattenMetadata(formData);
 
       await dispatch(updateFile({
-        id: file._id,
-        name: fileName,
-        content: renderedHtml,
+        id:          file._id,
+        name:        fileName,
+        content:     renderedHtml,
         metadata,
       }));
 
@@ -175,13 +237,18 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
         <Stack spacing={2}>
           {Object.entries(fields).map(([key, config]) => (
             <FieldRenderer
-              key={key} fieldKey={key} config={config}
-              value={formData} error={errors}
+              key={key}
+              fieldKey={key}
+              config={config}
+              value={formData}
+              error={errors}
               onChange={setFormData}
               expandedArrays={expandedArrays}
               onToggleArrayExpand={(k, expanded) =>
                 setExpandedArrays((prev) => ({ ...prev, [k]: expanded }))}
               disabled={loading}
+              schemasMap={schemasMap}
+              parsedCache={parsedCache}
             />
           ))}
         </Stack>

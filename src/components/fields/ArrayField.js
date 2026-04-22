@@ -1,26 +1,212 @@
 import { useState } from "react";
 import {
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  Paper,
-  Stack,
-  Divider,
-  Collapse,
-  FormHelperText,
-  TextField,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  Chip,
+  Box, Typography, Button, IconButton, Paper, Stack,
+  Divider, Collapse, FormHelperText, TextField,
+  MenuItem, Checkbox, FormControlLabel, Chip,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import AddRoundedIcon           from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
-import { v4 as uuidv4 } from "uuid";
-import TextareaField from "./TextareaField";
+import ExpandMoreRoundedIcon    from "@mui/icons-material/ExpandMoreRounded";
+import ExpandLessRoundedIcon    from "@mui/icons-material/ExpandLessRounded";
+import { v4 as uuidv4 }        from "uuid";
+import yaml                     from "js-yaml";
+import TextareaField            from "./TextareaField";
+
+const MAX_DEPTH = 5;
+
+// ── Cache helpers ─────────────────────────────────────────────────
+// parsedCache may arrive as a useRef object ({ current: {} })
+// or as a plain object {} (when passed down through ItemFields).
+// These helpers normalise both cases.
+
+function getCache(parsedCache) {
+  if (parsedCache && typeof parsedCache === "object" && "current" in parsedCache) {
+    return parsedCache.current;
+  }
+  return parsedCache || {};
+}
+
+// ── Schema resolution ─────────────────────────────────────────────
+
+function resolveFields(config, schemasMap, parsedCache, depth) {
+  if (depth >= MAX_DEPTH) return null;
+
+  // Inline sub-fields (legacy array with `fields` key)
+  if (config.fields && Object.keys(config.fields).length > 0) {
+    return config.fields;
+  }
+
+  // Schema reference via `items: "$Name"` or `type: "$Name"`
+  const refRaw = config.items || config.type || "";
+  if (!refRaw.startsWith("$") || !schemasMap) return null;
+  const refName = refRaw.replace(/^\$/, "");
+
+  const cache = getCache(parsedCache);
+
+  if (!cache[refName]) {
+    const raw = schemasMap[refName];
+    if (!raw?.schemaYaml) return null;
+    try {
+      const parsed = yaml.load(raw.schemaYaml);
+      cache[refName] = parsed?.fields || {};
+    } catch {
+      return null;
+    }
+  }
+
+  return cache[refName] || null;
+}
+
+function buildEmptyItem(fieldsMap, schemasMap, parsedCache, depth = 0) {
+  if (!fieldsMap || depth >= MAX_DEPTH) return {};
+  const item = {};
+  Object.entries(fieldsMap).forEach(([key, cfg]) => {
+    if (cfg.type === "array") {
+      item[key] = [];
+    } else if (cfg.type?.startsWith("$") || cfg.items?.startsWith("$")) {
+      const nested = resolveFields(cfg, schemasMap, parsedCache, depth + 1);
+      item[key] = nested ? buildEmptyItem(nested, schemasMap, parsedCache, depth + 1) : {};
+    } else if (cfg.default !== undefined) {
+      item[key] = cfg.default;
+    } else if (cfg.type === "checkbox") {
+      item[key] = false;
+    } else {
+      item[key] = "";
+    }
+  });
+  return item;
+}
+
+// ── Primitive field renderer ──────────────────────────────────────
+
+function PrimitiveField({ fieldKey, fieldConfig, value, onChange, disabled }) {
+  const label      = fieldConfig.label || fieldKey;
+  const fieldValue = value ?? fieldConfig.default ?? "";
+
+  if (fieldConfig.type === "textarea") {
+    return (
+      <TextareaField fieldKey={fieldKey} config={fieldConfig}
+        value={fieldValue} onChange={onChange} disabled={disabled} />
+    );
+  }
+  if (fieldConfig.type === "select") {
+    return (
+      <TextField select label={label} fullWidth size="small"
+        value={fieldValue} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+        {fieldConfig.options?.map((opt) => (
+          <MenuItem key={opt.value || opt} value={opt.value || opt}>{opt.label || opt}</MenuItem>
+        ))}
+      </TextField>
+    );
+  }
+  if (fieldConfig.type === "checkbox") {
+    return (
+      <FormControlLabel
+        control={<Checkbox size="small" checked={fieldValue === true}
+          onChange={(e) => onChange(e.target.checked)} disabled={disabled} />}
+        label={label} />
+    );
+  }
+  if (fieldConfig.type === "date") {
+    return (
+      <TextField type="date" label={label} fullWidth size="small"
+        InputLabelProps={{ shrink: true }} value={fieldValue}
+        onChange={(e) => onChange(e.target.value)} disabled={disabled} />
+    );
+  }
+  return (
+    <TextField label={label} fullWidth size="small"
+      value={fieldValue} onChange={(e) => onChange(e.target.value)} disabled={disabled}
+      placeholder={fieldConfig.placeholder}
+      type={fieldConfig.type === "number" ? "number" : "text"}
+      inputProps={fieldConfig.type === "number"
+        ? { min: fieldConfig.min, max: fieldConfig.max, step: fieldConfig.step }
+        : {}} />
+  );
+}
+
+// ── ItemFields — renders all fields of one item, recurses ─────────
+// Has its own local expand state for any nested ArrayFields it contains,
+// so nested "Add children" buttons always show their new items immediately.
+
+function ItemFields({ fieldsMap, itemData, onItemChange, disabled, schemasMap, parsedCache, depth }) {
+  // Local expand state for nested arrays inside this item
+  const [nestedExpanded, setNestedExpanded] = useState({});
+
+  if (!fieldsMap) return null;
+  if (depth >= MAX_DEPTH) {
+    return (
+      <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic" }}>
+        Max nesting depth reached.
+      </Typography>
+    );
+  }
+
+  return (
+    <Stack spacing={2}>
+      {Object.entries(fieldsMap).map(([key, cfg]) => {
+        const val = itemData?.[key];
+
+        // Nested array field
+        if (cfg.type === "array") {
+          return (
+            <ArrayField
+              key={key}
+              fieldKey={key}
+              config={cfg}
+              value={Array.isArray(val) ? val : []}
+              onChange={(newArr) => onItemChange(key, newArr)}
+              disabled={disabled}
+              schemasMap={schemasMap}
+              parsedCache={parsedCache}
+              depth={depth + 1}
+              // Wire up local expand state so new items are immediately visible
+              expanded={nestedExpanded[key] ?? true}
+              onToggleExpand={(v) => setNestedExpanded((prev) => ({ ...prev, [key]: v }))}
+            />
+          );
+        }
+
+        // Embedded $SchemaRef — render fields inline
+        if (cfg.type?.startsWith("$")) {
+          const nestedFields = resolveFields(cfg, schemasMap, parsedCache, depth + 1);
+          if (!nestedFields) return null;
+          return (
+            <Box key={key} sx={{ pl: 1.5, borderLeft: "3px solid", borderColor: "primary.light" }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
+                {cfg.label || key}{" "}
+                <span style={{ opacity: 0.5, fontFamily: "monospace" }}>({cfg.type})</span>
+              </Typography>
+              <ItemFields
+                fieldsMap={nestedFields}
+                itemData={typeof val === "object" && val !== null ? val : {}}
+                onItemChange={(nk, nv) => onItemChange(key, { ...(val || {}), [nk]: nv })}
+                disabled={disabled}
+                schemasMap={schemasMap}
+                parsedCache={parsedCache}
+                depth={depth + 1}
+              />
+            </Box>
+          );
+        }
+
+        // Primitive field
+        return (
+          <PrimitiveField
+            key={key}
+            fieldKey={key}
+            fieldConfig={cfg}
+            value={val}
+            onChange={(nv) => onItemChange(key, nv)}
+            disabled={disabled}
+          />
+        );
+      })}
+    </Stack>
+  );
+}
+
+// ── ArrayField ────────────────────────────────────────────────────
 
 export default function ArrayField({
   fieldKey,
@@ -31,172 +217,65 @@ export default function ArrayField({
   disabled,
   expanded,
   onToggleExpand,
+  schemasMap = {},
+  parsedCache = {},
+  depth = 0,
 }) {
-  const [inputValue, setInputValue] = useState("");
-  const label = config.label || fieldKey;
-  const isExpanded = expanded || false;
-  const itemFields = config.fields || {};
+  const [inputValue,    setInputValue]    = useState("");
+  // Own expand state as fallback when parent doesn't pass onToggleExpand
+  const [localExpanded, setLocalExpanded] = useState(true);
 
-  // Simple array (no nested fields)
-  const isSimpleArray = Object.keys(itemFields).length === 0;
+  const label        = config.label || fieldKey;
+  const isControlled = onToggleExpand !== undefined;
+  const isExpanded   = isControlled ? (expanded ?? true) : localExpanded;
+
+  const toggleExpand = (v) => {
+    if (isControlled) onToggleExpand(v);
+    else setLocalExpanded(v);
+  };
+
+  const resolvedFields = resolveFields(config, schemasMap, parsedCache, depth);
+  const isSimpleArray  = !resolvedFields;
 
   const handleAddSimpleItem = () => {
     if (!inputValue.trim()) return;
-
-    const newItem = inputValue.trim();
-    onChange([...value, newItem]);
+    onChange([...value, inputValue.trim()]);
     setInputValue("");
   };
 
   const handleAddComplexItem = () => {
-    const newItem = {};
-
-    Object.entries(itemFields).forEach(([fieldKey, fieldConfig]) => {
-      if (fieldConfig.default !== undefined) {
-        newItem[fieldKey] = fieldConfig.default;
-      } else if (fieldConfig.type === "checkbox") {
-        newItem[fieldKey] = false;
-      } else {
-        newItem[fieldKey] = "";
-      }
-    });
-
+    const newItem = resolvedFields
+      ? buildEmptyItem(resolvedFields, schemasMap, parsedCache, depth)
+      : {};
     newItem._id = uuidv4();
-
     onChange([...value, newItem]);
-    if (onToggleExpand) onToggleExpand(true);
+    // Always expand so the new item is immediately visible
+    toggleExpand(true);
   };
 
   const handleRemoveItem = (index) => {
-    const newArray = [...value];
-    newArray.splice(index, 1);
-    onChange(newArray);
+    const next = [...value];
+    next.splice(index, 1);
+    onChange(next);
   };
 
-  const handleItemChange = (index, fieldKey, fieldValue) => {
-    const newArray = [...value];
-    newArray[index] = {
-      ...newArray[index],
-      [fieldKey]: fieldValue,
-    };
-    onChange(newArray);
+  const handleItemFieldChange = (index, fk, fv) => {
+    const next = [...value];
+    next[index] = { ...next[index], [fk]: fv };
+    onChange(next);
   };
 
-  const renderNestedField = (item, index, fieldKey, fieldConfig) => {
-    const fieldValue = item[fieldKey] ?? fieldConfig.default ?? "";
-    const fieldLabel = fieldConfig.label || fieldKey;
-
-    if (fieldConfig.type === "textarea") {
-      return (
-        <TextareaField
-          key={fieldKey}
-          fieldKey={fieldKey}
-          config={fieldConfig}
-          value={fieldValue}
-          onChange={(newValue) => handleItemChange(index, fieldKey, newValue)}
-          disabled={disabled}
-        />
-      );
-    }
-
-    if (fieldConfig.type === "select") {
-      return (
-        <TextField
-          key={fieldKey}
-          select
-          label={fieldLabel}
-          fullWidth
-          size="small"
-          value={fieldValue}
-          onChange={(e) => handleItemChange(index, fieldKey, e.target.value)}
-          disabled={disabled}
-        >
-          {fieldConfig.options?.map((opt) => (
-            <MenuItem key={opt.value || opt} value={opt.value || opt}>
-              {opt.label || opt}
-            </MenuItem>
-          ))}
-        </TextField>
-      );
-    }
-
-    if (fieldConfig.type === "checkbox") {
-      return (
-        <FormControlLabel
-          key={fieldKey}
-          control={
-            <Checkbox
-              size="small"
-              checked={fieldValue === true}
-              onChange={(e) =>
-                handleItemChange(index, fieldKey, e.target.checked)
-              }
-              disabled={disabled}
-            />
-          }
-          label={fieldLabel}
-        />
-      );
-    }
-
-    if (fieldConfig.type === "date") {
-      return (
-        <TextField
-          key={fieldKey}
-          type="date"
-          label={fieldLabel}
-          fullWidth
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          value={fieldValue}
-          onChange={(e) => handleItemChange(index, fieldKey, e.target.value)}
-          disabled={disabled}
-        />
-      );
-    }
-
-    return (
-      <TextField
-        key={fieldKey}
-        label={fieldLabel}
-        fullWidth
-        size="small"
-        value={fieldValue}
-        onChange={(e) => handleItemChange(index, fieldKey, e.target.value)}
-        disabled={disabled}
-        placeholder={fieldConfig.placeholder}
-        type={fieldConfig.type === "number" ? "number" : "text"}
-        inputProps={
-          fieldConfig.type === "number"
-            ? {
-                min: fieldConfig.min,
-                max: fieldConfig.max,
-                step: fieldConfig.step,
-              }
-            : {}
-        }
-      />
-    );
-  };
-
-  // Render simple array (chips with input)
+  // ── Simple array (chips + text input) ────────────────────────
   if (isSimpleArray) {
     return (
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-          {label}{" "}
-          {config.required && <span style={{ color: "#d32f2f" }}>*</span>}
+          {label} {config.required && <span style={{ color: "#d32f2f" }}>*</span>}
         </Typography>
+        {config.helperText && <FormHelperText sx={{ mb: 2 }}>{config.helperText}</FormHelperText>}
 
-        {config.helperText && (
-          <FormHelperText sx={{ mb: 2 }}>{config.helperText}</FormHelperText>
-        )}
-
-        {/* Input field for adding new items */}
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-          <TextField
-            fullWidth
-            size="small"
+          <TextField fullWidth size="small"
             placeholder={config.placeholder || `Enter a ${label.toLowerCase()}`}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -206,153 +285,95 @@ export default function ArrayField({
                 e.preventDefault();
                 handleAddSimpleItem();
               }
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleAddSimpleItem}
-            disabled={disabled || !inputValue.trim()}
-          >
+            }} />
+          <Button variant="contained" onClick={handleAddSimpleItem}
+            disabled={disabled || !inputValue.trim()}>
             Add
           </Button>
         </Box>
 
-        {error && (
-          <FormHelperText error sx={{ mb: 1 }}>
-            {error}
-          </FormHelperText>
-        )}
+        {error && <FormHelperText error sx={{ mb: 1 }}>{error}</FormHelperText>}
 
-        {/* Display added items as chips */}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {value.length === 0 ? (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ fontStyle: "italic" }}
-            >
-              No items added yet
-            </Typography>
-          ) : (
-            value.map((item, index) => (
-              <Chip
-                key={index}
-                label={item}
-                onDelete={() => handleRemoveItem(index)}
-                color="primary"
-                variant="outlined"
-                size="small"
-              />
-            ))
-          )}
+          {value.length === 0
+            ? <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>No items added yet</Typography>
+            : value.map((item, i) => (
+                <Chip key={i} label={item} onDelete={() => handleRemoveItem(i)}
+                  color="primary" variant="outlined" size="small" />
+              ))}
         </Box>
       </Box>
     );
   }
 
-  // Render complex array (cards with nested fields)
+  // ── Complex array (item cards) ────────────────────────────────
+  const refLabel = (config.items || config.type || "").startsWith("$")
+    ? (config.items || config.type)
+    : null;
+
   return (
-    <Box sx={{ mb: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 1,
-        }}
-      >
+    <Box sx={{ mb: 1 }}>
+      {/* Header row */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
         <Typography variant="subtitle2" color="text.secondary">
           {label}{" "}
           {config.required && <span style={{ color: "#d32f2f" }}>*</span>}
+          {refLabel && (
+            <Typography component="span" variant="caption"
+              sx={{ ml: 0.5, color: "text.disabled", fontFamily: "monospace" }}>
+              ({refLabel})
+            </Typography>
+          )}
         </Typography>
-        <Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {value.length > 0 && (
-            <IconButton
-              size="small"
-              onClick={() => onToggleExpand?.(!isExpanded)}
-              sx={{ mr: 1 }}
-            >
-              {isExpanded ? (
-                <ExpandLessRoundedIcon />
-              ) : (
-                <ExpandMoreRoundedIcon />
-              )}
+            <IconButton size="small" onClick={() => toggleExpand(!isExpanded)}>
+              {isExpanded ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
             </IconButton>
           )}
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddRoundedIcon />}
-            onClick={handleAddComplexItem}
-            disabled={disabled}
-          >
+          <Button size="small" variant="outlined" startIcon={<AddRoundedIcon />}
+            onClick={handleAddComplexItem} disabled={disabled}>
             Add
           </Button>
         </Box>
       </Box>
 
-      {error && (
-        <FormHelperText error sx={{ mb: 1 }}>
-          {error}
-        </FormHelperText>
-      )}
+      {error && <FormHelperText error sx={{ mb: 1 }}>{error}</FormHelperText>}
+      {config.helperText && <FormHelperText sx={{ mb: 2 }}>{config.helperText}</FormHelperText>}
 
-      {config.helperText && (
-        <FormHelperText sx={{ mb: 2 }}>{config.helperText}</FormHelperText>
-      )}
-
-      <Collapse in={isExpanded || value.length === 0}>
+      <Collapse in={isExpanded}>
         <Stack spacing={2}>
           {value.length === 0 ? (
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 3,
-                textAlign: "center",
-                bgcolor: "action.hover",
-                borderStyle: "dashed",
-              }}
-            >
+            <Paper variant="outlined" sx={{ p: 3, textAlign: "center", bgcolor: "action.hover", borderStyle: "dashed" }}>
               <Typography color="text.secondary">
-                No items added yet. Click "Add" to create a new{" "}
-                {label.toLowerCase()} item.
+                No items yet. Click "Add" to create a new {label.toLowerCase()} item.
               </Typography>
             </Paper>
           ) : (
             value.map((item, index) => (
-              <Paper
-                key={item._id || index}
-                variant="outlined"
-                sx={{ p: 2, position: "relative" }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1,
-                  }}
-                >
+              <Paper key={item._id || index} variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
                   <Typography variant="subtitle2" color="primary">
                     {label} #{index + 1}
                   </Typography>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleRemoveItem(index)}
-                    disabled={disabled}
-                  >
+                  <IconButton size="small" color="error"
+                    onClick={() => handleRemoveItem(index)} disabled={disabled}>
                     <DeleteOutlineRoundedIcon fontSize="small" />
                   </IconButton>
                 </Box>
 
                 <Divider sx={{ mb: 2 }} />
 
-                <Stack spacing={2}>
-                  {Object.entries(itemFields).map(([nestedKey, nestedConfig]) =>
-                    renderNestedField(item, index, nestedKey, nestedConfig),
-                  )}
-                </Stack>
+                <ItemFields
+                  fieldsMap={resolvedFields}
+                  itemData={item}
+                  onItemChange={(fk, fv) => handleItemFieldChange(index, fk, fv)}
+                  disabled={disabled}
+                  schemasMap={schemasMap}
+                  parsedCache={parsedCache}
+                  depth={depth + 1}
+                />
               </Paper>
             ))
           )}

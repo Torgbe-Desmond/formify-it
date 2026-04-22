@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = ['https://formify-node-3kzc.onrender.com',"http://localhost:5000"][0];
+const BASE_URL = ['https://formify-node-3kzc.onrender.com',"http://localhost:5000"][1];
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -52,6 +52,7 @@ export const foldersApi = {
 // ── Schema ────────────────────────────────────────────────────────
 export const schemaApi = {
   get:    (folderId)       => apiClient.get(`/api/folders/${folderId}/schema`),
+  // data = { schemas: { [name]: { schemaYaml, templateHtml, templateCss } }, entrySchema }
   upsert: (folderId, data) => apiClient.put(`/api/folders/${folderId}/schema`, data),
 };
 
