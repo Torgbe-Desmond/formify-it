@@ -12,7 +12,7 @@ import { v4 as uuidv4 }        from "uuid";
 import yaml                     from "js-yaml";
 import TextareaField            from "./TextareaField";
 
-const MAX_DEPTH = 5;
+const MAX_DEPTH = 8;
 
 // ── Cache helpers ─────────────────────────────────────────────────
 // parsedCache may arrive as a useRef object ({ current: {} })

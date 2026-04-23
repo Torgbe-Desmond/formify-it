@@ -1,9 +1,8 @@
 import axios from 'axios';
-
-const BASE_URL = ['https://formify-node-3kzc.onrender.com',"http://localhost:5000"][0];
+import BASE_URL from './api'
 
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
+    baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
