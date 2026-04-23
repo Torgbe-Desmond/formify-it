@@ -7,4 +7,4 @@ function environmentType(environment){
     }
 }
 
-export const BASE_URL = environmentType("Production")
+export default BASE_URL = environmentType("Production")
