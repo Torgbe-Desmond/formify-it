@@ -26,7 +26,7 @@ import EditFileDataDialog from '../components/EditFileDataDialog';
 import PaginationPreview from '../components/fileEditor/PaginationPreview';
 import EmailComposerDialog from '../components/email/EmailComposerDialog'
 
-import {breadcrumbApi} from '../store/api/apiClient';
+import {breadcrumbApi, emailAPI} from '../store/api/apiClient';
 
 function stripCssBlock(content) {
     if (!content) return content;
@@ -225,13 +225,30 @@ export default function FileEditorPage() {
     };
 
 
-    const handleEmailSend = async ({from, to, subject, body, attachments}) => {
-        // Call your backend endpoint here
-        await fetch('/api/send-email', {
-            method: 'POST',
-            body: JSON.stringify({from, to, subject, body}),
-        });
-    }
+    const handleEmailSend = async ({ from, to, subject, body, attachments }) => {
+        try {
+            const formData = new FormData();
+
+            formData.append('from', from);
+            formData.append('to', to);
+            formData.append('subject', subject);
+            formData.append('body', body);
+
+            if (attachments && attachments.length > 0) {
+                for (const file of attachments) {
+                    formData.append('files', file);
+                }
+            }
+
+            const response = await emailAPI.post(formData);
+
+            if (response.data) {
+                console.log('✅ Email sent:', response.data);
+            }
+        } catch (err) {
+            console.error('❌ Error sending email:', err);
+        }
+    };
 
     if (!file) {
         return (

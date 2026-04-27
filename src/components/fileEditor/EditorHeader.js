@@ -57,12 +57,12 @@ export default function EditorHeader({
                     <ListItemText>Download PDF</ListItemText>
                 </MenuItem>
 
-                <MenuItem onClick={onEmailClick}>
-                    <ListItemIcon>
-                        <PictureAsPdfIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Email</ListItemText>
-                </MenuItem>
+                {/*<MenuItem onClick={onEmailClick}>*/}
+                {/*    <ListItemIcon>*/}
+                {/*        <PictureAsPdfIcon fontSize="small"/>*/}
+                {/*    </ListItemIcon>*/}
+                {/*    <ListItemText>Email</ListItemText>*/}
+                {/*</MenuItem>*/}
             </Menu>
         </Box>
     );
