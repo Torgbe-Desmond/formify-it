@@ -24,6 +24,7 @@ import RenameFileDialog from '../components/fileEditor/RenameFileDialog';
 import DeleteFileDialog from '../components/fileEditor/DeleteFileDialog';
 import EditFileDataDialog from '../components/EditFileDataDialog';
 import PaginationPreview from '../components/fileEditor/PaginationPreview';
+import EmailComposerDialog from '../components/email/EmailComposerDialog'
 
 import {breadcrumbApi} from '../store/api/apiClient';
 
@@ -59,6 +60,7 @@ export default function FileEditorPage() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [editDataOpen, setEditDataOpen] = useState(false);
     const [previewMargins, setPreviewMargins] = useState(60);
+    const [emailOpen, setEmailOpen] = useState(false);
 
     const open = Boolean(anchorEl);
 
@@ -222,6 +224,15 @@ export default function FileEditorPage() {
             });
     };
 
+
+    const handleEmailSend = async ({from, to, subject, body, attachments}) => {
+        // Call your backend endpoint here
+        await fetch('/api/send-email', {
+            method: 'POST',
+            body: JSON.stringify({from, to, subject, body}),
+        });
+    }
+
     if (!file) {
         return (
             <Container maxWidth="lg" sx={{py: 4}}>
@@ -254,6 +265,9 @@ export default function FileEditorPage() {
                     setEditDataOpen(true);
                 }}
                 onPDFDownload={handleDownloadPDF}
+                onEmailClick={() => {
+                    setEmailOpen(true)
+                }}
             />
 
             {isEditing ? (
@@ -296,6 +310,12 @@ export default function FileEditorPage() {
                 onClose={() => setDeleteOpen(false)}
                 fileName={file.name}
                 onDelete={handleDeleteConfirm}
+            />
+
+            <EmailComposerDialog
+                open={emailOpen}
+                onClose={() => setEmailOpen(false)}
+                onSend={handleEmailSend}
             />
 
             <EditFileDataDialog
