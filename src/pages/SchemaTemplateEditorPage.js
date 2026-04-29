@@ -1,5 +1,5 @@
-import {useState, useEffect, useRef} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     Container,
     Box,
@@ -31,12 +31,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import {Liquid} from 'liquidjs';
+import { Liquid } from 'liquidjs';
 import yaml from 'js-yaml';
 import CodeMirror from '@uiw/react-codemirror';
-import {html} from '@codemirror/lang-html';
-import {css} from '@codemirror/lang-css';
-import {useDispatch, useSelector} from 'react-redux';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
     loadSchema,
@@ -85,7 +85,7 @@ function parseYamlToBuilder(yamlString) {
                 placeholder: v.placeholder || '',
             })) : [],
         }));
-        return {name: parsed.name || '', description: parsed.description || '', fields};
+        return { name: parsed.name || '', description: parsed.description || '', fields };
     } catch {
         return null;
     }
@@ -93,7 +93,7 @@ function parseYamlToBuilder(yamlString) {
 
 // ── NewSchemaDialog ───────────────────────────────────────────────
 
-function NewSchemaDialog({open, onClose, onConfirm, existing}) {
+function NewSchemaDialog({ open, onClose, onConfirm, existing }) {
     const [value, setValue] = useState('');
     const error = existing.includes(value.trim());
 
@@ -105,60 +105,60 @@ function NewSchemaDialog({open, onClose, onConfirm, existing}) {
     };
 
     return (<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-            <DialogTitle>New Schema</DialogTitle>
-            <DialogContent>
-                <TextField
-                    autoFocus fullWidth label="Schema name" value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-                    error={error}
-                    helperText={error ? 'A schema with this name already exists.' : 'e.g. Address, LineItem, Category'}
-                    sx={{mt: 1}}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button variant="contained" onClick={handleConfirm} disabled={!value.trim() || error}>
-                    Create
-                </Button>
-            </DialogActions>
-        </Dialog>);
+        <DialogTitle>New Schema</DialogTitle>
+        <DialogContent>
+            <TextField
+                autoFocus fullWidth label="Schema name" value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+                error={error}
+                helperText={error ? 'A schema with this name already exists.' : 'e.g. Address, LineItem, Category'}
+                sx={{ mt: 1 }}
+            />
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleConfirm} disabled={!value.trim() || error}>
+                Create
+            </Button>
+        </DialogActions>
+    </Dialog>);
 }
 
 // ── RenameSchemaDialog ────────────────────────────────────────────
 
-function RenameSchemaDialog({open, onClose, onConfirm, current, existing}) {
+function RenameSchemaDialog({ open, onClose, onConfirm, current, existing }) {
     const [value, setValue] = useState(current);
     useEffect(() => setValue(current), [current]);
     const isDuplicate = existing.filter((n) => n !== current).includes(value.trim());
 
     return (<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-            <DialogTitle>Rename Schema</DialogTitle>
-            <DialogContent>
-                <TextField
-                    autoFocus fullWidth label="New name" value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !isDuplicate && value.trim() && onConfirm(value.trim())}
-                    error={isDuplicate}
-                    helperText={isDuplicate ? 'Name already in use.' : ''}
-                    sx={{mt: 1}}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button variant="contained"
-                        onClick={() => onConfirm(value.trim())}
-                        disabled={!value.trim() || isDuplicate || value.trim() === current}>
-                    Rename
-                </Button>
-            </DialogActions>
-        </Dialog>);
+        <DialogTitle>Rename Schema</DialogTitle>
+        <DialogContent>
+            <TextField
+                autoFocus fullWidth label="New name" value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !isDuplicate && value.trim() && onConfirm(value.trim())}
+                error={isDuplicate}
+                helperText={isDuplicate ? 'Name already in use.' : ''}
+                sx={{ mt: 1 }}
+            />
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button variant="contained"
+                onClick={() => onConfirm(value.trim())}
+                disabled={!value.trim() || isDuplicate || value.trim() === current}>
+                Rename
+            </Button>
+        </DialogActions>
+    </Dialog>);
 }
 
 // ── Main page ─────────────────────────────────────────────────────
 
 export default function SchemaTemplateEditorPage() {
-    const {folderId} = useParams();
+    const { folderId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -197,7 +197,7 @@ export default function SchemaTemplateEditorPage() {
     const [renameSchemaOpen, setRenameSchemaOpen] = useState(false);
     const [deleteSchemaOpen, setDeleteSchemaOpen] = useState(false);
 
-    const [snackbar, setSnackbar] = useState({open: false, message: '', severity: 'success'});
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const fileInputRef = useRef(null);
     const open = Boolean(anchorEl);
 
@@ -206,8 +206,8 @@ export default function SchemaTemplateEditorPage() {
     // ── Load on mount ──────────────────────────────────────────────
     useEffect(() => {
         if (!folderId) return;
-        dispatch(loadSchema({folderId}));
-        if (!folder) dispatch(loadFolders({projectId: ''}));
+        dispatch(loadSchema({ folderId }));
+        if (!folder) dispatch(loadFolders({ projectId: '' }));
     }, [folderId, dispatch, folder]);
 
     // ── Sync active schema when folder schema loads ────────────────
@@ -274,7 +274,7 @@ export default function SchemaTemplateEditorPage() {
     // ── Schema management ──────────────────────────────────────────
 
     const handleAddSchema = (schemaName) => {
-        dispatch(addNamedSchema({folderId, schemaName}));
+        dispatch(addNamedSchema({ folderId, schemaName }));
         setActiveSchema(schemaName);
         setIsEditing(true);
         setView('builder');
@@ -282,13 +282,13 @@ export default function SchemaTemplateEditorPage() {
     };
 
     const handleRenameSchema = (newName) => {
-        dispatch(renameNamedSchema({folderId, oldName: activeSchema, newName}));
+        dispatch(renameNamedSchema({ folderId, oldName: activeSchema, newName }));
         setActiveSchema(newName);
         setRenameSchemaOpen(false);
     };
 
     const handleDeleteSchema = () => {
-        dispatch(removeNamedSchema({folderId, schemaName: activeSchema}));
+        dispatch(removeNamedSchema({ folderId, schemaName: activeSchema }));
         // Switch to whatever remains
         const remaining = schemaNames.filter((n) => n !== activeSchema);
         setActiveSchema(remaining[0] || '');
@@ -296,7 +296,7 @@ export default function SchemaTemplateEditorPage() {
     };
 
     const handleSetEntry = (name) => {
-        dispatch(setEntrySchema({folderId, entrySchema: name}));
+        dispatch(setEntrySchema({ folderId, entrySchema: name }));
     };
 
     // ── Editor helpers ─────────────────────────────────────────────
@@ -310,14 +310,14 @@ export default function SchemaTemplateEditorPage() {
             setFields(parsed.fields);
         }
         // Optimistically update Redux so other components see the change
-        dispatch(updateNamedSchema({folderId, schemaName: activeSchema, patch: {schemaYaml: yamlString}}));
+        dispatch(updateNamedSchema({ folderId, schemaName: activeSchema, patch: { schemaYaml: yamlString } }));
     };
 
     const flushActiveToRedux = () => {
         dispatch(updateNamedSchema({
             folderId,
             schemaName: activeSchema,
-            patch: {schemaYaml: schemaContent, templateHtml: htmlContent, templateCss: cssContent},
+            patch: { schemaYaml: schemaContent, templateHtml: htmlContent, templateCss: cssContent },
         }));
     };
 
@@ -326,11 +326,11 @@ export default function SchemaTemplateEditorPage() {
         // Build the full schemas map from Redux (which now has our latest patch)
         const latestMap = {
             ...schemasMap,
-            [activeSchema]: {schemaYaml: schemaContent, templateHtml: htmlContent, templateCss: cssContent},
+            [activeSchema]: { schemaYaml: schemaContent, templateHtml: htmlContent, templateCss: cssContent },
         };
-        await dispatch(upsertSchema({folderId, schemas: latestMap, entrySchema}));
+        await dispatch(upsertSchema({ folderId, schemas: latestMap, entrySchema }));
         setIsEditing(false);
-        setSnackbar({open: true, message: 'Schema saved.', severity: 'success'});
+        setSnackbar({ open: true, message: 'Schema saved.', severity: 'success' });
     };
 
     const handleCancelEdit = () => {
@@ -347,8 +347,8 @@ export default function SchemaTemplateEditorPage() {
     // ── Download / Upload ──────────────────────────────────────────
 
     const handleDownload = () => {
-        const payload = {schemas: schemasMap, entrySchema};
-        const blob = new Blob([JSON.stringify(payload, null, 2)], {type: SCHEMA_FILE_MIME});
+        const payload = { schemas: schemasMap, entrySchema };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: SCHEMA_FILE_MIME });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -381,10 +381,10 @@ export default function SchemaTemplateEditorPage() {
                 if (parsed.schemas && typeof parsed.schemas === 'object') {
                     // New shape
                     Object.entries(parsed.schemas).forEach(([sName, sData]) => {
-                        dispatch(addNamedSchema({folderId, schemaName: sName}));
-                        dispatch(updateNamedSchema({folderId, schemaName: sName, patch: sData}));
+                        dispatch(addNamedSchema({ folderId, schemaName: sName }));
+                        dispatch(updateNamedSchema({ folderId, schemaName: sName, patch: sData }));
                     });
-                    if (parsed.entrySchema) dispatch(setEntrySchema({folderId, entrySchema: parsed.entrySchema}));
+                    if (parsed.entrySchema) dispatch(setEntrySchema({ folderId, entrySchema: parsed.entrySchema }));
                     setActiveSchema(parsed.entrySchema || Object.keys(parsed.schemas)[0] || '');
                 } else {
                     // Old flat shape — load into active schema
@@ -397,7 +397,7 @@ export default function SchemaTemplateEditorPage() {
                     dispatch(updateNamedSchema({
                         folderId,
                         schemaName: activeSchema,
-                        patch: {schemaYaml: uploadedYaml, templateHtml: uploadedHtml, templateCss: uploadedCss}
+                        patch: { schemaYaml: uploadedYaml, templateHtml: uploadedHtml, templateCss: uploadedCss }
                     }));
                     const pb = parseYamlToBuilder(uploadedYaml);
                     if (pb) {
@@ -409,17 +409,17 @@ export default function SchemaTemplateEditorPage() {
 
                 setIsEditing(true);
                 setView('builder');
-                setSnackbar({open: true, message: 'Schema uploaded. Review and save when ready.', severity: 'success'});
+                setSnackbar({ open: true, message: 'Schema uploaded. Review and save when ready.', severity: 'success' });
             } catch (err) {
-                setSnackbar({open: true, message: `Failed to parse file: ${err.message}`, severity: 'error'});
+                setSnackbar({ open: true, message: `Failed to parse file: ${err.message}`, severity: 'error' });
             }
         };
-        reader.onerror = () => setSnackbar({open: true, message: 'Failed to read the file.', severity: 'error'});
+        reader.onerror = () => setSnackbar({ open: true, message: 'Failed to read the file.', severity: 'error' });
         reader.readAsText(file);
     };
 
     const handleDeleteFolder = async () => {
-        await dispatch(deleteFolder({id: folderId}));
+        await dispatch(deleteFolder({ id: folderId }));
         navigate(-1);
     };
 
@@ -429,295 +429,295 @@ export default function SchemaTemplateEditorPage() {
     const hasContent = schemaContent || htmlContent || cssContent;
     const isEntrySchema = activeSchema === entrySchema;
 
-    return (<Container maxWidth="lg" sx={{py: 4, pb: isMobile ? '80px' : 4}}>
-            <SchemaEditorHeader
-                fileName={folder?.name || 'Schema Editor'}
-                anchorEl={anchorEl} open={open}
-                onMenuClick={(e) => setAnchorEl(e.currentTarget)}
-                onMenuClose={() => setAnchorEl(null)}
-                onEditClick={() => {
-                    setIsEditing(true);
-                    setView('builder');
-                    setAnchorEl(null);
-                }}
-                onRenameClick={() => {
-                    setRenameOpen(true);
-                    setAnchorEl(null);
-                }}
-                onDeleteClick={() => {
-                    setDeleteOpen(true);
-                    setAnchorEl(null);
-                }}
-            />
+    return (<Container maxWidth="lg" sx={{ py: 4, pb: isMobile ? '80px' : 4 }}>
+        <SchemaEditorHeader
+            fileName={folder?.name || 'Schema Editor'}
+            anchorEl={anchorEl} open={open}
+            onMenuClick={(e) => setAnchorEl(e.currentTarget)}
+            onMenuClose={() => setAnchorEl(null)}
+            onEditClick={() => {
+                setIsEditing(true);
+                setView('builder');
+                setAnchorEl(null);
+            }}
+            onRenameClick={() => {
+                setRenameOpen(true);
+                setAnchorEl(null);
+            }}
+            onDeleteClick={() => {
+                setDeleteOpen(true);
+                setAnchorEl(null);
+            }}
+        />
 
-            {/* Download / Upload toolbar */}
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap'}}>
-                {hasContent && (<Tooltip title="Download all schemas as a .schema.json file">
-                        <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon/>}
-                                onClick={handleDownload}>
-                            Download Schema
-                        </Button>
-                    </Tooltip>)}
-                <Tooltip title="Upload a previously downloaded .schema.json file">
-                    <Button size="small" variant="outlined" color="secondary"
-                            startIcon={<UploadRoundedIcon/>} onClick={handleUploadClick}>
-                        Upload Schema
-                    </Button>
-                </Tooltip>
-                <input ref={fileInputRef} type="file" accept=".json,.schema.json"
-                       style={{display: 'none'}} onChange={handleFileChange}/>
-            </Box>
+        {/* Download / Upload toolbar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+            {hasContent && (<Tooltip title="Download all schemas as a .schema.json file">
+                <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon />}
+                    onClick={handleDownload}>
+                    Download Schema
+                </Button>
+            </Tooltip>)}
+            <Tooltip title="Upload a previously downloaded .schema.json file">
+                <Button size="small" variant="outlined" color="secondary"
+                    startIcon={<UploadRoundedIcon />} onClick={handleUploadClick}>
+                    Upload Schema
+                </Button>
+            </Tooltip>
+            <input ref={fileInputRef} type="file" accept=".json,.schema.json"
+                style={{ display: 'none' }} onChange={handleFileChange} />
+        </Box>
 
-            {/* Main layout: sidebar + editor */}
-            <Box sx={{display: 'flex', gap: 2, alignItems: 'flex-start'}}>
+        {/* Main layout: sidebar + editor */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
 
-                {/* ── Schema sidebar ──────────────────────────────────── */}
-                <Paper elevation={1} sx={{
-                    width: isMobile ? '100%' : 220,
-                    flexShrink: 0,
-                    borderRadius: 2,
-                    overflow: 'hidden', ...(isMobile ? {mb: 2} : {}),
+            {/* ── Schema sidebar ──────────────────────────────────── */}
+            <Paper elevation={1} sx={{
+                width: isMobile ? '100%' : 220,
+                flexShrink: 0,
+                borderRadius: 2,
+                overflow: 'hidden', ...(isMobile ? { mb: 2 } : {}),
+            }}>
+                <Box sx={{
+                    px: 2,
+                    py: 1.5,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider'
                 }}>
-                    <Box sx={{
-                        px: 2,
-                        py: 1.5,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderBottom: '1px solid',
-                        borderColor: 'divider'
-                    }}>
-                        <Typography variant="subtitle2" fontWeight={700}>Schemas</Typography>
-                        <Tooltip title="Add a new schema">
-                            <IconButton size="small" onClick={() => setNewSchemaOpen(true)}>
-                                <AddIcon fontSize="small"/>
+                    <Typography variant="subtitle2" fontWeight={700}>Schemas</Typography>
+                    <Tooltip title="Add a new schema">
+                        <IconButton size="small" onClick={() => setNewSchemaOpen(true)}>
+                            <AddIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+
+                <List dense disablePadding>
+                    {schemaNames.length === 0 && (<ListItem>
+                        <ListItemText primary={<Typography variant="caption" color="text.secondary">No schemas
+                            yet</Typography>} />
+                    </ListItem>)}
+                    {schemaNames.map((sName) => (<ListItemButton key={sName} selected={sName === activeSchema}
+                        onClick={() => {
+                            setActiveSchema(sName);
+                            setIsEditing(false);
+                        }}
+                        sx={{ py: 1 }}>
+                        <ListItemText
+                            primary={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Typography variant="body2" fontWeight={sName === activeSchema ? 700 : 400}
+                                    sx={{ fontFamily: 'monospace' }}>
+                                    {sName}
+                                </Typography>
+                                {sName === entrySchema && (<Chip label="entry" size="small"
+                                    sx={{
+                                        fontSize: 9,
+                                        height: 16,
+                                        bgcolor: 'primary.main',
+                                        color: '#fff'
+                                    }} />)}
+                            </Box>}
+                        />
+                    </ListItemButton>))}
+                </List>
+            </Paper>
+
+            {/* ── Editor area ─────────────────────────────────────── */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+                {/* Active schema toolbar */}
+                {activeSchema && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                        <Typography variant="subtitle1" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
+                            {activeSchema}
+                        </Typography>
+
+                        {/* Set as entry */}
+                        <Tooltip
+                            title={isEntrySchema ? 'This is the entry schema' : 'Set as entry schema (used to render files)'}>
+                            <span>
+                                <IconButton size="small" onClick={() => handleSetEntry(activeSchema)} disabled={isEntrySchema}>
+                                    {isEntrySchema ? <StarIcon fontSize="small" color="primary" /> : <StarBorderIcon fontSize="small" />}
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+
+                        {/* Rename */}
+                        <Tooltip title="Rename schema">
+                            <IconButton size="small" onClick={() => setRenameSchemaOpen(true)}>
+                                <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
+
+                        {/* Delete — disabled if only one schema remains */}
+                        <Tooltip
+                            title={schemaNames.length <= 1 ? 'Cannot delete the last schema' : 'Delete schema'}>
+                            <span>
+                                <IconButton size="small" color="error"
+                                    onClick={() => setDeleteSchemaOpen(true)} disabled={schemaNames.length <= 1}>
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+
+                        {!isEditing && (<Button size="small" variant="outlined" sx={{ ml: 'auto' }}
+                            onClick={() => {
+                                setIsEditing(true);
+                                setView('builder');
+                            }}>
+                            Edit
+                        </Button>)}
+                    </Box>)}
+
+                {isEditing ? (<>
+                    {/* View tabs */}
+                    <Box sx={{ mb: 2 }}>
+                        <ButtonGroup>
+                            {['builder', 'schema', ...(isEntrySchema ? ['template', 'preview'] : [])].map((v) => (
+                                <Button key={v} variant={view === v ? 'contained' : 'outlined'}
+                                    onClick={() => setView(v)}>
+                                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                                </Button>))}
+                        </ButtonGroup>
+                        {!isEntrySchema && (<Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                            Template/preview only available on the entry schema.
+                        </Typography>)}
                     </Box>
 
-                    <List dense disablePadding>
-                        {schemaNames.length === 0 && (<ListItem>
-                                <ListItemText primary={<Typography variant="caption" color="text.secondary">No schemas
-                                    yet</Typography>}/>
-                            </ListItem>)}
-                        {schemaNames.map((sName) => (<ListItemButton key={sName} selected={sName === activeSchema}
-                                                                     onClick={() => {
-                                                                         setActiveSchema(sName);
-                                                                         setIsEditing(false);
-                                                                     }}
-                                                                     sx={{py: 1}}>
-                                <ListItemText
-                                    primary={<Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                        <Typography variant="body2" fontWeight={sName === activeSchema ? 700 : 400}
-                                                    sx={{fontFamily: 'monospace'}}>
-                                            {sName}
-                                        </Typography>
-                                        {sName === entrySchema && (<Chip label="entry" size="small"
-                                                                         sx={{
-                                                                             fontSize: 9,
-                                                                             height: 16,
-                                                                             bgcolor: 'primary.main',
-                                                                             color: '#fff'
-                                                                         }}/>)}
-                                    </Box>}
-                                />
-                            </ListItemButton>))}
-                    </List>
-                </Paper>
+                    {view === 'builder' && (<FormSchemaBuilder
+                        fields={fields} setFields={setFields}
+                        name={name} setName={setName}
+                        description={description} setDescription={setDescription}
+                        expandedArrays={expandedArrays} setExpandedArrays={setExpandedArrays}
+                        onGenerate={handleGenerateYAML}
+                        onSave={handleSave}
+                        onCancel={handleCancelEdit}
+                        otherSchemas={otherSchemaNames}
+                    />)}
 
-                {/* ── Editor area ─────────────────────────────────────── */}
-                <Box sx={{flex: 1, minWidth: 0}}>
-                    {/* Active schema toolbar */}
-                    {activeSchema && (
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap'}}>
-                            <Typography variant="subtitle1" fontWeight={700} sx={{fontFamily: 'monospace'}}>
-                                {activeSchema}
-                            </Typography>
+                    {view === 'schema' && (<Box sx={{ mb: 4 }}>
+                        <Typography variant="subtitle1" gutterBottom>Schema (YAML)</Typography>
+                        <TextField multiline minRows={14} fullWidth value={schemaContent}
+                            onChange={(e) => setSchemaContent(e.target.value)}
+                            sx={{ '& .MuiInputBase-input': { fontFamily: 'monospace' } }} />
+                    </Box>)}
 
-                            {/* Set as entry */}
-                            <Tooltip
-                                title={isEntrySchema ? 'This is the entry schema' : 'Set as entry schema (used to render files)'}>
-                <span>
-                  <IconButton size="small" onClick={() => handleSetEntry(activeSchema)} disabled={isEntrySchema}>
-                    {isEntrySchema ? <StarIcon fontSize="small" color="primary"/> : <StarBorderIcon fontSize="small"/>}
-                  </IconButton>
-                </span>
-                            </Tooltip>
+                    {view === 'template' && isEntrySchema && (<Box sx={{ mb: 4 }}>
+                        <Box sx={{ mb: 1.5 }}>
+                            <ButtonGroup size="small">
+                                {['html', 'css'].map((sub) => (<Button key={sub}
+                                    variant={templateSubView === sub ? 'contained' : 'outlined'}
+                                    onClick={() => setTemplateSubView(sub)}>
+                                    {sub.toUpperCase()}
+                                </Button>))}
+                            </ButtonGroup>
+                        </Box>
 
-                            {/* Rename */}
-                            <Tooltip title="Rename schema">
-                                <IconButton size="small" onClick={() => setRenameSchemaOpen(true)}>
-                                    <EditIcon fontSize="small"/>
-                                </IconButton>
-                            </Tooltip>
+                        {templateSubView === 'html' && (<>
+                            <Typography variant="subtitle1" gutterBottom>HTML Template +
+                                Liquid</Typography>
+                            <Paper variant="outlined"
+                                sx={{ overflow: 'hidden', borderRadius: 1, bgcolor: 'inherit' }}>
+                                <CodeMirror value={htmlContent} height="500px" extensions={[html({})]}
+                                    onChange={setHtmlContent}
+                                    basicSetup={{
+                                        lineNumbers: true,
+                                        highlightActiveLine: true,
+                                        foldGutter: true,
+                                        tabSize: 2
+                                    }} />
+                            </Paper>
+                        </>)}
 
-                            {/* Delete — disabled if only one schema remains */}
-                            <Tooltip
-                                title={schemaNames.length <= 1 ? 'Cannot delete the last schema' : 'Delete schema'}>
-                <span>
-                  <IconButton size="small" color="error"
-                              onClick={() => setDeleteSchemaOpen(true)} disabled={schemaNames.length <= 1}>
-                    <DeleteIcon fontSize="small"/>
-                  </IconButton>
-                </span>
-                            </Tooltip>
+                        {templateSubView === 'css' && (<>
+                            <Typography variant="subtitle1" gutterBottom>CSS Styles</Typography>
+                            <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 1 }}>
+                                <CodeMirror value={cssContent} height="500px" extensions={[css()]}
+                                    onChange={setCssContent}
+                                    basicSetup={{
+                                        lineNumbers: true,
+                                        highlightActiveLine: true,
+                                        foldGutter: true,
+                                        tabSize: 2
+                                    }} />
+                            </Paper>
+                        </>)}
+                    </Box>)}
 
-                            {!isEditing && (<Button size="small" variant="outlined" sx={{ml: 'auto'}}
-                                                    onClick={() => {
-                                                        setIsEditing(true);
-                                                        setView('builder');
-                                                    }}>
-                                    Edit
-                                </Button>)}
-                        </Box>)}
-
-                    {isEditing ? (<>
-                            {/* View tabs */}
-                            <Box sx={{mb: 2}}>
-                                <ButtonGroup>
-                                    {['builder', 'schema', ...(isEntrySchema ? ['template', 'preview'] : [])].map((v) => (
-                                        <Button key={v} variant={view === v ? 'contained' : 'outlined'}
-                                                onClick={() => setView(v)}>
-                                            {v.charAt(0).toUpperCase() + v.slice(1)}
-                                        </Button>))}
-                                </ButtonGroup>
-                                {!isEntrySchema && (<Typography variant="caption" color="text.secondary" sx={{ml: 1}}>
-                                        Template/preview only available on the entry schema.
-                                    </Typography>)}
-                            </Box>
-
-                            {view === 'builder' && (<FormSchemaBuilder
-                                    fields={fields} setFields={setFields}
-                                    name={name} setName={setName}
-                                    description={description} setDescription={setDescription}
-                                    expandedArrays={expandedArrays} setExpandedArrays={setExpandedArrays}
-                                    onGenerate={handleGenerateYAML}
-                                    onSave={handleSave}
-                                    onCancel={handleCancelEdit}
-                                    otherSchemas={otherSchemaNames}
-                                />)}
-
-                            {view === 'schema' && (<Box sx={{mb: 4}}>
-                                    <Typography variant="subtitle1" gutterBottom>Schema (YAML)</Typography>
-                                    <TextField multiline minRows={14} fullWidth value={schemaContent}
-                                               onChange={(e) => setSchemaContent(e.target.value)}
-                                               sx={{'& .MuiInputBase-input': {fontFamily: 'monospace'}}}/>
-                                </Box>)}
-
-                            {view === 'template' && isEntrySchema && (<Box sx={{mb: 4}}>
-                                    <Box sx={{mb: 1.5}}>
-                                        <ButtonGroup size="small">
-                                            {['html', 'css'].map((sub) => (<Button key={sub}
-                                                                                   variant={templateSubView === sub ? 'contained' : 'outlined'}
-                                                                                   onClick={() => setTemplateSubView(sub)}>
-                                                    {sub.toUpperCase()}
-                                                </Button>))}
-                                        </ButtonGroup>
-                                    </Box>
-
-                                    {templateSubView === 'html' && (<>
-                                            <Typography variant="subtitle1" gutterBottom>HTML Template +
-                                                Liquid</Typography>
-                                            <Paper variant="outlined"
-                                                   sx={{overflow: 'hidden', borderRadius: 1, bgcolor: 'inherit'}}>
-                                                <CodeMirror value={htmlContent} height="500px" extensions={[html({})]}
-                                                            onChange={setHtmlContent}
-                                                            basicSetup={{
-                                                                lineNumbers: true,
-                                                                highlightActiveLine: true,
-                                                                foldGutter: true,
-                                                                tabSize: 2
-                                                            }}/>
-                                            </Paper>
-                                        </>)}
-
-                                    {templateSubView === 'css' && (<>
-                                            <Typography variant="subtitle1" gutterBottom>CSS Styles</Typography>
-                                            <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 1}}>
-                                                <CodeMirror value={cssContent} height="500px" extensions={[css()]}
-                                                            onChange={setCssContent}
-                                                            basicSetup={{
-                                                                lineNumbers: true,
-                                                                highlightActiveLine: true,
-                                                                foldGutter: true,
-                                                                tabSize: 2
-                                                            }}/>
-                                            </Paper>
-                                        </>)}
-                                </Box>)}
-
-                            {view === 'preview' && isEntrySchema && (
-                                <Paper elevation={2} sx={{p: 3, minHeight: '50vh', borderRadius: 2}}>
-                                    <div
-                                        dangerouslySetInnerHTML={{__html: renderedContent || '<p>No content to preview yet...</p>'}}/>
-                                </Paper>)}
-
-                            <EditorActions onSave={handleSave} onCancel={handleCancelEdit}
-                                           hideMobileBar={view === 'builder'}/>
-                        </>) : (<Paper elevation={1} sx={{p: 3, minHeight: '60vh', borderRadius: 2}}>
-                            {activeSchema ? (<div dangerouslySetInnerHTML={{
-                                    __html: renderedContent || '<p>No template content yet. Use the Edit button to add one.</p>'
-                                }}/>) : (<Typography color="text.secondary">
-                                    Select or create a schema from the sidebar.
-                                </Typography>)}
+                    {view === 'preview' && isEntrySchema && (
+                        <Paper elevation={2} sx={{ p: 3, minHeight: '50vh', borderRadius: 2 }}>
+                            <div
+                                dangerouslySetInnerHTML={{ __html: renderedContent || '<p>No content to preview yet...</p>' }} />
                         </Paper>)}
-                </Box>
+
+                    <EditorActions onSave={handleSave} onCancel={handleCancelEdit}
+                        hideMobileBar={view === 'builder'} />
+                </>) : (<Paper elevation={1} sx={{ p: 3, minHeight: '60vh', borderRadius: 2 }}>
+                    {activeSchema ? (<div dangerouslySetInnerHTML={{
+                        __html: renderedContent || '<p>No template content yet. Use the Edit button to add one.</p>'
+                    }} />) : (<Typography color="text.secondary">
+                        Select or create a schema from the sidebar.
+                    </Typography>)}
+                </Paper>)}
             </Box>
+        </Box>
 
-            {/* ── Dialogs ───────────────────────────────────────────── */}
+        {/* ── Dialogs ───────────────────────────────────────────── */}
 
-            <NewSchemaDialog
-                open={newSchemaOpen}
-                onClose={() => setNewSchemaOpen(false)}
-                onConfirm={handleAddSchema}
-                existing={schemaNames}
-            />
+        <NewSchemaDialog
+            open={newSchemaOpen}
+            onClose={() => setNewSchemaOpen(false)}
+            onConfirm={handleAddSchema}
+            existing={schemaNames}
+        />
 
-            <RenameSchemaDialog
-                open={renameSchemaOpen}
-                onClose={() => setRenameSchemaOpen(false)}
-                onConfirm={handleRenameSchema}
-                current={activeSchema}
-                existing={schemaNames}
-            />
+        <RenameSchemaDialog
+            open={renameSchemaOpen}
+            onClose={() => setRenameSchemaOpen(false)}
+            onConfirm={handleRenameSchema}
+            current={activeSchema}
+            existing={schemaNames}
+        />
 
-            <Dialog open={deleteSchemaOpen} onClose={() => setDeleteSchemaOpen(false)} maxWidth="xs" fullWidth>
-                <DialogTitle>Delete "{activeSchema}"?</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        This will remove the schema definition. Any fields in other schemas that reference{' '}
-                        <strong>${activeSchema}</strong> will need to be updated manually.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDeleteSchemaOpen(false)}>Cancel</Button>
-                    <Button variant="contained" color="error" onClick={handleDeleteSchema}>Delete</Button>
-                </DialogActions>
-            </Dialog>
+        <Dialog open={deleteSchemaOpen} onClose={() => setDeleteSchemaOpen(false)} maxWidth="xs" fullWidth>
+            <DialogTitle>Delete "{activeSchema}"?</DialogTitle>
+            <DialogContent>
+                <Typography>
+                    This will remove the schema definition. Any fields in other schemas that reference{' '}
+                    <strong>${activeSchema}</strong> will need to be updated manually.
+                </Typography>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setDeleteSchemaOpen(false)}>Cancel</Button>
+                <Button variant="contained" color="error" onClick={handleDeleteSchema}>Delete</Button>
+            </DialogActions>
+        </Dialog>
 
-            <RenameFileDialog
-                open={renameOpen} onClose={() => setRenameOpen(false)}
-                fileName={newFolderName} onFileNameChange={setNewFolderName}
-                onSave={async () => {
-                    if (newFolderName.trim() && folderId) {
-                        await dispatch(renameFolder({id: folderId, name: newFolderName.trim()}));
-                    }
-                    setRenameOpen(false);
-                }}
-            />
+        <RenameFileDialog
+            open={renameOpen} onClose={() => setRenameOpen(false)}
+            fileName={newFolderName} onFileNameChange={setNewFolderName}
+            onSave={async () => {
+                if (newFolderName.trim() && folderId) {
+                    await dispatch(renameFolder({ id: folderId, name: newFolderName.trim() }));
+                }
+                setRenameOpen(false);
+            }}
+        />
 
-            <DeleteFileDialog
-                open={deleteOpen} onClose={() => setDeleteOpen(false)}
-                fileName={folder?.name} onDelete={handleDeleteFolder}
-            />
+        <DeleteFileDialog
+            open={deleteOpen} onClose={() => setDeleteOpen(false)}
+            fileName={folder?.name} onDelete={handleDeleteFolder}
+        />
 
-            <Snackbar open={snackbar.open} autoHideDuration={4000}
-                      onClose={() => setSnackbar((s) => ({...s, open: false}))}
-                      anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}>
-                <Alert severity={snackbar.severity}
-                       onClose={() => setSnackbar((s) => ({...s, open: false}))} variant="filled">
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-        </Container>);
+        <Snackbar open={snackbar.open} autoHideDuration={4000}
+            onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+            <Alert severity={snackbar.severity}
+                onClose={() => setSnackbar((s) => ({ ...s, open: false }))} variant="filled">
+                {snackbar.message}
+            </Alert>
+        </Snackbar>
+    </Container>);
 }

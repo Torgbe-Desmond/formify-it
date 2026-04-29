@@ -15,6 +15,7 @@ import NewProjectDialog from '../components/dashboard/NewProjectDialog';
 import RenameProjectDialog from '../components/dashboard/RenameProjectDialog';
 import DeleteProjectDialog from '../components/dashboard/DeleteProjectDialog';
 
+
 export default function Dashboard() {
   const navigate = useNavigate();
 

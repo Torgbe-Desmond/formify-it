@@ -10,6 +10,7 @@ import FolderDeleteRoundedIcon          from '@mui/icons-material/FolderDeleteRo
 import SchemaRoundedIcon                from '@mui/icons-material/SchemaRounded';
 import CheckCircleOutlineRoundedIcon    from '@mui/icons-material/CheckCircleOutlineRounded';
 import RemoveRoundedIcon                from '@mui/icons-material/RemoveRounded';
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import { useNavigate } from 'react-router-dom';
 
 function timeAgo(dateStr) {
@@ -58,7 +59,7 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
     >
       {/* Name + icon — on mobile shows meta underneath */}
       <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, minWidth: 0 }}>
-        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
+        <FolderOutlinedIcon sx={{ fontSize: 20, color: "#f0a500", flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
 
         <Box sx={{ minWidth: 0 }}>
           {/* Folder name */}

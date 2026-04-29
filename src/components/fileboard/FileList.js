@@ -39,7 +39,7 @@ export default function FileList({ files, loading, isSuccess, onFileClick }) {
 
   return (
     <Box sx={{ mx: { xs: 2, sm: 3 }, mt: 2, pb: 4 }}>
-      <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+      <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
 
         {/* Header row */}
         <Box sx={{

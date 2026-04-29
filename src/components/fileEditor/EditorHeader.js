@@ -1,68 +1,64 @@
 import {
-    Box, Typography, IconButton, Menu,
+    Box, IconButton, Menu,
     MenuItem, ListItemIcon, ListItemText,
 } from '@mui/material';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import {useNavigate} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useGetBreadcrumbQuery } from "../../store/api/apiSlice";
+import Breadcrumbs from "../Breadcrumbs";
 
 export default function EditorHeader({
-                                         fileName, anchorEl, open,
-                                         onMenuClick, onMenuClose,
-                                         onRenameClick, onDeleteClick, onEditMetadataClick, onPDFDownload, onEmailClick
-                                     }) {
-    const navigate = useNavigate();
+    fileName, anchorEl, open,
+    onMenuClick, onMenuClose,
+    onRenameClick, onDeleteClick, onEditMetadataClick, onPDFDownload, onEmailClick
+}) {
+    const { fileId } = useParams()
+    const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery(
+        { type: 'file', id: fileId },
+        { skip: !fileId }
+    );
 
     return (
-        <Box sx={{mb: 3, display: 'flex', alignItems: 'center', gap: 1}}>
-            <IconButton onClick={() => navigate(-1)}>
-                <ArrowBackIosIcon/>
-            </IconButton>
+        <Box sx={{ display: 'flex', width: "100%", justifyContent: "space-between", gap: 1, px: { xs: 2, sm: 1 }, pt: { xs: 2, sm: 1.5 }, pb: 2 }}>
 
-            <Typography
-                variant="h6" fontWeight={700}
-                sx={{flex: 1, overflow: 'hidden', textOverflow: 'ellipsis'}}
-                title={fileName}
-            >
-                {fileName}
-            </Typography>
+            <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 
             <IconButton onClick={onMenuClick}>
-                <MoreHorizIcon/>
+                <MoreHorizIcon />
             </IconButton>
 
-            <Menu anchorEl={anchorEl} open={open} onClose={onMenuClose}>
+            <Menu sx={{ borderRadius: 1 }} anchorEl={anchorEl} open={open} onClose={onMenuClose}>
                 <MenuItem onClick={onRenameClick}>
-                    <ListItemIcon><DriveFileRenameOutlineRoundedIcon fontSize="small"/></ListItemIcon>
+                    <ListItemIcon><DriveFileRenameOutlineRoundedIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Rename File</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={onEditMetadataClick}>
-                    <ListItemIcon><EditRoundedIcon fontSize="small"/></ListItemIcon>
+                    <ListItemIcon><EditRoundedIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Edit Data</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={onDeleteClick} sx={{color: 'error.main'}}>
-                    <ListItemIcon sx={{color: 'error.main'}}>
-                        <DeleteOutlineRoundedIcon fontSize="small"/>
+                <MenuItem onClick={onDeleteClick} sx={{ color: 'error.main' }}>
+                    <ListItemIcon sx={{ color: 'error.main' }}>
+                        <DeleteOutlineRoundedIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Delete File</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={onPDFDownload}>
                     <ListItemIcon>
-                        <PictureAsPdfIcon fontSize="small"/>
+                        <PictureAsPdfIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Download PDF</ListItemText>
                 </MenuItem>
 
-                <MenuItem onClick={onEmailClick}>
+                {/* <MenuItem onClick={onEmailClick}>
                     <ListItemIcon>
-                        <PictureAsPdfIcon fontSize="small"/>
+                        <PictureAsPdfIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Email</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
             </Menu>
         </Box>
     );

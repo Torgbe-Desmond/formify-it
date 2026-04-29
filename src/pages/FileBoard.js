@@ -28,7 +28,7 @@ import RenameFolderDialog from '../components/fileboard/RenameFolderDialog';
 import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
 
 export default function FileBoard() {
-  const { folderId } = useParams();
+  const { folderId, projectId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -106,7 +106,7 @@ export default function FileBoard() {
         files={filteredFiles}
         loading={loading}
         isSuccess={isSuccess}
-        onFileClick={(id) => navigate(`/file/${id}`)}
+        onFileClick={(id) => navigate(`/project/${projectId}/folder/${folderId}/file/${id}`)}
       />
 
       <AddFile

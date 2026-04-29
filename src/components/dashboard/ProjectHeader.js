@@ -9,7 +9,7 @@ export default function ProjectHeader({ onAddProject, onSearchChange, searchQuer
   return (
     <Box sx={{
       px: { xs: 2, sm: 3 },
-      pt: { xs: 2.5, sm: 3 },
+      pt: { xs: 2.5, sm: 1 },
       pb: 2,
       display: 'flex',
       flexDirection: { xs: 'column', sm: 'row' },

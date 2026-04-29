@@ -20,7 +20,7 @@ export default function FolderBoardHeader({
   );
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
+    <Box sx={{ px: { xs: 2, sm: 1 }, pl: { xs: 2.5, sm: 3.5 }, pt: { xs: 2.5, sm: 2 }, pb: 2 }}>
       {/* Breadcrumb */}
       <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 

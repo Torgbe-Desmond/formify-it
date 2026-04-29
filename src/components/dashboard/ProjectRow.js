@@ -7,6 +7,7 @@ import FolderRoundedIcon                from '@mui/icons-material/FolderRounded'
 import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import DeleteOutlineRoundedIcon         from '@mui/icons-material/DeleteOutlineRounded';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
@@ -52,7 +53,7 @@ export default function ProjectRow({ project, isLast, onClick, onRename, onDelet
     >
       {/* Name + icon */}
       <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, minWidth: 0 }}>
-        <FolderRoundedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
+        <AccountTreeOutlinedIcon sx={{ fontSize: 20, color: '#54aeff', flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
 
         <Box sx={{ minWidth: 0 }}>
           <Typography

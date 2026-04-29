@@ -37,8 +37,6 @@ export default function FolderBoard() {
   const [renameName, setRenameName] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  console.log("isSuccess",isSuccess)
-
   useEffect(() => {
     if (targetFolder) setRenameName(targetFolder.name);
   }, [targetFolder]);
@@ -92,7 +90,7 @@ export default function FolderBoard() {
         folders={filteredFolders}
         loading={loading}
         isSuccess={isSuccess}
-        onFolderClick={(id) => navigate(`/folder/${id}`)}
+        onFolderClick={(id) => navigate(`/project/${projectId}/folder/${id}`)}
         onRenameClick={handleRenameOpen}
         onDeleteClick={handleDeleteOpen}
       />

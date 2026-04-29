@@ -41,7 +41,7 @@ export default function FolderList({ folders, loading, isSuccess, onFolderClick,
 
   return (
     <Box sx={{ mx: { xs: 1, sm: 3 }, mt: 2, pb: 4 }}>
-      <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+      <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
 
         {/* Header row */}
         <Box sx={{

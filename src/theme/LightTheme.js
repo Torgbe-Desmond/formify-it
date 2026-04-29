@@ -4,49 +4,61 @@ const LightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2', // Standard Material UI Blue
+      main: '#1976d2',
       light: '#42a5f5',
       dark: '#1565c0',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#9c27b0', // Standard Material Purple
+      main: '#9c27b0',
     },
     background: {
-      default: '#f4f6f8', // Light gray background for contrast
+      default: '#ffffff', // Changed to pure white
       paper: '#ffffff',   // White for cards and modals
     },
     text: {
-      primary: '#1a2027',   // Darker gray for better legibility
-      secondary: '#5f6368', // Accessible gray for subtitles
+      primary: '#1a2027',
+      secondary: '#5f6368',
     },
     divider: '#e0e0e0',
   },
+
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif', // Standard Material font
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: { fontWeight: 700 },
     h6: { fontWeight: 600 },
-    button: { 
-      fontWeight: 500, 
-      textTransform: 'none' // Keeps buttons looking modern (not all caps)
+    button: {
+      fontWeight: 500,
+      textTransform: 'none',
     },
   },
+
   shape: {
-    borderRadius: 8, // Standard Material 3 / Modern feel
+    borderRadius: 8,
   },
+
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#ffffff', // Ensures full page background is white
+        },
+      },
+    },
+
     MuiButton: {
       styleOverrides: {
         root: {
           borderRadius: 8,
           padding: '6px 16px',
-          boxShadow: 'none', // Flat design is cleaner for form tools
+          boxShadow: 'none',
           '&:hover': {
             boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)',
           },
         },
       },
     },
+
     MuiCard: {
       styleOverrides: {
         root: {
@@ -56,19 +68,21 @@ const LightTheme = createTheme({
         },
       },
     },
+
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1976d2', // Solid blue header
+          backgroundColor: '#1976d2',
           color: '#ffffff',
           boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.1)',
         },
       },
     },
+
     MuiTextField: {
       defaultProps: {
-        variant: 'outlined', // Modern outlined look
-        size: 'small',       // Better for dense form layouts
+        variant: 'outlined',
+        size: 'small',
       },
     },
   },

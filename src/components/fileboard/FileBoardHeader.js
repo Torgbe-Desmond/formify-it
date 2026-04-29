@@ -35,7 +35,7 @@ export default function FileBoardHeader({
 
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 2 }}>
+    <Box sx={{ px: { xs: 2, sm: 1 }, pl: { xs: 2.5, sm: 3.5 }, pt: { xs: 2.5, sm: 2 }, pb: 2 }}>
       {/* Breadcrumb */}
       <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 
@@ -95,7 +95,7 @@ export default function FileBoardHeader({
         anchorEl={anchorEl} open={open} onClose={onMenuClose}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        slotProps={{ paper: { elevation: 3, sx: { borderRadius: 2, minWidth: 180 } } }}
+        slotProps={{ paper: { elevation: 3, sx: { borderRadius: 1, minWidth: 180 } } }}
       >
         <MenuItem onClick={onEditSchemaClick}>
           <ListItemIcon><SchemaRoundedIcon fontSize="small" /></ListItemIcon>

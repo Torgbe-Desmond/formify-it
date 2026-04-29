@@ -1,8 +1,8 @@
-import {useState, useEffect} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
-import {Container, useMediaQuery, useTheme, Typography} from '@mui/material';
-import {useDispatch, useSelector} from 'react-redux';
-import {Liquid} from 'liquidjs';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, useMediaQuery, useTheme, Typography } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { Liquid } from 'liquidjs';
 import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
 
 import {
@@ -15,7 +15,7 @@ import {
     selectFilesLoading,
 } from '../store/slices/filesSlice';
 
-import {loadSchema, selectSchemaByFolder, selectEntrySchemaName} from '../store/slices/schemaSlice';
+import { loadSchema, selectSchemaByFolder, selectEntrySchemaName } from '../store/slices/schemaSlice';
 
 import EditorHeader from '../components/fileEditor/EditorHeader';
 import MarkdownEditor from '../components/fileEditor/MarkdownEditor';
@@ -26,7 +26,7 @@ import EditFileDataDialog from '../components/EditFileDataDialog';
 import PaginationPreview from '../components/fileEditor/PaginationPreview';
 import EmailComposerDialog from '../components/email/EmailComposerDialog'
 
-import {breadcrumbApi} from '../store/api/apiClient';
+import { breadcrumbApi } from '../store/api/apiClient';
 
 function stripCssBlock(content) {
     if (!content) return content;
@@ -36,7 +36,7 @@ function stripCssBlock(content) {
 }
 
 export default function FileEditorPage() {
-    const {fileId} = useParams();
+    const { fileId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -67,7 +67,7 @@ export default function FileEditorPage() {
     // Load file on mount
     useEffect(() => {
         if (!fileId) return;
-        dispatch(loadFileById({id: fileId}));
+        dispatch(loadFileById({ id: fileId }));
         return () => {
             dispatch(clearCurrentFile());
         };
@@ -82,7 +82,7 @@ export default function FileEditorPage() {
                 const res = await breadcrumbApi.get('file', fileId);
                 const folder = res?.data.filter((f) => f.type === 'folder')[0];
                 if (folder) {
-                    dispatch(loadSchema({folderId: folder.id}));
+                    dispatch(loadSchema({ folderId: folder.id }));
                 }
             } catch (err) {
                 console.log(err);
@@ -168,7 +168,7 @@ export default function FileEditorPage() {
 
     const handleDeleteConfirm = async () => {
         if (!fileId) return;
-        await dispatch(deleteFile({id: fileId}));
+        await dispatch(deleteFile({ id: fileId }));
         navigate(-1);
     };
 
@@ -195,7 +195,7 @@ export default function FileEditorPage() {
         const opt = {
             margin: 0,
             filename: `${file.name || 'document'}.pdf`,
-            image: {type: 'jpeg', quality: 0.98},
+            image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
                 scale: 2,
                 useCORS: true,
@@ -225,24 +225,24 @@ export default function FileEditorPage() {
     };
 
 
-    const handleEmailSend = async ({from, to, subject, body, attachments}) => {
+    const handleEmailSend = async ({ from, to, subject, body, attachments }) => {
         // Call your backend endpoint here
         await fetch('/api/send-email', {
             method: 'POST',
-            body: JSON.stringify({from, to, subject, body}),
+            body: JSON.stringify({ from, to, subject, body }),
         });
     }
 
     if (!file) {
         return (
-            <Container maxWidth="lg" sx={{py: 4}}>
+            <Container maxWidth="lg" sx={{ py: 4 }}>
                 <Typography>Loading file...</Typography>
             </Container>
         );
     }
 
     return (
-        <Container maxWidth="lg" sx={{py: 4, overflowX: 'hidden', pb: isMobile ? '80px' : 4}}>
+        <Container maxWidth="lg" sx={{ overflowX: 'hidden', pb: isMobile ? '80px' : 4 }}>
             <EditorHeader
                 fileName={file.name}
                 anchorEl={anchorEl}
@@ -285,7 +285,7 @@ export default function FileEditorPage() {
                             setIsEditing(false);
                         }}
                     />
-                </>
+                </> 
             ) : (
                 <PaginationPreview
                     content={renderedContent}
@@ -324,7 +324,7 @@ export default function FileEditorPage() {
                 file={file}
                 folderId={file.folderId}
                 onSaved={() => {
-                    dispatch(loadFileById({id: fileId}));
+                    dispatch(loadFileById({ id: fileId }));
                     setEditDataOpen(false);
                 }}
             />
