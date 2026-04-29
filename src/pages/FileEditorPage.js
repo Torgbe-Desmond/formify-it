@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, useMediaQuery, useTheme, Typography } from '@mui/material';
+import { Container, useMediaQuery, useTheme, LinearProgress, Box } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { Liquid } from 'liquidjs';
 import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
@@ -235,8 +235,10 @@ export default function FileEditorPage() {
 
     if (!file) {
         return (
-            <Container maxWidth="lg" sx={{ py: 4 }}>
-                <Typography>Loading file...</Typography>
+            <Container maxWidth="lg" sx={{ }}>
+                <Box sx={{ position: "fixed", top: 0, right: 0, left: 0 }} >
+                    <LinearProgress aria-label="Loading…" />
+                </Box>
             </Container>
         );
     }
@@ -285,7 +287,7 @@ export default function FileEditorPage() {
                             setIsEditing(false);
                         }}
                     />
-                </> 
+                </>
             ) : (
                 <PaginationPreview
                     content={renderedContent}

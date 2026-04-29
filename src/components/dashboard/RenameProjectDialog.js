@@ -7,7 +7,7 @@ export default function RenameProjectDialog({
   open, onClose, projectName, onProjectNameChange, onSave, renameProjectLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} fullWidth maxWidth="xs">
       <DialogTitle>Rename Project</DialogTitle>
       <DialogContent>
         <TextField

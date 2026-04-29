@@ -7,7 +7,7 @@ export default function DeleteFolderDialog({
   open, onClose, folderName, onDelete, deleteFolderLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open}  fullWidth maxWidth="xs">
       <DialogTitle>Delete Folder</DialogTitle>
       <DialogContent>
         <Typography>

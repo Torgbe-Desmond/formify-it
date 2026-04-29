@@ -7,7 +7,7 @@ export default function DeleteProjectDialog({
   open, onClose, projectName, onDelete, deleteProjectLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} fullWidth maxWidth="xs">
       <DialogTitle>Delete Project</DialogTitle>
       <DialogContent>
         <Typography>

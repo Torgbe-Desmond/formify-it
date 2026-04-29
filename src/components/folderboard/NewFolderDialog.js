@@ -20,7 +20,7 @@ export default function NewFolderDialog({ open, createFolderLoading, onClose, on
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog open={open}  fullWidth maxWidth="xs">
       <DialogTitle>New Folder</DialogTitle>
       <DialogContent>
         <TextField

@@ -7,7 +7,7 @@ export default function DeleteFileDialog({
   open, onClose, fileName, onDelete, deleteFileLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} maxWidth="xs" fullWidth>
       <DialogTitle>Delete File</DialogTitle>
       <DialogContent>
         <Typography>

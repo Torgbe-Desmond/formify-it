@@ -7,7 +7,7 @@ export default function RenameFileDialog({
   open, onClose, fileName, onFileNameChange, onSave, renameFileLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} maxWidth="xs" fullWidth>
       <DialogTitle>Rename File</DialogTitle>
       <DialogContent>
         <TextField

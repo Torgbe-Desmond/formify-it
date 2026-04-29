@@ -7,7 +7,7 @@ export default function RenameFolderDialog({
   open, onClose, folderName, onFolderNameChange, onSave, renameFolderLoading
 }) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} fullWidth maxWidth="xs">
       <DialogTitle>Rename Folder</DialogTitle>
       <DialogContent>
         <TextField

@@ -20,7 +20,7 @@ export default function NewProjectDialog({ open, onClose, onCreate, createProjec
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog open={open} fullWidth maxWidth="xs">
       <DialogTitle>New Project</DialogTitle>
       <DialogContent>
         <TextField

@@ -216,7 +216,7 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
 
   if (loaded && Object.keys(fields).length === 0) {
     return (
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open}>
         <DialogTitle>Edit Data</DialogTitle>
         <DialogContent>
           <Alert severity="warning">No schema found for this file.</Alert>
@@ -229,7 +229,7 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
   }
 
   return (
-    <Dialog open={open} onClose={loading ? undefined : onClose}
+    <Dialog open={open} 
       disableEscapeKeyDown={loading} fullWidth maxWidth="sm">
       <DialogTitle>Edit Data</DialogTitle>
 
