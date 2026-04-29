@@ -3,7 +3,6 @@ import {
   Box, Typography, IconButton, Chip,
   Menu, MenuItem, ListItemIcon, ListItemText,
 } from '@mui/material';
-import FolderRoundedIcon                from '@mui/icons-material/FolderRounded';
 import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
 import DeleteOutlineRoundedIcon         from '@mui/icons-material/DeleteOutlineRounded';
