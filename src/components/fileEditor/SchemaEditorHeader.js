@@ -2,11 +2,11 @@ import {
   Box, Typography, IconButton, Menu,
   MenuItem, ListItemIcon, ListItemText,
 } from '@mui/material';
-import ArrowBackIosIcon                 from '@mui/icons-material/ArrowBackIos';
-import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
-import EditRoundedIcon                  from '@mui/icons-material/EditRounded';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import DeleteOutlineRoundedIcon         from '@mui/icons-material/DeleteOutlineRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import { useNavigate } from 'react-router-dom';
 
 export default function SchemaEditorHeader({
@@ -17,9 +17,9 @@ export default function SchemaEditorHeader({
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ mb: 3, display: 'flex', alignItems: 'center',  }}>
       <IconButton onClick={() => navigate(-1)}>
-        <ArrowBackIosIcon />
+        <ArrowBackIosIcon fontSize="small" />
       </IconButton>
 
       <Typography

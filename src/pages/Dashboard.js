@@ -61,7 +61,7 @@ export default function Dashboard() {
 
     await renameProject({
       id: targetProject.id,
-      data: { name: renameName.trim() }, // ✅ matches your API slice
+      data: { name: renameName.trim() }, 
     }).unwrap();
 
     setRenameOpen(false);

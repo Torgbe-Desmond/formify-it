@@ -61,7 +61,7 @@ export default function FolderBoard() {
   const handleRenameSave = async () => {
     if (!targetFolder || !renameName.trim()) return;
     await renameFolder({ id: targetFolder.id, data: { name: renameName.trim() } }).unwrap();
-    setRenameOpen(true);
+    setRenameOpen(false);
     setTargetFolder(null);
   };
 

@@ -44,8 +44,8 @@ function usePageSplitter(content, margin) {
       document.body.appendChild(measurer);
     }
 
-    const contentWidth = PAGE_WIDTH_PX - margin * 2;
-    const usableHeight = PAGE_HEIGHT_PX - margin * 2;
+    const contentWidth = PAGE_WIDTH_PX - margin;
+    const usableHeight = PAGE_HEIGHT_PX - margin;
 
     measurer.style.width = `${contentWidth}px`;
     measurer.innerHTML = content;
@@ -262,7 +262,7 @@ export default function PaginationPreview({ content, margins = DEFAULT_MARGIN, o
           gap: scale < 1 ? `${Math.round(24 * scale)}px` : '24px',
           pb: 4,
           // Background mimics a document tray
-          bgcolor: '#e8e8e8',
+          // bgcolor: '#e8e8e8',
           borderRadius: 2,
           pt: 3,
           px: 2,

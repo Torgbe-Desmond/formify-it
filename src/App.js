@@ -25,9 +25,9 @@ import SchemaTemplateEditorPage from "./pages/SchemaTemplateEditorPage";
 import OfflineBanner from "./components/OfflineBanner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import LightTheme from "./theme/LightTheme";
 import Landing from "./pages/Landing";
 import AppSidebar from "./components/sidebar/AppSidebar";
+import ClaudeTheme from "./theme/ClaudeTheme";
 
 // const SIDEBAR_ROUTES = [
 //   "/",
@@ -101,7 +101,7 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider theme={LightTheme}>
+    <ThemeProvider theme={ClaudeTheme}>
       <CssBaseline />
 
       <OfflineBanner />

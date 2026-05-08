@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/useRedux';
 import { login } from '../store/slices/authSlice';
+import {
+  Box, Button, TextField, Typography, Stack,
+  Alert, useTheme, useMediaQuery, CircularProgress,
+} from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
-const Login = () => {
+export default function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { loading, error } = useAppSelector((state) => state.auth);
   const [form, setForm] = useState({ email: '', password: '' });
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 850);
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 850);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const p = theme.palette;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,125 +24,179 @@ const Login = () => {
     if (res.meta.requestStatus === 'fulfilled') navigate('/');
   };
 
-  const styles = {
-    root: { 
-      minHeight: '100vh', 
-      display: 'flex', 
-      background: '#f4f6f8', 
-      fontFamily: '"Roboto", sans-serif' 
-    },
-    leftPanel: { 
-      flex: isMobile ? '1' : '0 0 420px', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      justifyContent: 'center', 
-      padding: isMobile ? '40px 24px' : '64px 56px', 
-      background: '#ffffff', 
-      borderRight: isMobile ? 'none' : '1px solid #e0e0e0', 
-      zIndex: 1 
-    },
-    rightPanel: { 
-      flex: 1, 
-      display: isMobile ? 'none' : 'flex', 
-      background: '#f8fafc', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      position: 'relative', 
-      overflow: 'hidden' 
-    },
-    brand: { 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: isMobile ? 'center' : 'flex-start',
-      gap: '10px', 
-      marginBottom: '40px' 
-    },
-    brandMark: { 
-      width: 32, 
-      height: 32, 
-      background: '#1976d2', 
-      clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' 
-    },
-    brandName: { fontSize: '20px', fontWeight: 700, color: '#1a2027' },
-    heading: { 
-      fontSize: isMobile ? '28px' : '32px', 
-      fontWeight: 700, 
-      color: '#1a2027', 
-      marginBottom: '8px',
-      textAlign: isMobile ? 'center' : 'left'
-    },
-    subheading: { 
-      fontSize: '14px', 
-      color: '#5f6368', 
-      marginBottom: '32px',
-      textAlign: isMobile ? 'center' : 'left'
-    },
-    label: { 
-      fontSize: '11px', 
-      fontWeight: 700, 
-      textTransform: 'uppercase', 
-      color: '#94a3b8', 
-      marginBottom: '8px', 
-      display: 'block' 
-    },
-    input: { 
-      width: '100%', 
-      padding: '12px', 
-      border: '1px solid #e0e0e0', 
-      borderRadius: '8px', 
-      marginBottom: '20px', 
-      boxSizing: 'border-box', 
-      outline: 'none', 
-      fontSize: '16px' // Better for mobile zoom
-    },
-    submitBtn: { 
-      width: '100%', 
-      padding: '14px', 
-      background: '#1976d2', 
-      color: '#ffffff', 
-      border: 'none', 
-      borderRadius: '8px', 
-      fontWeight: 700, 
-      cursor: 'pointer',
-      fontSize: '15px'
-    },
-    gridOverlay: { 
-      position: 'absolute', 
-      inset: 0, 
-      backgroundImage: 'linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px)', 
-      backgroundSize: '40px 40px', 
-      opacity: 0.5 
-    },
-  };
-
   return (
-    <div style={styles.root}>
-      <div style={styles.leftPanel}>
-        <div style={styles.brand}><div style={styles.brandMark}/><span style={styles.brandName}>Formify</span></div>
-        <h1 style={styles.heading}>Welcome back.</h1>
-        <p style={styles.subheading}>Sign in to access your documents.</p>
-        <form onSubmit={handleSubmit}>
-          <label style={styles.label}>Email</label>
-          <input style={styles.input} type="email" onChange={e => setForm({...form, email: e.target.value})} required />
-          <label style={styles.label}>Password</label>
-          <input style={styles.input} type="password" onChange={e => setForm({...form, password: e.target.value})} required />
-          {error && <div style={{color: '#d32f2f', fontSize: '13px', marginBottom: '16px'}}>{error}</div>}
-          <button style={styles.submitBtn} disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</button>
-        </form>
-        <div style={{marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#5f6368'}}>
-          Don't have an account? <Link to="/register" style={{color: '#1976d2', fontWeight: 600, textDecoration: 'none'}}>Register</Link>
-        </div>
-      </div>
-      
-      <div style={styles.rightPanel}>
-        <div style={styles.gridOverlay} />
-        <div style={{zIndex: 1, padding: '40px', background: '#ffffff', borderRadius: '16px', border: '1px solid #e0e0e0', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', maxWidth: '300px'}}>
-          <div style={{color: '#1976d2', fontWeight: 700, fontSize: '12px', marginBottom: '16px', letterSpacing: '0.1em'}}>SECURE LOGIN</div>
-          <div style={{fontSize: '14px', color: '#5f6368', lineHeight: 1.6}}>Your data is encrypted and synced across all your devices in real-time.</div>
-        </div>
-      </div>
-    </div>
-  );
-};
+    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
 
-export default Login;
+      {/* ── LEFT PANEL ────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          flex: isMobile ? 1 : '0 0 440px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          px: { xs: 3, sm: 7 },
+          py: 8,
+          bgcolor: 'background.paper',
+          borderRight: isMobile ? 'none' : `1px solid ${p.divider}`,
+          zIndex: 1,
+        }}
+      >
+        {/* Brand */}
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1.25}
+          sx={{ mb: 5, justifyContent: isMobile ? 'center' : 'flex-start' }}
+        >
+          <Box sx={{
+            width: 30, height: 30, flexShrink: 0,
+            bgcolor: p.primary.main,
+            clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+          }} />
+          <Typography fontWeight={800} fontSize="18px" color="text.primary">
+            Formify
+          </Typography>
+        </Stack>
+
+        {/* Heading */}
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          color="text.primary"
+          sx={{ mb: 0.75, textAlign: isMobile ? 'center' : 'left', letterSpacing: '-0.02em' }}
+        >
+          Welcome back.
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 4, textAlign: isMobile ? 'center' : 'left' }}
+        >
+          Sign in to access your documents.
+        </Typography>
+
+        {/* Form */}
+        <Box component="form" onSubmit={handleSubmit}>
+          <Typography
+            sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.08em', color: 'text.disabled', mb: 0.75 }}
+          >
+            Email
+          </Typography>
+          <TextField
+            fullWidth
+            type="email"
+            size="small"
+            required
+            sx={{ mb: 2.5 }}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+
+          <Typography
+            sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.08em', color: 'text.disabled', mb: 0.75 }}
+          >
+            Password
+          </Typography>
+          <TextField
+            fullWidth
+            type="password"
+            size="small"
+            required
+            sx={{ mb: 3 }}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2.5, fontSize: '13px' }}>
+              {error}
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disableElevation
+            disabled={loading}
+            size="large"
+            sx={{
+              fontWeight: 700,
+              fontSize: '14px',
+              py: 1.5,
+              boxShadow: `0 4px 16px ${alpha(p.primary.main, 0.25)}`,
+            }}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : 'Sign In'}
+          </Button>
+        </Box>
+
+        {/* Footer link */}
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+          Don't have an account?{' '}
+          <Link to="/register" style={{ color: p.primary.main, fontWeight: 700, textDecoration: 'none' }}>
+            Register
+          </Link>
+        </Typography>
+      </Box>
+
+      {/* ── RIGHT PANEL ───────────────────────────────────────────────── */}
+      {!isMobile && (
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'background.default',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Grid background */}
+          <Box sx={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            backgroundImage: `linear-gradient(${p.divider} 1px, transparent 1px), linear-gradient(90deg, ${p.divider} 1px, transparent 1px)`,
+            backgroundSize: '44px 44px',
+            maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
+            opacity: 0.7,
+          }} />
+
+          {/* Glow */}
+          <Box sx={{
+            position: 'absolute',
+            width: '500px', height: '500px',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${alpha(p.primary.main, 0.07)} 0%, transparent 65%)`,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Info card */}
+          <Box
+            sx={{
+              position: 'relative', zIndex: 1,
+              bgcolor: 'background.paper',
+              border: `1px solid ${p.divider}`,
+              borderRadius: 3,
+              p: 4,
+              maxWidth: 280,
+              boxShadow: `0 12px 40px ${alpha('#000', 0.06)}`,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                textTransform: 'uppercase', color: p.primary.main, mb: 1.5,
+              }}
+            >
+              Secure Login
+            </Typography>
+            <Typography variant="body2" color="text.secondary" lineHeight={1.7}>
+              Your data is encrypted and synced across all your devices in real-time.
+            </Typography>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+}

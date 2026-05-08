@@ -13,6 +13,7 @@ export default function RenameFileDialog({
         <TextField
           autoFocus fullWidth
           label="File name"
+          disabled={renameFileLoading}
           variant="outlined"
           margin="dense"
           value={fileName}

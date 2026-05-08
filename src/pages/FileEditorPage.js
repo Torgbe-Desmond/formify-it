@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, useMediaQuery, useTheme, LinearProgress, Box } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { Liquid } from 'liquidjs';
-import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
 
 import {
     loadFileById,
@@ -25,8 +24,9 @@ import DeleteFileDialog from '../components/fileEditor/DeleteFileDialog';
 import EditFileDataDialog from '../components/EditFileDataDialog';
 import PaginationPreview from '../components/fileEditor/PaginationPreview';
 import EmailComposerDialog from '../components/email/EmailComposerDialog'
+import { v4 as uuidv4 } from 'uuid';
 
-import { breadcrumbApi } from '../store/api/apiClient';
+import { breadcrumbApi, pdfExport } from '../store/api/apiClient';
 
 function stripCssBlock(content) {
     if (!content) return content;
@@ -48,7 +48,6 @@ export default function FileEditorPage() {
     const entrySchemaName = useSelector(selectEntrySchemaName(file?.folderId));
     const isLoading = useSelector(selectFilesLoading);
 
-    // Resolve the entry schema for template + CSS
     const schema = folderSchema?.schemas?.[entrySchemaName] || null;
 
     const [content, setContent] = useState('');
@@ -61,6 +60,7 @@ export default function FileEditorPage() {
     const [editDataOpen, setEditDataOpen] = useState(false);
     const [previewMargins, setPreviewMargins] = useState(60);
     const [emailOpen, setEmailOpen] = useState(false);
+    const [downloading, setDownloading] = useState(false)
 
     const open = Boolean(anchorEl);
 
@@ -172,56 +172,29 @@ export default function FileEditorPage() {
         navigate(-1);
     };
 
-    const handleDownloadPDF = () => {
-        if (!renderedContent || !file) {
-            alert('Nothing to download');
-            return;
+    const handleDownloadPDF = async () => {
+        if (!renderedContent || !file) return;
+        try {
+            setDownloading(true)
+            const id = uuidv4()
+            const res = await pdfExport.post(id,{
+                html: renderedContent,
+                filename: file.name,
+                margins: previewMargins,
+            }, { responseType: 'blob' })
+
+            const url = URL.createObjectURL(res.data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${file.name}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+            setDownloading(false)
+        } catch (err) {
+            console.error('PDF export failed:', err);
+            setDownloading(false)
+            alert('Failed to generate PDF. Please try again.');
         }
-
-        // Wrap rendered content in a container that matches the preview margins.
-        // This ensures the downloaded PDF looks exactly like the on-screen preview.
-        const inner = document.createElement('div');
-        inner.innerHTML = renderedContent;
-
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = `
-      width: 794px;
-      padding: ${previewMargins}px;
-      box-sizing: border-box;
-      background: #fff;
-    `;
-        wrapper.appendChild(inner);
-
-        const opt = {
-            margin: 0,
-            filename: `${file.name || 'document'}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                letterRendering: true,
-                // Lock render width to A4 so content matches preview exactly
-                width: 794,
-                windowWidth: 794,
-            },
-            jsPDF: {
-                unit: 'mm',
-                format: 'a4',
-                orientation: 'portrait',
-            },
-            pagebreak: {
-                // Respect natural content flow; avoid cutting mid-element where possible
-                mode: ['avoid-all', 'css', 'legacy'],
-            },
-        };
-
-        html2pdf()
-            .set(opt)
-            .from(wrapper)
-            .save()
-            .finally(() => {
-                wrapper.remove();
-            });
     };
 
 
@@ -235,8 +208,18 @@ export default function FileEditorPage() {
 
     if (!file) {
         return (
-            <Container maxWidth="lg" sx={{ }}>
-                <Box sx={{ position: "fixed", top: 0, right: 0, left: 0 }} >
+            <Container maxWidth="lg" sx={{}}>
+                <Box sx={{ position: "sticky", top: 0, right: 0, left: 0 }} >
+                    <LinearProgress aria-label="Loading…" />
+                </Box>
+            </Container>
+        );
+    }
+
+    if (downloading) {
+        return (
+            <Container maxWidth="lg" sx={{}}>
+                <Box sx={{ position: "sticky", top: 0, right: 0, left: 0, color: "orange" }} >
                     <LinearProgress aria-label="Loading…" />
                 </Box>
             </Container>

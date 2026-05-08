@@ -12,6 +12,7 @@ export default function RenameFolderDialog({
       <DialogContent>
         <TextField
           autoFocus fullWidth
+          disabled={renameFolderLoading}
           label="Folder Name"
           value={folderName}
           onChange={(e) => onFolderNameChange(e.target.value)}

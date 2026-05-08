@@ -15,25 +15,25 @@ export default function MarkdownEditor({
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
         style={{
-          width:           isMobile ? '100%' : '50%',
-          minHeight:       isMobile ? '50vh' : 'auto',
-          fontFamily:      'monospace',
-          fontSize:        isMobile ? 16 : 14,
-          padding:         12,
-          borderRadius:    4,
-          border:          `1px solid ${theme.palette.divider}`,
+          width: isMobile ? '100%' : '50%',
+          minHeight: isMobile ? '50vh' : 'auto',
+          fontFamily: 'monospace',
+          fontSize: isMobile ? 16 : 14,
+          padding: 12,
+          borderRadius: 4,
+          border: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
-          color:           theme.palette.text.primary,
-          resize:          'vertical',
-          overflow:        'auto',
-          outline:         'none',
+          color: theme.palette.text.primary,
+          resize: 'vertical',
+          overflow: 'auto',
+          outline: 'none',
         }}
       />
 
       <Paper sx={{
-        width:     isMobile ? '100%' : '50%',
-        p:         3,
-        border:    `1px solid ${theme.palette.divider}`,
+        width: isMobile ? '100%' : '50%',
+        p: 3,
+        border: `1px solid ${theme.palette.divider}`,
         overflowX: 'auto',
         overflowY: 'auto',
         minHeight: isMobile ? '50vh' : '70vh',
