@@ -34,10 +34,7 @@ const FolderSkeleton = ({ isLast }) => (
 
 
 export default function FolderList({ folders, loading, isSuccess, onFolderClick, onRenameClick, onDeleteClick }) {
-  console.log("isSuccess",isSuccess)
   const isEmpty = isSuccess && (folders?.length === 0);
-
-  console.log("isEmpty", isEmpty)
 
   return (
     <Box sx={{ mx: { xs: 1, sm: 3 }, mt: 2, pb: 4 }}>

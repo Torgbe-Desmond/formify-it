@@ -16,7 +16,9 @@ import {
 import { SIDEBAR_WIDTH, COLLAPSED_WIDTH, parseActivePath, activeRenderedPath } from "./Sidebarutils";
 import ProjectNode from "./ProjectNode";
 import { useGetProjectsQuery } from "../../store/api/apiSlice";
-
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { logout } from "../../store/slices/authSlice";
+import { useDispatch } from "react-redux";
 // ─────────────────────────────────────────────
 // AppSidebar
 //
@@ -82,7 +84,16 @@ export default function AppSidebar() {
                         activeIds={activeIds}
                         onNavigate={handleNavigate}
                     />
+
+                    <Logout label="Logout" isDashboard={isDashboard} />
+
                 </>
+            )}
+
+            {collapsed && (
+                <CollapsedLogout
+                    isDashboard={isDashboard}
+                />
             )}
         </Box>
     );
@@ -190,6 +201,58 @@ function SectionLabel({ label }) {
         </Box>
     );
 }
+
+function Logout({ label, isDashboard }) {
+    const dispatch = useDispatch();
+    return (
+        <Box sx={{
+            p: 0.5, borderTop: "1px solid",
+            borderColor: "divider",
+        }}>
+            <IconButton
+                onClick={() => dispatch(logout())}
+                sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    gap: 1,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.6px",
+                    borderRadius: 1,
+                    borderTop: "1px solid divider",
+                    width: "100%",
+                    "&:hover": {
+                        bgcolor: isDashboard ? "primary.main" : "transparent",
+                        color: isDashboard ? "primary.contrastText" : "text.secondary",
+                        "&:hover": { bgcolor: isDashboard ? "primary.dark" : "action.hover" },
+                    },
+                }}>
+
+                <LogoutOutlinedIcon />
+                <Typography variant="caption" sx={{ fontWeight: isDashboard ? 600 : 400 }}>
+                    {label}
+                </Typography>
+            </IconButton>
+        </Box>
+    );
+}
+
+function CollapsedLogout({ isDashboard }) {
+    const dispatch = useDispatch()
+    return (
+        <Box sx={{ position: "fixed", bottom: 0, p: 1, mr: 0.5, gap: 0.5 }}>
+            <Tooltip title="Logout" placement="right">
+                <IconButton
+                    onClick={() => dispatch(logout())} color={isDashboard ? "primary" : "default"}
+                >
+                    <LogoutOutlinedIcon />
+                </IconButton>
+            </Tooltip>
+        </Box>
+    );
+}
+
 
 function ProjectList({ projects, isLoading, activeIds, activeSidebarItem, onNavigate }) {
     if (isLoading) {

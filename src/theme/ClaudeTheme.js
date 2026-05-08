@@ -5,7 +5,7 @@ const ClaudeTheme = createTheme({
     mode: 'light',
     primary: {
       main: '#D97757',       // Claude's warm coral/orange
-      light: '#E8957A',
+      light: '#caa092',
       dark: '#C4623E',
       contrastText: '#ffffff',
     },

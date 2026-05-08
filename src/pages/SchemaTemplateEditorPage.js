@@ -37,6 +37,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { useDispatch, useSelector } from 'react-redux';
+import { createTheme } from '@uiw/codemirror-themes';
+import { tags as t } from '@lezer/highlight';
+import { alpha } from '@mui/material/styles';
 
 import {
     loadSchema,
@@ -163,6 +166,36 @@ export default function SchemaTemplateEditorPage() {
     const dispatch = useDispatch();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const p = theme.palette;
+
+    const codeMirrorTheme = createTheme({
+        theme: theme.palette.mode,
+        settings: {
+            background: p.background.paper,
+            foreground: p.text.primary,
+            caret: p.primary.main,
+            selection: alpha(p.primary.main, 0.2),
+            selectionMatch: alpha(p.primary.main, 0.1),
+            lineHighlight: alpha(p.primary.main, 0.05),
+            gutterBackground: p.background.default,
+            gutterForeground: p.text.disabled,
+            gutterBorder: p.divider,
+        },
+        styles: [
+            { tag: t.comment, color: p.text.disabled, fontStyle: 'italic' },
+            { tag: t.keyword, color: p.primary.main, fontWeight: 'bold' },
+            { tag: t.string, color: p.mode === 'dark' ? '#a5d6a7' : '#2e7d32' },
+            { tag: t.tagName, color: p.primary.main },
+            { tag: t.attributeName, color: p.secondary.main },
+            { tag: t.attributeValue, color: p.mode === 'dark' ? '#ffcc80' : '#e65100' },
+            { tag: t.className, color: p.primary.light },
+            { tag: t.propertyName, color: p.primary.main },
+            { tag: t.number, color: p.error.main },
+            { tag: t.operator, color: p.text.secondary },
+            { tag: t.punctuation, color: p.text.secondary },
+        ],
+    });
 
     const folderSchema = useSelector(selectSchemaByFolder(folderId));
     const schemasMap = useSelector(selectSchemasMap(folderId));
@@ -620,28 +653,28 @@ export default function SchemaTemplateEditorPage() {
                                 Liquid</Typography>
                             <Paper variant="outlined"
                                 sx={{ overflow: 'hidden', borderRadius: 1, bgcolor: 'inherit' }}>
-                                <CodeMirror value={htmlContent} height="500px" extensions={[html({})]}
+                                <CodeMirror
+                                    value={htmlContent}
+                                    height="500px"
+                                    extensions={[html({})]}
                                     onChange={setHtmlContent}
-                                    basicSetup={{
-                                        lineNumbers: true,
-                                        highlightActiveLine: true,
-                                        foldGutter: true,
-                                        tabSize: 2
-                                    }} />
+                                    theme={codeMirrorTheme}
+                                    basicSetup={{ lineNumbers: true, highlightActiveLine: true, foldGutter: true, tabSize: 2 }}
+                                />
                             </Paper>
                         </>)}
 
                         {templateSubView === 'css' && (<>
                             <Typography variant="subtitle1" gutterBottom>CSS Styles</Typography>
                             <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 1 }}>
-                                <CodeMirror value={cssContent} height="500px" extensions={[css()]}
+                                <CodeMirror
+                                    value={cssContent}
+                                    height="500px"
+                                    extensions={[css()]}
                                     onChange={setCssContent}
-                                    basicSetup={{
-                                        lineNumbers: true,
-                                        highlightActiveLine: true,
-                                        foldGutter: true,
-                                        tabSize: 2
-                                    }} />
+                                    theme={codeMirrorTheme}   // ← add this
+                                    basicSetup={{ lineNumbers: true, highlightActiveLine: true, foldGutter: true, tabSize: 2 }}
+                                />
                             </Paper>
                         </>)}
                     </Box>)}

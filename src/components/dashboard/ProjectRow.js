@@ -45,6 +45,7 @@ export default function ProjectRow({ project, isLast, onClick, onRename, onDelet
         cursor: 'pointer',
         borderBottom: isLast ? 'none' : '1px solid',
         borderColor: 'divider',
+        bgcolor:'background.paper',
         transition: 'background 0.1s',
         '&:hover': { bgcolor: 'action.hover' },
         '&:hover .row-actions': { opacity: 1 },

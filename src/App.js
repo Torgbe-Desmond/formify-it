@@ -14,7 +14,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-
+import './App.css'
 import { selectIsAuth } from "./store/slices/authSlice";
 
 import Dashboard from "./pages/Dashboard";
@@ -27,7 +27,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Landing from "./pages/Landing";
 import AppSidebar from "./components/sidebar/AppSidebar";
-import ClaudeTheme from "./theme/ClaudeTheme";
+import LightTheme from "./theme/LightTheme";
 
 // const SIDEBAR_ROUTES = [
 //   "/",
@@ -101,7 +101,7 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider theme={ClaudeTheme}>
+    <ThemeProvider theme={LightTheme}>
       <CssBaseline />
 
       <OfflineBanner />

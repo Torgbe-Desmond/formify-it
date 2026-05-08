@@ -3,37 +3,37 @@ import {
   Box, Typography, IconButton, Chip,
   Menu, MenuItem, ListItemIcon, ListItemText,
 } from '@mui/material';
-import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import FolderDeleteRoundedIcon          from '@mui/icons-material/FolderDeleteRounded';
-import SchemaRoundedIcon                from '@mui/icons-material/SchemaRounded';
-import CheckCircleOutlineRoundedIcon    from '@mui/icons-material/CheckCircleOutlineRounded';
-import RemoveRoundedIcon                from '@mui/icons-material/RemoveRounded';
+import FolderDeleteRoundedIcon from '@mui/icons-material/FolderDeleteRounded';
+import SchemaRoundedIcon from '@mui/icons-material/SchemaRounded';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import { useNavigate } from 'react-router-dom';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
-  const diff  = Date.now() - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60000);
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins < 1)   return 'just now';
-  if (mins < 60)  return `${mins}m ago`;
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days < 30)  return `${days}d ago`;
+  if (days < 30) return `${days}d ago`;
   return new Date(dateStr).toLocaleDateString();
 }
 
 export default function FolderRow({ folder, isLast, onClick, onRename, onDelete }) {
-  const navigate                    = useNavigate();
-  const [anchorEl, setAnchorEl]     = useState(null);
-  const menuOpen                    = Boolean(anchorEl);
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
 
-  const handleMenuClick  = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
-  const handleMenuClose  = () => setAnchorEl(null);
-  const handleRename     = () => { handleMenuClose(); onRename(); };
-  const handleDelete     = () => { handleMenuClose(); onDelete(); };
+  const handleMenuClick = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
+  const handleMenuClose = () => setAnchorEl(null);
+  const handleRename = () => { handleMenuClose(); onRename(); };
+  const handleDelete = () => { handleMenuClose(); onDelete(); };
   const handleEditSchema = (e) => { e.stopPropagation(); handleMenuClose(); navigate(`/schema/${folder.id}`); };
 
   return (
@@ -51,6 +51,7 @@ export default function FolderRow({ folder, isLast, onClick, onRename, onDelete 
         cursor: 'pointer',
         borderBottom: isLast ? 'none' : '1px solid',
         borderColor: 'divider',
+        bgcolor: 'background.paper',
         transition: 'background 0.1s',
         '&:hover': { bgcolor: 'action.hover' },
         '&:hover .row-actions': { opacity: 1 },

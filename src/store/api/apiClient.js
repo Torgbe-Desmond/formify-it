@@ -42,7 +42,7 @@ export const projectsApi = {
 
 // ── Folders ───────────────────────────────────────────────────────
 export const foldersApi = {
-  getByProject: (projectId) => apiClient.get(`/api/projects/${projectId}/folders`),
+  // getByProject: (projectId) => apiClient.get(`/api/projects/${projectId}/folders`),
   create: (projectId, data) => apiClient.post(`/api/projects/${projectId}/folders`, data),
   rename: (id, data) => apiClient.put(`/api/folders/${id}`, data),
   delete: (id) => apiClient.delete(`/api/folders/${id}`),
