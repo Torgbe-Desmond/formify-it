@@ -193,7 +193,6 @@ export default function FileEditorPage() {
         } catch (err) {
             console.error('PDF export failed:', err);
             setDownloading(false)
-            alert('Failed to generate PDF. Please try again.');
         }
     };
 
@@ -249,7 +248,10 @@ export default function FileEditorPage() {
                     setAnchorEl(null);
                     setEditDataOpen(true);
                 }}
-                onPDFDownload={handleDownloadPDF}
+                onPDFDownload={()=>{
+                    setAnchorEl(null);
+                    handleDownloadPDF()
+                }}
                 onEmailClick={() => {
                     setEmailOpen(true)
                 }}
