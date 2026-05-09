@@ -1,7 +1,6 @@
 import { Box, Typography, Skeleton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 function buildPath(crumb, allCrumbs) {
     const project = allCrumbs.find(c => c.type === "project");
@@ -15,7 +14,6 @@ function buildPath(crumb, allCrumbs) {
 }
 
 export default function Breadcrumbs({ crumbs = [], loadingBreadcrumbs }) {
-    const isOnline = useOnlineStatus();
     const navigate = useNavigate();
 
     if (loadingBreadcrumbs) {

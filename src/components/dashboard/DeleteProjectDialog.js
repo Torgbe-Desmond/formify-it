@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button, Box } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Typography, Button, Box } from '@mui/material';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
 export default function DeleteProjectDialog({ open, onClose, projectName, onDelete, deleteProjectLoading, isOnline }) {

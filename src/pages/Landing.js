@@ -5,7 +5,6 @@ import {
   CardContent, AppBar, Toolbar, Chip, Stack, useTheme,
   useMediaQuery, Divider,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 
 const features = [
   {
