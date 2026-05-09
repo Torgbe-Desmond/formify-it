@@ -15,10 +15,12 @@ import FolderList from '../components/folderboard/FolderList';
 import NewFolderDialog from '../components/folderboard/NewFolderDialog';
 import RenameFolderDialog from '../components/fileboard/RenameFolderDialog';
 import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function FolderBoard() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
 
   // ── Queries & Mutations ─────────────────────────────
   const { data: projects = [] } = useGetProjectsQuery();
@@ -83,6 +85,7 @@ export default function FolderBoard() {
         projectName={project?.name}
         onAddFolderClick={() => setNewFolderOpen(true)}
         searchQuery={searchQuery}
+        isOnline={isOnline}
         onSearchChange={setSearchQuery}
       />
 
@@ -90,6 +93,7 @@ export default function FolderBoard() {
         folders={filteredFolders}
         loading={loading}
         isSuccess={isSuccess}
+        isOnline={isOnline}
         onFolderClick={(id) => navigate(`/project/${projectId}/folder/${id}`)}
         onRenameClick={handleRenameOpen}
         onDeleteClick={handleDeleteOpen}
@@ -98,6 +102,7 @@ export default function FolderBoard() {
       <NewFolderDialog
         open={newFolderOpen}
         createFolderLoading={createFolderLoading}
+        isOnline={isOnline}
         onClose={() => setNewFolderOpen(false)}
         onCreate={handleCreateFolder}
       />
@@ -106,6 +111,7 @@ export default function FolderBoard() {
         open={renameOpen}
         onClose={() => setRenameOpen(false)}
         renameFolderLoading={renameFolderLoading}
+        isOnline={isOnline}
         folderName={renameName}
         onFolderNameChange={setRenameName}
         onSave={handleRenameSave}
@@ -113,6 +119,7 @@ export default function FolderBoard() {
 
       <DeleteFolderDialog
         open={deleteOpen}
+        isOnline={isOnline}
         deleteFolderLoading={deleteFolderLoading}
         onClose={() => setDeleteOpen(false)}
         folderName={targetFolder?.name}

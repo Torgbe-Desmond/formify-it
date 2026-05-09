@@ -1,24 +1,27 @@
-import {
-  Dialog, DialogTitle, DialogContent,
-  DialogActions, Typography, Button,
-} from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Typography, Button, Box } from '@mui/material';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
-export default function DeleteFolderDialog({
-  open, onClose, folderName, onDelete, deleteFolderLoading
-}) {
+export default function DeleteFolderDialog({ open, onClose, folderName, onDelete, deleteFolderLoading , isOnline }) {
   return (
-    <Dialog open={open}  fullWidth maxWidth="xs">
-      <DialogTitle>Delete Folder</DialogTitle>
-      <DialogContent>
-        <Typography>
-          Are you sure you want to delete "{folderName}"? This will also delete
-          all files inside. This action cannot be undone.
-        </Typography>
+    <Dialog open={open} fullWidth maxWidth="xs">
+      <DialogContent sx={{ pt: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2 }}>
+          <Box sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: 'rgba(220,38,38,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <WarningAmberRoundedIcon sx={{ color: '#dc2626', fontSize: 24 }} />
+          </Box>
+          <Box>
+            <Typography fontWeight={700} color="#1a1f36" sx={{ mb: 0.75, fontSize: '15px' }}>Delete folder?</Typography>
+            <Typography variant="body2" color="text.secondary" lineHeight={1.6} sx={{ fontSize: '13.5px' }}>
+              <strong>"{folderName}"</strong> and all its files will be permanently deleted. This cannot be undone.
+            </Typography>
+          </Box>
+        </Box>
       </DialogContent>
-      <DialogActions>
-        <Button disabled={deleteFolderLoading} onClick={onClose}>Cancel</Button>
-        <Button variant="contained" color="error" disabled={deleteFolderLoading} onClick={onDelete}>
-          {deleteFolderLoading ? "Deleting" : "Delete"}
+      <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+        <Button disabled={deleteFolderLoading} onClick={onClose} sx={{ borderRadius: 7 }}>Cancel</Button>
+        <Button variant="contained" disabled={deleteFolderLoading || !isOnline} onClick={onDelete}
+          sx={{ borderRadius: 7, bgcolor: '#dc2626', '&:hover': { bgcolor: '#b91c1c' } }}>
+          {deleteFolderLoading ? "Deleting…" : "Delete folder"}
         </Button>
       </DialogActions>
     </Dialog>

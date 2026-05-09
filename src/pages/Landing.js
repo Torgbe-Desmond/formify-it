@@ -7,41 +7,39 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
-/* ─── Feature data ───────────────────────────────────────────────────────── */
 const features = [
   {
-    icon: '◈',
+    icon: '⊞',
     title: 'Schema Templates',
     desc: 'Define reusable form fields with YAML once, fill it forever across any project.',
   },
   {
-    icon: '◇',
+    icon: '◧',
     title: 'Structured Docs',
-    desc: 'Project → Folder → File logic. Export any document cleanly to PDF.',
+    desc: 'Project → Folder → File hierarchy. Export any document cleanly to PDF.',
   },
   {
-    icon: '⬘',
-    title: 'Rich Text',
+    icon: '✦',
+    title: 'Rich Text Editing',
     desc: 'Bold, italic, and lists — inline rich text editing powered by Tiptap.',
   },
   {
-    icon: '○',
+    icon: '◎',
     title: 'Live Preview',
     desc: 'See your rendered HTML document update in real time as you type.',
   },
   {
-    icon: '△',
+    icon: '⬡',
     title: 'Team Ready',
     desc: 'JWT-secured accounts with fully independent per-user projects.',
   },
   {
-    icon: '⬡',
+    icon: '⊟',
     title: 'PDF Export',
     desc: 'Pixel-perfect PDF generation via headless Chrome — what you see is what you get.',
   },
 ];
 
-/* ─── Animated counter hook ─────────────────────────────────────────────── */
 function useCountUp(target, duration = 1200, start = false) {
   const [value, setValue] = useState(0);
   useEffect(() => {
@@ -58,37 +56,35 @@ function useCountUp(target, duration = 1200, start = false) {
   return value;
 }
 
-/* ─── Stats bar ─────────────────────────────────────────────────────────── */
 const stats = [
   { value: 500, suffix: '+', label: 'Documents created' },
-  { value: 12, suffix: 'x', label: 'Faster than Word' },
+  { value: 12, suffix: '×', label: 'Faster than Word' },
   { value: 99, suffix: '%', label: 'Export accuracy' },
 ];
 
 function StatItem({ value, suffix, label, animate }) {
   const count = useCountUp(value, 1400, animate);
-  const theme = useTheme();
   return (
     <Box sx={{ textAlign: 'center', px: 3 }}>
       <Typography
         sx={{
-          fontSize: { xs: '2rem', md: '2.75rem' },
-          fontWeight: 800,
-          color: theme.palette.primary.main,
+          fontSize: { xs: '2.2rem', md: '2.75rem' },
+          fontWeight: 700,
+          color: '#1a1f36',
           lineHeight: 1,
           fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '-0.04em',
         }}
       >
         {count}{suffix}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: 500 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, fontWeight: 500, fontSize: '13px' }}>
         {label}
       </Typography>
     </Box>
   );
 }
 
-/* ─── Main component ─────────────────────────────────────────────────────── */
 export default function Landing() {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -97,7 +93,6 @@ export default function Landing() {
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
 
-  // Trigger counter when stats section scrolls into view
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
@@ -107,46 +102,37 @@ export default function Landing() {
     return () => observer.disconnect();
   }, []);
 
-  const p = theme.palette;
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', overflowX: 'hidden' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f8f7f4', overflowX: 'hidden' }}>
 
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
-      <AppBar position="sticky" color="default" elevation={0}
-        sx={{
-          bgcolor: alpha(p.background.paper, 0.85),
-          backdropFilter: 'blur(12px)',
-          borderBottom: `1px solid ${p.divider}`,
-        }}
-      >
-        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2.5, md: 8 } }}>
-          {/* Brand */}
-          <Stack direction="row" alignItems="center" spacing={1.25}>
+      <AppBar position="sticky" elevation={0}>
+        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2.5, md: 6 }, minHeight: '56px !important' }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{
               width: 28, height: 28,
-              bgcolor: p.primary.main,
-              clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-              flexShrink: 0,
-            }} />
-            <Typography fontWeight={800} fontSize="17px" color="text.primary" letterSpacing="0.01em">
+              background: 'linear-gradient(135deg, #1a1f36 0%, #2d3561 100%)',
+              borderRadius: '7px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Box sx={{
+                width: 12, height: 12,
+                background: '#f59e0b',
+                borderRadius: '3px',
+                transform: 'rotate(45deg)',
+              }} />
+            </Box>
+            <Typography fontWeight={700} fontSize="15px" color="#1a1f36" letterSpacing="-0.01em">
               Formify
             </Typography>
           </Stack>
 
-          {/* Actions */}
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
             <Button
-              variant="outlined"
+              variant="text"
               size="small"
               onClick={() => navigate('/login')}
-              sx={{
-                borderColor: p.divider,
-                color: 'text.secondary',
-                fontWeight: 600,
-                fontSize: '13px',
-                '&:hover': { borderColor: p.primary.main, color: p.primary.main, bgcolor: alpha(p.primary.main, 0.04) },
-              }}
+              sx={{ color: 'text.secondary', fontWeight: 500, '&:hover': { color: '#1a1f36', bgcolor: 'transparent' } }}
             >
               Sign in
             </Button>
@@ -154,8 +140,7 @@ export default function Landing() {
               variant="contained"
               size="small"
               onClick={() => navigate('/register')}
-              disableElevation
-              sx={{ fontWeight: 700, fontSize: '13px' }}
+              sx={{ borderRadius: 7, px: 2.5 }}
             >
               Get started
             </Button>
@@ -169,93 +154,93 @@ export default function Landing() {
         sx={{
           position: 'relative',
           textAlign: 'center',
-          pt: { xs: 8, md: 14 },
-          pb: { xs: 6, md: 10 },
+          pt: { xs: 9, md: 15 },
+          pb: { xs: 7, md: 12 },
           px: { xs: 3, md: 8 },
           overflow: 'hidden',
         }}
       >
-        {/* Grid background */}
+        {/* Subtle dot grid */}
         <Box sx={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: `linear-gradient(${p.divider} 1px, transparent 1px), linear-gradient(90deg, ${p.divider} 1px, transparent 1px)`,
-          backgroundSize: isMobile ? '40px 40px' : '56px 56px',
-          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%)',
-          opacity: 0.6,
+          backgroundImage: `radial-gradient(circle, #c8c5bd 1px, transparent 1px)`,
+          backgroundSize: '28px 28px',
+          maskImage: 'radial-gradient(ellipse 70% 65% at 50% 45%, black 20%, transparent 100%)',
+          opacity: 0.5,
         }} />
 
-        {/* Glow orb */}
+        {/* Warm glow */}
         <Box sx={{
           position: 'absolute',
-          width: { xs: '300px', md: '700px' },
-          height: { xs: '160px', md: '320px' },
-          background: `radial-gradient(ellipse, ${alpha(p.primary.main, 0.1)} 0%, transparent 70%)`,
-          top: 0, left: '50%', transform: 'translateX(-50%)',
+          width: { xs: '280px', md: '600px' },
+          height: { xs: '200px', md: '360px' },
+          background: 'radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 70%)',
+          top: '5%', left: '50%', transform: 'translateX(-50%)',
           pointerEvents: 'none',
         }} />
 
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          {/* Eyebrow chip */}
           <Chip
-            label="Document management"
+            label="Document management platform"
             size="small"
             sx={{
-              mb: 3,
-              bgcolor: alpha(p.primary.main, 0.08),
-              color: p.primary.main,
-              border: `1px solid ${alpha(p.primary.main, 0.2)}`,
-              fontWeight: 700,
-              fontSize: '10px',
-              letterSpacing: '0.08em',
+              mb: 3.5,
+              bgcolor: 'rgba(26,31,54,0.06)',
+              color: '#1a1f36',
+              border: '1px solid rgba(26,31,54,0.12)',
+              fontWeight: 600,
+              fontSize: '11px',
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
+              height: 26,
             }}
           />
 
-          {/* Headline */}
           <Typography
             variant="h1"
             sx={{
-              fontSize: { xs: '2.4rem', sm: '3.5rem', md: 'clamp(3rem, 6vw, 5rem)' },
-              fontWeight: 800,
-              lineHeight: 1.12,
-              letterSpacing: '-0.03em',
-              color: 'text.primary',
+              fontSize: { xs: '2.6rem', sm: '3.6rem', md: 'clamp(3.2rem, 6vw, 5.2rem)' },
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: '-0.035em',
+              color: '#1a1f36',
               mb: 2.5,
             }}
           >
-            Your documents,{' '}
-            <Box component="span" sx={{ color: 'primary.main' }}>reliably</Box>{' '}
-            structured.
+            Documents built on{' '}
+            <Box component="span" sx={{
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: '2px',
+                left: 0, right: 0,
+                height: '3px',
+                background: '#f59e0b',
+                borderRadius: '2px',
+              }
+            }}>
+              structure.
+            </Box>
           </Typography>
 
-          {/* Sub */}
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.65, maxWidth: 480, mx: 'auto', mb: 4.5 }}
+            sx={{ fontSize: { xs: '1rem', md: '1.125rem' }, lineHeight: 1.7, maxWidth: 460, mx: 'auto', mb: 5 }}
           >
             Define templates once. Fill forms. Get polished documents — every time.
           </Typography>
 
-          {/* CTA buttons */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            justifyContent="center"
-            alignItems="center"
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center" alignItems="center">
             <Button
               variant="contained"
               size="large"
               onClick={() => navigate('/login')}
-              disableElevation
               sx={{
-                px: 4.5, py: 1.5,
-                fontWeight: 700,
-                fontSize: '14px',
-                boxShadow: `0 4px 20px ${alpha(p.primary.main, 0.3)}`,
-                width: isMobile ? '100%' : 'auto',
-                maxWidth: 280,
+                px: 4.5, borderRadius: 8,
+                width: isMobile ? '100%' : 'auto', maxWidth: 260,
+                boxShadow: '0 4px 20px rgba(26,31,54,0.25)',
               }}
             >
               Go to app →
@@ -265,15 +250,8 @@ export default function Landing() {
               size="large"
               onClick={() => navigate('/register')}
               sx={{
-                px: 4, py: 1.5,
-                fontWeight: 600,
-                fontSize: '14px',
-                borderColor: p.divider,
-                color: 'text.primary',
-                bgcolor: 'background.paper',
-                width: isMobile ? '100%' : 'auto',
-                maxWidth: 280,
-                '&:hover': { borderColor: p.primary.main, bgcolor: alpha(p.primary.main, 0.04) },
+                px: 4, borderRadius: 8, bgcolor: 'white',
+                width: isMobile ? '100%' : 'auto', maxWidth: 260,
               }}
             >
               Create account
@@ -286,10 +264,10 @@ export default function Landing() {
       <Box
         ref={statsRef}
         sx={{
-          bgcolor: 'background.paper',
-          borderTop: `1px solid ${p.divider}`,
-          borderBottom: `1px solid ${p.divider}`,
-          py: { xs: 4, md: 5 },
+          bgcolor: 'white',
+          borderTop: '1px solid #e8e6e1',
+          borderBottom: '1px solid #e8e6e1',
+          py: { xs: 4.5, md: 5.5 },
         }}
       >
         <Container maxWidth="md">
@@ -300,7 +278,7 @@ export default function Landing() {
               <Divider
                 orientation={isMd ? 'horizontal' : 'vertical'}
                 flexItem
-                sx={{ borderColor: p.divider }}
+                sx={{ borderColor: '#e8e6e1' }}
               />
             }
             justifyContent="space-evenly"
@@ -314,50 +292,55 @@ export default function Landing() {
       </Box>
 
       {/* ── FEATURES ────────────────────────────────────────────────────── */}
-      <Box component="section" sx={{ py: { xs: 7, md: 11 }, px: { xs: 2, md: 4 } }}>
+      <Box component="section" sx={{ py: { xs: 8, md: 12 }, px: { xs: 2, md: 4 } }}>
         <Container maxWidth="lg">
-          {/* Section label */}
-          <Typography
-            sx={{
-              textAlign: 'center',
-              fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'text.disabled',
-              mb: 5,
-            }}
-          >
-            Everything you need
-          </Typography>
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography
+              sx={{
+                fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', color: 'text.disabled', mb: 2,
+              }}
+            >
+              Everything you need
+            </Typography>
+            <Typography
+              variant="h3"
+              sx={{ fontSize: { xs: '1.9rem', md: '2.4rem' }, color: '#1a1f36', maxWidth: 480, mx: 'auto', lineHeight: 1.2 }}
+            >
+              Powerful tools, clean interface
+            </Typography>
+          </Box>
 
-          <Grid container spacing={2.5}>
-            {features.map((f) => (
+          <Grid container spacing={2}>
+            {features.map((f, i) => (
               <Grid item xs={12} sm={6} md={4} key={f.title}>
                 <Card
                   elevation={0}
                   sx={{
                     height: '100%',
-                    border: `1px solid ${p.divider}`,
-                    bgcolor: 'background.paper',
-                    transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
+                    bgcolor: 'white',
+                    transition: 'all 0.2s',
                     '&:hover': {
-                      borderColor: alpha(p.primary.main, 0.4),
-                      boxShadow: `0 4px 24px ${alpha(p.primary.main, 0.08)}`,
-                      transform: 'translateY(-2px)',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 8px 32px rgba(26,31,54,0.09)',
+                      borderColor: 'rgba(26,31,54,0.2)',
                     },
                   }}
                 >
                   <CardContent sx={{ p: 3.5 }}>
-                    <Typography
-                      sx={{ fontSize: '22px', color: 'primary.main', mb: 2, display: 'block', lineHeight: 1 }}
-                    >
+                    <Box sx={{
+                      width: 40, height: 40, borderRadius: '10px',
+                      bgcolor: i % 3 === 0 ? 'rgba(245,158,11,0.1)' : i % 3 === 1 ? 'rgba(26,31,54,0.06)' : 'rgba(5,150,105,0.08)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      mb: 2.5, fontSize: '18px',
+                      color: i % 3 === 0 ? '#d97706' : i % 3 === 1 ? '#1a1f36' : '#059669',
+                    }}>
                       {f.icon}
-                    </Typography>
-                    <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 1, fontSize: '16px' }}>
+                    </Box>
+                    <Typography variant="h6" fontWeight={600} color="#1a1f36" sx={{ mb: 1, fontSize: '14.5px' }}>
                       {f.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" lineHeight={1.65}>
+                    <Typography variant="body2" color="text.secondary" lineHeight={1.7} fontSize="13.5px">
                       {f.desc}
                     </Typography>
                   </CardContent>
@@ -369,35 +352,41 @@ export default function Landing() {
       </Box>
 
       {/* ── CTA BANNER ──────────────────────────────────────────────────── */}
-      <Box sx={{ px: { xs: 2, md: 4 }, pb: { xs: 7, md: 10 } }}>
+      <Box sx={{ px: { xs: 2, md: 4 }, pb: { xs: 8, md: 12 } }}>
         <Container maxWidth="md">
           <Box
             sx={{
-              bgcolor: p.primary.main,
-              borderRadius: 3,
-              px: { xs: 4, md: 7 },
-              py: { xs: 5, md: 6.5 },
+              background: 'linear-gradient(135deg, #1a1f36 0%, #2d3561 100%)',
+              borderRadius: 4,
+              px: { xs: 4, md: 8 },
+              py: { xs: 5.5, md: 7 },
               textAlign: 'center',
               position: 'relative',
               overflow: 'hidden',
               '&::before': {
-                content: '""',
-                position: 'absolute', inset: 0,
-                backgroundImage: `radial-gradient(circle at 20% 50%, ${alpha('#fff', 0.07)} 0%, transparent 50%), radial-gradient(circle at 80% 20%, ${alpha('#fff', 0.05)} 0%, transparent 40%)`,
+                content: '""', position: 'absolute', inset: 0,
+                backgroundImage: `radial-gradient(circle at 15% 50%, rgba(245,158,11,0.15) 0%, transparent 45%), radial-gradient(circle at 85% 30%, rgba(255,255,255,0.04) 0%, transparent 40%)`,
               },
             }}
           >
+            {/* Decorative amber dot */}
+            <Box sx={{
+              position: 'absolute', top: 28, right: 32,
+              width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b',
+            }} />
+            <Box sx={{
+              position: 'absolute', bottom: 24, left: 40,
+              width: 5, height: 5, borderRadius: '50%', bgcolor: 'rgba(245,158,11,0.5)',
+            }} />
+
             <Typography
               variant="h4"
-              fontWeight={800}
-              color="primary.contrastText"
-              sx={{ mb: 1.5, fontSize: { xs: '1.6rem', md: '2rem' }, position: 'relative', zIndex: 1 }}
+              sx={{ color: 'white', mb: 1.5, fontSize: { xs: '1.7rem', md: '2.1rem' }, position: 'relative', zIndex: 1 }}
             >
               Ready to get started?
             </Typography>
             <Typography
-              color={alpha(p.primary.contrastText, 0.75)}
-              sx={{ mb: 3.5, fontSize: '15px', position: 'relative', zIndex: 1 }}
+              sx={{ color: 'rgba(255,255,255,0.6)', mb: 4, fontSize: '15px', position: 'relative', zIndex: 1 }}
             >
               Join teams already using Formify to ship documents faster.
             </Typography>
@@ -407,16 +396,10 @@ export default function Landing() {
               onClick={() => navigate('/register')}
               sx={{
                 position: 'relative', zIndex: 1,
-                bgcolor: 'background.paper',
-                color: 'primary.main',
-                fontWeight: 700,
-                px: 4.5, py: 1.5,
-                fontSize: '14px',
-                boxShadow: 'none',
-                '&:hover': {
-                  bgcolor: 'background.default',
-                  boxShadow: 'none',
-                },
+                bgcolor: '#f59e0b', color: '#1a1f36', fontWeight: 700,
+                px: 5, borderRadius: 8,
+                '&:hover': { bgcolor: '#fbbf24' },
+                boxShadow: '0 4px 20px rgba(245,158,11,0.4)',
               }}
             >
               Create free account
@@ -428,36 +411,27 @@ export default function Landing() {
       {/* ── FOOTER ──────────────────────────────────────────────────────── */}
       <Box
         component="footer"
-        sx={{
-          borderTop: `1px solid ${p.divider}`,
-          py: 3,
-          px: { xs: 3, md: 8 },
-          bgcolor: 'background.paper',
-        }}
+        sx={{ borderTop: '1px solid #e8e6e1', py: 3.5, px: { xs: 3, md: 6 }, bgcolor: 'white' }}
       >
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={2}
-        >
-          <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{
-              width: 18, height: 18,
-              bgcolor: p.primary.main,
-              clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-              opacity: 0.8,
-            }} />
-            <Typography fontSize="13px" fontWeight={700} color="text.secondary">
+              width: 22, height: 22,
+              background: 'linear-gradient(135deg, #1a1f36 0%, #2d3561 100%)',
+              borderRadius: '5px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Box sx={{ width: 8, height: 8, background: '#f59e0b', borderRadius: '2px', transform: 'rotate(45deg)' }} />
+            </Box>
+            <Typography fontSize="13px" fontWeight={700} color="#1a1f36">
               Formify
             </Typography>
           </Stack>
-          <Typography fontSize="12px" color="text.disabled" textAlign="center">
-            Document management for teams. © {new Date().getFullYear()}
+          <Typography fontSize="12px" color="text.disabled">
+            Document management for teams · © {new Date().getFullYear()}
           </Typography>
         </Stack>
       </Box>
-
     </Box>
   );
 }

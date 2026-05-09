@@ -18,7 +18,7 @@ import {
     Chip,
     Tooltip,
 } from "@mui/material";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import yaml from "js-yaml";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -51,19 +51,19 @@ const refColor = "#546e7a";
  * (excluding the current one). These are offered as `$SchemaName` type options.
  */
 export default function FormSchemaBuilder({
-                                              onGenerate,
-                                              onSave,
-                                              onCancel,
-                                              fields,
-                                              setFields,
-                                              name,
-                                              setName,
-                                              description,
-                                              setDescription,
-                                              expandedArrays,
-                                              setExpandedArrays,
-                                              otherSchemas = [],   // NEW: names of sibling schemas in the same folder
-                                          }) {
+    onGenerate,
+    onSave,
+    onCancel,
+    fields,
+    setFields,
+    name,
+    setName,
+    description,
+    setDescription,
+    expandedArrays,
+    setExpandedArrays,
+    otherSchemas = [],   // NEW: names of sibling schemas in the same folder
+}) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -97,7 +97,7 @@ export default function FormSchemaBuilder({
 
     const updateField = (idx, updates) => {
         setFields((prev) =>
-            prev.map((f, i) => (i === idx ? {...f, ...updates} : f))
+            prev.map((f, i) => (i === idx ? { ...f, ...updates } : f))
         );
     };
 
@@ -135,7 +135,7 @@ export default function FormSchemaBuilder({
                     ? {
                         ...f,
                         fields: f.fields.map((s, j) =>
-                            j === subIdx ? {...s, ...updates} : s
+                            j === subIdx ? { ...s, ...updates } : s
                         ),
                     }
                     : f
@@ -147,14 +147,14 @@ export default function FormSchemaBuilder({
         setFields((prev) =>
             prev.map((f, i) =>
                 i === parentIdx
-                    ? {...f, fields: f.fields.filter((_, j) => j !== subIdx)}
+                    ? { ...f, fields: f.fields.filter((_, j) => j !== subIdx) }
                     : f
             )
         );
     };
 
     const toggleArrayExpand = (idx) => {
-        setExpandedArrays((prev) => ({...prev, [idx]: !prev[idx]}));
+        setExpandedArrays((prev) => ({ ...prev, [idx]: !prev[idx] }));
     };
 
     // ── YAML generation ───────────────────────────────────────────
@@ -189,7 +189,7 @@ export default function FormSchemaBuilder({
                                 type: sub.type,
                                 label: sub.label.trim() || sub.type,
                                 required: sub.required,
-                                ...(sub.placeholder?.trim() && {placeholder: sub.placeholder.trim()}),
+                                ...(sub.placeholder?.trim() && { placeholder: sub.placeholder.trim() }),
                             };
                         }
                     });
@@ -209,29 +209,29 @@ export default function FormSchemaBuilder({
                     type: f.type,
                     label: f.label.trim() || f.type,
                     required: f.required,
-                    ...(f.placeholder?.trim() && {placeholder: f.placeholder.trim()}),
+                    ...(f.placeholder?.trim() && { placeholder: f.placeholder.trim() }),
                 };
             }
         });
 
-        return yaml.dump(schema, {indent: 2});
+        return yaml.dump(schema, { indent: 2 });
     };
 
     const handleGenerate = () => onGenerate?.(generateYAML());
 
     // ── Render ────────────────────────────────────────────────────
     return (
-        <Box sx={{pb: isMobile ? "80px" : 0}}>
+        <Box sx={{ pb: isMobile ? "80px" : 0 }}>
             <Stack spacing={isMobile ? 2 : 3}>
 
                 {/* Schema meta */}
                 <Paper elevation={0}
-                       sx={{p: isMobile ? 2 : 3, borderRadius: 2, border: "1px solid", borderColor: "divider"}}>
+                    sx={{ p: isMobile ? 2 : 3, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
                     <Stack spacing={2}>
                         <TextField fullWidth label="Schema Name" value={name}
-                                   onChange={(e) => setName(e.target.value)} placeholder="e.g. Invoice"/>
+                            onChange={(e) => setName(e.target.value)} placeholder="e.g. Invoice" />
                         <TextField fullWidth label="Description (optional)" value={description}
-                                   onChange={(e) => setDescription(e.target.value)} multiline minRows={2}/>
+                            onChange={(e) => setDescription(e.target.value)} multiline minRows={2} />
                     </Stack>
                 </Paper>
 
@@ -245,37 +245,37 @@ export default function FormSchemaBuilder({
                         bgcolor: alpha(refColor, 0.04)
                     }}>
                         <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" gap={0.5}>
-                            <LinkIcon sx={{fontSize: 14, color: refColor}}/>
+                            <LinkIcon sx={{ fontSize: 14, color: refColor }} />
                             <Typography variant="caption" color="text.secondary">
                                 Available references:
                             </Typography>
                             {otherSchemas.map((s) => (
                                 <Chip key={s} label={`$${s}`} size="small"
-                                      sx={{
-                                          fontSize: 11,
-                                          bgcolor: alpha(refColor, 0.1),
-                                          color: refColor,
-                                          fontFamily: "monospace"
-                                      }}/>
+                                    sx={{
+                                        fontSize: 11,
+                                        bgcolor: alpha(refColor, 0.1),
+                                        color: refColor,
+                                        fontFamily: "monospace"
+                                    }} />
                             ))}
                         </Stack>
                     </Paper>
                 )}
 
-                <Divider/>
+                <Divider />
 
                 {/* Fields header (desktop) */}
                 {!isMobile && (
-                    <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h6" fontWeight={600}>Fields ({fields.length})</Typography>
-                        <Button variant="outlined" startIcon={<AddIcon/>} onClick={addField}>Add Field</Button>
+                        <Button variant="outlined" startIcon={<AddIcon />} onClick={addField}>Add Field</Button>
                     </Box>
                 )}
 
                 {/* Field cards */}
                 <Stack spacing={isMobile ? 2 : 2.5}>
                     {fields.length === 0 ? (
-                        <Typography color="text.secondary" align="center" sx={{py: 6}}>
+                        <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
                             {isMobile ? 'Tap "Add" below' : 'Click "Add Field"'} to start building
                         </Typography>
                     ) : (
@@ -288,20 +288,20 @@ export default function FormSchemaBuilder({
 
                             return (
                                 <Paper key={field.id} elevation={1}
-                                       sx={{borderRadius: 2, borderTop: `4px solid ${color}`, overflow: "hidden"}}>
+                                    sx={{ borderRadius: 2, borderTop: `4px solid ${color}`, overflow: "hidden" }}>
 
-                                    <Box sx={{p: isMobile ? 2 : 2.5}}>
+                                    <Box sx={{ p: isMobile ? 2 : 2.5 }}>
                                         {/* Card header */}
                                         <Stack direction="row" justifyContent="space-between" alignItems="center"
-                                               mb={2}>
-                                            <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
+                                            mb={2}>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                                 <Box sx={{
                                                     width: 10,
                                                     height: 10,
                                                     borderRadius: "50%",
                                                     bgcolor: color,
                                                     flexShrink: 0
-                                                }}/>
+                                                }} />
                                                 <Typography variant="subtitle1" fontWeight={600}>
                                                     {isRef ? "Reference" : isArray ? "Array" : `Field ${idx + 1}`}
                                                 </Typography>
@@ -311,24 +311,24 @@ export default function FormSchemaBuilder({
                                                 {(isRef || isArrayRef) && (
                                                     <Tooltip
                                                         title="This field references another schema in this folder">
-                                                        <LinkIcon sx={{fontSize: 14, color: refColor}}/>
+                                                        <LinkIcon sx={{ fontSize: 14, color: refColor }} />
                                                     </Tooltip>
                                                 )}
                                             </Box>
                                             <IconButton size="small" color="error" onClick={() => removeField(idx)}>
-                                                <DeleteIcon fontSize="small"/>
+                                                <DeleteIcon fontSize="small" />
                                             </IconButton>
                                         </Stack>
 
                                         <Stack spacing={2}>
                                             {/* Key */}
                                             <TextField fullWidth label="Field Key / ID" disabled value={field.id}
-                                                       size="small" helperText="Used in YAML output"/>
+                                                size="small" helperText="Used in YAML output" />
 
                                             {/* Label */}
                                             <TextField fullWidth label="Display Label" value={field.label}
-                                                       onChange={(e) => updateField(idx, {label: e.target.value})}
-                                                       size="small"/>
+                                                onChange={(e) => updateField(idx, { label: e.target.value })}
+                                                size="small" />
 
                                             {/* Type + Required */}
                                             <Stack direction="row" spacing={2} alignItems="center">
@@ -342,26 +342,26 @@ export default function FormSchemaBuilder({
                                                     IconComponent={ArrowDropDownIcon}
                                                     sx={{
                                                         minWidth: 160,
-                                                        "& .MuiSelect-select": {color, fontWeight: 500},
+                                                        "& .MuiSelect-select": { color, fontWeight: 500 },
                                                     }}
                                                 >
                                                     {/* Primitives */}
                                                     {PRIMITIVE_TYPES.map((t) => (
                                                         <MenuItem key={t} value={t}
-                                                                  sx={{color: primitiveColors[t] || "inherit"}}>
+                                                            sx={{ color: primitiveColors[t] || "inherit" }}>
                                                             {t}
                                                         </MenuItem>
                                                     ))}
 
                                                     {/* Schema references */}
-                                                    {otherSchemas.length > 0 && <Divider/>}
+                                                    {otherSchemas.length > 0 && <Divider />}
                                                     {otherSchemas.map((s) => (
                                                         <MenuItem key={`$${s}`} value={`$${s}`}
-                                                                  sx={{
-                                                                      color: refColor,
-                                                                      fontFamily: "monospace",
-                                                                      fontWeight: 500
-                                                                  }}>
+                                                            sx={{
+                                                                color: refColor,
+                                                                fontFamily: "monospace",
+                                                                fontWeight: 500
+                                                            }}>
                                                             ${s}
                                                         </MenuItem>
                                                     ))}
@@ -370,10 +370,10 @@ export default function FormSchemaBuilder({
                                                 <FormControlLabel
                                                     control={
                                                         <Checkbox checked={field.required}
-                                                                  onChange={(e) => updateField(idx, {required: e.target.checked})}
-                                                                  size="small" sx={{color, "&.Mui-checked": {color}}}/>
+                                                            onChange={(e) => updateField(idx, { required: e.target.checked })}
+                                                            size="small" sx={{ color, "&.Mui-checked": { color } }} />
                                                     }
-                                                    label="Required" sx={{m: 0}}
+                                                    label="Required" sx={{ m: 0 }}
                                                 />
                                             </Stack>
 
@@ -381,24 +381,24 @@ export default function FormSchemaBuilder({
                                             {isArray && (
                                                 <Box>
                                                     <Typography variant="caption" color="text.secondary"
-                                                                sx={{mb: 0.5, display: "block"}}>
+                                                        sx={{ mb: 0.5, display: "block" }}>
                                                         Array item type
                                                     </Typography>
                                                     <Select
                                                         value={field.items || "__inline__"}
                                                         onChange={(e) => {
                                                             const v = e.target.value;
-                                                            updateField(idx, {items: v === "__inline__" ? "" : v});
+                                                            updateField(idx, { items: v === "__inline__" ? "" : v });
                                                         }}
                                                         size="small"
-                                                        sx={{minWidth: 200}}
+                                                        sx={{ minWidth: 200 }}
                                                     >
                                                         <MenuItem value="__inline__">
                                                             <em>Inline sub-fields (defined below)</em>
                                                         </MenuItem>
                                                         {otherSchemas.map((s) => (
                                                             <MenuItem key={s} value={`$${s}`}
-                                                                      sx={{color: refColor, fontFamily: "monospace"}}>
+                                                                sx={{ color: refColor, fontFamily: "monospace" }}>
                                                                 ${s}
                                                             </MenuItem>
                                                         ))}
@@ -409,8 +409,8 @@ export default function FormSchemaBuilder({
                                             {/* Placeholder — only for primitive scalar fields */}
                                             {!isArray && !isRef && field.type !== "checkbox" && (
                                                 <TextField fullWidth label="Placeholder" value={field.placeholder}
-                                                           onChange={(e) => updateField(idx, {placeholder: e.target.value})}
-                                                           size="small"/>
+                                                    onChange={(e) => updateField(idx, { placeholder: e.target.value })}
+                                                    size="small" />
                                             )}
                                         </Stack>
                                     </Box>
@@ -431,80 +431,80 @@ export default function FormSchemaBuilder({
                                                 onClick={() => toggleArrayExpand(idx)}
                                             >
                                                 <Stack direction="row" justifyContent="space-between"
-                                                       alignItems="center">
+                                                    alignItems="center">
                                                     <Typography variant="subtitle2" color="text.secondary">
                                                         Sub-fields ({field.fields.length})
                                                     </Typography>
-                                                    {expanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                                                    {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                                 </Stack>
                                             </Box>
 
                                             <Collapse in={expanded}>
-                                                <Box sx={{p: isMobile ? 2 : 2.5, pt: 1.5}}>
+                                                <Box sx={{ p: isMobile ? 2 : 2.5, pt: 1.5 }}>
                                                     <Stack spacing={isMobile ? 2 : 2}>
                                                         {field.fields.length === 0 && (
                                                             <Typography variant="body2" color="text.secondary"
-                                                                        sx={{fontStyle: "italic"}}>
+                                                                sx={{ fontStyle: "italic" }}>
                                                                 No sub-fields yet.
                                                             </Typography>
                                                         )}
 
                                                         {field.fields.map((sub, sIdx) => (
                                                             <Paper key={sub.id} variant="outlined"
-                                                                   sx={{p: isMobile ? 1.5 : 2, borderRadius: 1.5}}>
+                                                                sx={{ p: isMobile ? 1.5 : 2, borderRadius: 1.5 }}>
                                                                 <Stack direction="row" justifyContent="space-between"
-                                                                       alignItems="center" mb={1.5}>
+                                                                    alignItems="center" mb={1.5}>
                                                                     <Typography variant="caption" fontWeight={600}
-                                                                                color="text.secondary">
+                                                                        color="text.secondary">
                                                                         Sub-field {sIdx + 1}
                                                                     </Typography>
                                                                     <IconButton size="small" color="error"
-                                                                                onClick={() => removeSubField(idx, sIdx)}>
-                                                                        <DeleteIcon fontSize="small"/>
+                                                                        onClick={() => removeSubField(idx, sIdx)}>
+                                                                        <DeleteIcon fontSize="small" />
                                                                     </IconButton>
                                                                 </Stack>
 
                                                                 <Stack spacing={1.5}>
                                                                     <TextField fullWidth label="Key" value={sub.id}
-                                                                               onChange={(e) => updateSubField(idx, sIdx, {id: e.target.value})}
-                                                                               size="small"/>
+                                                                        onChange={(e) => updateSubField(idx, sIdx, { id: e.target.value })}
+                                                                        size="small" />
                                                                     <TextField fullWidth label="Label" value={sub.label}
-                                                                               onChange={(e) => updateSubField(idx, sIdx, {label: e.target.value})}
-                                                                               size="small"/>
+                                                                        onChange={(e) => updateSubField(idx, sIdx, { label: e.target.value })}
+                                                                        size="small" />
 
                                                                     <Stack direction="row" spacing={2}
-                                                                           alignItems="center">
+                                                                        alignItems="center">
                                                                         <Select value={sub.type}
-                                                                                onChange={(e) => updateSubField(idx, sIdx, {type: e.target.value})}
-                                                                                size="small" sx={{minWidth: 120}}>
+                                                                            onChange={(e) => updateSubField(idx, sIdx, { type: e.target.value })}
+                                                                            size="small" sx={{ minWidth: 120 }}>
                                                                             {PRIMITIVE_TYPES.filter((t) => t !== "array").map((t) => (
                                                                                 <MenuItem key={t}
-                                                                                          value={t}>{t}</MenuItem>
+                                                                                    value={t}>{t}</MenuItem>
                                                                             ))}
                                                                         </Select>
                                                                         <FormControlLabel
                                                                             control={
                                                                                 <Checkbox checked={sub.required}
-                                                                                          onChange={(e) => updateSubField(idx, sIdx, {required: e.target.checked})}
-                                                                                          size="small"/>
+                                                                                    onChange={(e) => updateSubField(idx, sIdx, { required: e.target.checked })}
+                                                                                    size="small" />
                                                                             }
-                                                                            label="Required" sx={{m: 0}}
+                                                                            label="Required" sx={{ m: 0 }}
                                                                         />
                                                                     </Stack>
 
                                                                     {sub.type !== "checkbox" && (
                                                                         <TextField fullWidth label="Placeholder"
-                                                                                   value={sub.placeholder || ""}
-                                                                                   onChange={(e) => updateSubField(idx, sIdx, {placeholder: e.target.value})}
-                                                                                   size="small"/>
+                                                                            value={sub.placeholder || ""}
+                                                                            onChange={(e) => updateSubField(idx, sIdx, { placeholder: e.target.value })}
+                                                                            size="small" />
                                                                     )}
                                                                 </Stack>
                                                             </Paper>
                                                         ))}
 
-                                                        <Button size="small" startIcon={<AddIcon fontSize="small"/>}
-                                                                onClick={() => addSubField(idx)}
-                                                                sx={{alignSelf: "flex-start"}}>
+                                                        <Button size="small" startIcon={<AddIcon fontSize="small" />}
+                                                            onClick={() => addSubField(idx)}
+                                                            sx={{ alignSelf: "flex-start" }}>
                                                             Add sub-field
                                                         </Button>
                                                     </Stack>
@@ -520,8 +520,8 @@ export default function FormSchemaBuilder({
                                             borderTop: "1px solid", borderColor: alpha(refColor, 0.2)
                                         }}>
                                             <Stack direction="row" alignItems="center" spacing={1}>
-                                                <LinkIcon sx={{fontSize: 14, color: refColor}}/>
-                                                <Typography variant="caption" sx={{color: refColor}}>
+                                                <LinkIcon sx={{ fontSize: 14, color: refColor }} />
+                                                <Typography variant="caption" sx={{ color: refColor }}>
                                                     Items will use the <strong>{field.items}</strong> schema. Fields are
                                                     defined there.
                                                 </Typography>
@@ -536,8 +536,8 @@ export default function FormSchemaBuilder({
                                             borderTop: "1px solid", borderColor: alpha(refColor, 0.2)
                                         }}>
                                             <Stack direction="row" alignItems="center" spacing={1}>
-                                                <LinkIcon sx={{fontSize: 14, color: refColor}}/>
-                                                <Typography variant="caption" sx={{color: refColor}}>
+                                                <LinkIcon sx={{ fontSize: 14, color: refColor }} />
+                                                <Typography variant="caption" sx={{ color: refColor }}>
                                                     This field embeds the <strong>{field.type}</strong> schema inline.
                                                 </Typography>
                                             </Stack>
@@ -552,9 +552,9 @@ export default function FormSchemaBuilder({
 
             {/* Desktop generate button */}
             {!isMobile && (
-                <Box sx={{textAlign: "center", mt: 4}}>
+                <Box sx={{ display:"flex", justifyContent:"flex-end", textAlign: "center", mt: 4 }}>
                     <Button variant="contained" size="large" disabled={fields.length === 0}
-                            onClick={handleGenerate} sx={{minWidth: 220, py: 1.5}}>
+                        onClick={handleGenerate} sx={{ minWidth: 220, py: 1.5 }}>
                         Generate YAML Schema
                     </Button>
                 </Box>
@@ -569,19 +569,19 @@ export default function FormSchemaBuilder({
                     boxShadow: "0 -2px 10px rgba(0,0,0,0.08)", zIndex: 1200,
                 }}>
                     {onCancel && (
-                        <Button fullWidth variant="outlined" color="inherit" onClick={onCancel} sx={{flexShrink: 1}}>
+                        <Button fullWidth variant="outlined" color="inherit" onClick={onCancel} sx={{ flexShrink: 1 }}>
                             Cancel
                         </Button>
                     )}
-                    <Button fullWidth variant="outlined" startIcon={<AddIcon/>} onClick={addField} sx={{flexShrink: 1}}>
+                    <Button fullWidth variant="outlined" startIcon={<AddIcon />} onClick={addField} sx={{ flexShrink: 1 }}>
                         Add
                     </Button>
                     <Button fullWidth variant="contained" onClick={handleGenerate}
-                            disabled={fields.length === 0} sx={{flexShrink: 1}}>
+                        disabled={fields.length === 0} sx={{ flexShrink: 1 }}>
                         Generate
                     </Button>
                     {onSave && (
-                        <Button fullWidth variant="contained" color="success" onClick={onSave} sx={{flexShrink: 1}}>
+                        <Button fullWidth variant="contained" color="success" onClick={onSave} sx={{ flexShrink: 1 }}>
                             Save
                         </Button>
                     )}

@@ -29,42 +29,35 @@ export default function FileRow({ file, isLast, onClick }) {
         display: 'grid',
         gridTemplateColumns: '1fr 80px 120px',
         alignItems: 'center',
-        px: { xs: 2, sm: 2.5 },
-        py: 1.25,
-        cursor: 'pointer',
-        bgcolor: 'background.paper',
-        borderBottom: isLast ? 'none' : '1px solid',
-        borderColor: 'divider',
+        px: 3, py: 1.5,
+        cursor: 'pointer', bgcolor: 'white',
+        borderBottom: isLast ? 'none' : '1px solid #e8e6e1',
         transition: 'background 0.1s',
-        '&:hover': { bgcolor: 'action.hover' },
+        '&:hover': { bgcolor: '#fafaf8' },
+        '&:hover .file-name': { color: '#1a1f36' },
       }}
     >
-      {/* Icon + name */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-        <InsertDriveFileOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
-        <Typography
-          variant="body2"
-          fontWeight={500}
-          noWrap
-          sx={{ '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
-        >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+        <Box sx={{
+          width: 32, height: 32, borderRadius: '8px',
+          bgcolor: 'rgba(26,31,54,0.05)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <InsertDriveFileOutlinedIcon sx={{ fontSize: 15, color: '#94a3b8' }} />
+        </Box>
+        <Typography className="file-name" variant="body2" fontWeight={500} noWrap
+          sx={{ fontSize: '13.5px', color: '#374151', transition: 'color 0.1s' }}>
           {file.name}
         </Typography>
       </Box>
 
-      {/* Size */}
-      <Typography
-        variant="caption" color="text.secondary"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1 }}
-      >
+      <Typography variant="caption" color="text.disabled"
+        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1, fontSize: '12px' }}>
         {formatSize(file.sizeBytes)}
       </Typography>
 
-      {/* Updated */}
-      <Typography
-        variant="caption" color="text.secondary"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right' }}
-      >
+      <Typography variant="caption" color="text.secondary"
+        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', fontSize: '12px' }}>
         {timeAgo(file.updatedAt)}
       </Typography>
     </Box>

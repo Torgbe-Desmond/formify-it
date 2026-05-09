@@ -1,30 +1,23 @@
-import {
-  Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Button,
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 
-export default function RenameFileDialog({
-  open, onClose, fileName, onFileNameChange, onSave, renameFileLoading
-}) {
+export default function RenameFileDialog({ open, onClose, fileName, onFileNameChange, onSave, renameFileLoading }) {
   return (
     <Dialog open={open} maxWidth="xs" fullWidth>
-      <DialogTitle>Rename File</DialogTitle>
-      <DialogContent>
+      <DialogTitle>Rename file</DialogTitle>
+      <DialogContent sx={{ pb: 1 }}>
         <TextField
-          autoFocus fullWidth
-          label="File name"
-          disabled={renameFileLoading}
-          variant="outlined"
-          margin="dense"
+          autoFocus fullWidth disabled={renameFileLoading}
           value={fileName}
           onChange={(e) => onFileNameChange(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSave(); }}
           sx={{ '& input': { fontSize: { xs: 16, sm: 14 }, WebkitTextSizeAdjust: '100%' } }}
         />
       </DialogContent>
-      <DialogActions>
-        <Button disabled={renameFileLoading} onClick={onClose}>Cancel</Button>
-        <Button disabled={renameFileLoading} variant="contained" onClick={onSave}> {renameFileLoading ? "Saving" : "Save"}</Button>
+      <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+        <Button disabled={renameFileLoading} onClick={onClose} sx={{ borderRadius: 7 }}>Cancel</Button>
+        <Button disabled={renameFileLoading} variant="contained" onClick={onSave} sx={{ borderRadius: 7 }}>
+          {renameFileLoading ? "Saving…" : "Save"}
+        </Button>
       </DialogActions>
     </Dialog>
   );

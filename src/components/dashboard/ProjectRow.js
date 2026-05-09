@@ -1,130 +1,95 @@
 import { useState } from 'react';
-import {
-  Box, Typography, IconButton, Chip,
-  Menu, MenuItem, ListItemIcon, ListItemText,
-} from '@mui/material';
-import MoreHorizIcon                    from '@mui/icons-material/MoreHoriz';
+import { Box, Typography, IconButton, Chip, Menu, MenuItem, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import DeleteOutlineRoundedIcon         from '@mui/icons-material/DeleteOutlineRounded';
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60000);
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins < 1)   return 'just now';
-  if (mins < 60)  return `${mins}m ago`;
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days < 30)  return `${days}d ago`;
+  if (days < 30) return `${days}d ago`;
   return new Date(dateStr).toLocaleDateString();
 }
 
-export default function ProjectRow({ project, isLast, onClick, onRename, onDelete }) {
+export default function ProjectRow({ isOnline, project, isLast, onClick, onRename, onDelete }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
-
   const handleMenuClick = (e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); };
   const handleMenuClose = () => setAnchorEl(null);
-  const handleRename = () => { handleMenuClose(); onRename(); };
-  const handleDelete = () => { handleMenuClose(); onDelete(); };
 
   return (
     <Box
       onClick={onClick}
       sx={{
         display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr 40px',            // mobile:  name+meta stacked | actions
-          sm: '1fr 80px 120px 40px', // desktop: name | folders | updated | actions
-        },
+        gridTemplateColumns: { xs: '1fr 40px', sm: '1fr 80px 120px 40px' },
         alignItems: 'center',
-        px: { xs: 2, sm: 2.5 },
-        py: { xs: 1.5, sm: 1.25 },
+        px: 3, py: 1.5,
         cursor: 'pointer',
-        borderBottom: isLast ? 'none' : '1px solid',
-        borderColor: 'divider',
-        bgcolor:'background.paper',
+        borderBottom: isLast ? 'none' : '1px solid #e8e6e1',
+        bgcolor: 'white',
         transition: 'background 0.1s',
-        '&:hover': { bgcolor: 'action.hover' },
+        '&:hover': { bgcolor: '#fafaf8' },
         '&:hover .row-actions': { opacity: 1 },
       }}
     >
-      {/* Name + icon */}
-      <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1.5, minWidth: 0 }}>
-        <AccountTreeOutlinedIcon sx={{ fontSize: 20, color: "primary.main", flexShrink: 0, mt: { xs: '2px', sm: 0 } }} />
-
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+        <Box sx={{
+          width: 36, height: 36, borderRadius: '9px',
+          bgcolor: 'rgba(26,31,54,0.05)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <FolderRoundedIcon sx={{ fontSize: 18, color: '#94a3b8' }} />
+        </Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography
-            variant="body2" fontWeight={600} noWrap
-            sx={{ color: 'text.primary', '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}
-          >
+          <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '13.5px', color: '#1a1f36' }}>
             {project.name}
           </Typography>
-
-          {/* Mobile-only: folder count + time stacked below name */}
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1, mt: 0.4 }}>
-            {(project.folderCount ?? 0) > 0 ? (
-              <Chip
-                label={`${project.folderCount} folder${project.folderCount === 1 ? '' : 's'}`}
-                size="small" variant="outlined"
-                sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }}
-              />
-            ) : (
-            <></>
-              // <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>No folders</Typography>
-            )}
-            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.65rem' }}>
-              {timeAgo(project.updatedAt)}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1, mt: 0.25 }}>
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '11.5px' }}>
+              {project.folderCount ?? 0} folders · {timeAgo(project.updatedAt)}
             </Typography>
           </Box>
         </Box>
       </Box>
 
-      {/* Folder count — desktop only */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}>
-        {(project.folderCount ?? 0) > 0 ? (
-          <Chip label={project.folderCount} size="small" variant="outlined"
-            sx={{ height: 20, fontSize: '0.7rem', borderRadius: 1 }} />
-        ) : (
-          <Typography variant="caption" color="text.disabled">—</Typography>
-        )}
+        {(project.folderCount ?? 0) > 0
+          ? <Chip label={project.folderCount} size="small" sx={{ height: 20, fontSize: '11px', bgcolor: 'rgba(26,31,54,0.06)', border: 'none', '& .MuiChip-label': { px: 1 } }} />
+          : <Typography variant="caption" color="text.disabled">—</Typography>
+        }
       </Box>
 
-      {/* Updated time — desktop only */}
-      <Typography variant="caption" color="text.secondary"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1, fontSize: '12.5px' }}>
         {timeAgo(project.updatedAt)}
       </Typography>
 
-      {/* Actions — always visible on mobile, hover-only on desktop */}
-      <Box
-        className="row-actions"
-        sx={{ opacity: { xs: 1, sm: 0 }, transition: 'opacity 0.15s', display: 'flex', justifyContent: 'flex-end' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <IconButton size="small" onClick={handleMenuClick} sx={{ color: 'text.secondary' }}>
-          <MoreHorizIcon fontSize="small" />
+      <Box className="row-actions" sx={{ opacity: { xs: 1, sm: 0 }, transition: 'opacity 0.15s', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+        <IconButton size="small" onClick={handleMenuClick} sx={{ color: 'text.disabled', '&:hover': { color: '#1a1f36', bgcolor: 'rgba(26,31,54,0.05)' } }}>
+          <MoreHorizIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Box>
 
-      <Menu
-        anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}
-        onClick={(e) => e.stopPropagation()}
+      <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose} onClick={(e) => e.stopPropagation()}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        slotProps={{ paper: { elevation: 3, sx: { borderRadius: 2, minWidth: 160 } } }}
-      >
-        <MenuItem onClick={handleRename}>
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
+        <MenuItem disabled={!isOnline} onClick={() => { handleMenuClose(); onRename(); }}>
           <ListItemIcon><DriveFileRenameOutlineRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Rename</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+        <MenuItem disabled={!isOnline} onClick={() => { handleMenuClose(); onDelete(); }} sx={{ color: 'error.main' }}>
           <ListItemIcon sx={{ color: 'error.main' }}><DeleteOutlineRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
       </Menu>
+
     </Box>
   );
 }

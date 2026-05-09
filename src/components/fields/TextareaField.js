@@ -122,27 +122,7 @@ export default function TextareaField({ fieldKey, config, value = '', onChange, 
               outline: 'none',
               minHeight: '120px',
             },
-            // Unordered lists keep normal padding
-            '& ul': {
-              paddingLeft: '1.5rem',
-            },
-            // Ordered lists: use CSS counters instead of ::marker
-            // so spacing is consistent between the editor and the PDF
-            '& ol': {
-              listStyle: 'none',
-              padding: '0 0 0 1.5rem',
-              counterReset: 'list-counter',
-            },
-            '& ol li': {
-              counterIncrement: 'list-counter',
-              display: 'flex',
-              gap: '8px',
-            },
-            '& ol li::before': {
-              content: 'counter(list-counter) "."',
-              minWidth: '20px',
-              flexShrink: 0,
-            },
+           
           }}
         >
           <EditorContent editor={editor} />

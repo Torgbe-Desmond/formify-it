@@ -1,50 +1,49 @@
 import { useState, useEffect } from 'react';
-import { Alert, Box, Slide } from '@mui/material';
+import { Box, Typography, Slide } from '@mui/material';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
-import SyncIcon from '@mui/icons-material/Sync';
+import SyncRoundedIcon from '@mui/icons-material/SyncRounded';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import db from '../db/_db';
 
 export default function OfflineBanner() {
-  const isOnline       = useOnlineStatus();
+  const isOnline = useOnlineStatus();
   const [pending, setPending] = useState(0);
 
-  // Poll pending sync count every 5 seconds
   useEffect(() => {
-    const check = async () => {
-      const count = await db.syncQueue.count();
-      setPending(count);
-    };
-
+    const check = async () => { const count = await db.syncQueue.count(); setPending(count); };
     check();
     const interval = setInterval(check, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Don't show anything if online and nothing pending
   if (isOnline && pending === 0) return null;
 
   return (
     <Slide direction="down" in={true} mountOnEnter unmountOnExit>
-      <Box sx={{ position: 'relative', top: 0, left: 0, right: 0}}>
+      <Box>
         {!isOnline && (
-          <Alert
-            severity="warning"
-            icon={<WifiOffIcon fontSize="small" />}
-            sx={{ borderRadius: 0, justifyContent: 'center' }}
-          >
-            You are offline.
-          </Alert>
+          <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+            bgcolor: '#fef3c7', borderBottom: '1px solid #fde68a',
+            py: 1, px: 3,
+          }}>
+            <WifiOffIcon sx={{ fontSize: 15, color: '#92400e' }} />
+            <Typography sx={{ fontSize: '13px', fontWeight: 500, color: '#92400e' }}>
+              You're offline
+            </Typography>
+          </Box>
         )}
-
         {isOnline && pending > 0 && (
-          <Alert
-            severity="info"
-            icon={<SyncIcon fontSize="small" />}
-            sx={{ borderRadius: 0, justifyContent: 'center' }}
-          >
-            Syncing {pending} pending {pending === 1 ? 'change' : 'changes'} to server...
-          </Alert>
+          <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+            bgcolor: 'rgba(26,31,54,0.04)', borderBottom: '1px solid #e8e6e1',
+            py: 1, px: 3,
+          }}>
+            <SyncRoundedIcon sx={{ fontSize: 15, color: '#64748b', animation: 'spin 1.5s linear infinite', '@keyframes spin': { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } } }} />
+            <Typography sx={{ fontSize: '13px', fontWeight: 500, color: '#64748b' }}>
+              Syncing {pending} pending {pending === 1 ? 'change' : 'changes'}…
+            </Typography>
+          </Box>
         )}
       </Box>
     </Slide>

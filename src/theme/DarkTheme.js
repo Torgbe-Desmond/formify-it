@@ -19,7 +19,7 @@ const DarkTheme = createTheme({
         text: {
             primary: '#e8eaf0',     // Soft white — not harsh pure white
             secondary: '#9ea3b0',   // Muted gray for subtitles
-            sidebar:"#000"
+            paragraph:"#000"
         },
         divider: '#2a2d3a',
         action: {

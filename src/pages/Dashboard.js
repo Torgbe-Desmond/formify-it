@@ -14,12 +14,13 @@ import ProjectList from '../components/dashboard/ProjectList';
 import NewProjectDialog from '../components/dashboard/NewProjectDialog';
 import RenameProjectDialog from '../components/dashboard/RenameProjectDialog';
 import DeleteProjectDialog from '../components/dashboard/DeleteProjectDialog';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
 
-  // ✅ RTK Query hooks
   const { data: projects = [], isLoading: loading, isSuccess } = useGetProjectsQuery();
   const [createProject, { isLoading: createProjectLoading }] = useCreateProjectMutation();
   const [renameProject, { isLoading: renameProjectLoading }] = useRenameProjectMutation();
@@ -61,7 +62,7 @@ export default function Dashboard() {
 
     await renameProject({
       id: targetProject.id,
-      data: { name: renameName.trim() }, 
+      data: { name: renameName.trim() },
     }).unwrap();
 
     setRenameOpen(false);
@@ -93,6 +94,7 @@ export default function Dashboard() {
 
       <ProjectList
         projects={filteredProjects}
+        isOnline={isOnline}
         loading={loading}
         isSuccess={isSuccess}
         onProjectClick={(id) => navigate(`/project/${id}`)}
@@ -105,6 +107,7 @@ export default function Dashboard() {
         open={newProjectOpen}
         onClose={() => setNewProjectOpen(false)}
         onCreate={handleCreate}
+        isOnline={isOnline}
       />
 
       <RenameProjectDialog
@@ -114,6 +117,7 @@ export default function Dashboard() {
         projectName={renameName}
         onProjectNameChange={setRenameName}
         onSave={handleRenameSave}
+        isOnline={isOnline} 
       />
 
       <DeleteProjectDialog
@@ -122,6 +126,7 @@ export default function Dashboard() {
         onClose={() => { setDeleteOpen(false); setTargetProject(null); }}
         projectName={targetProject?.name}
         onDelete={handleDeleteConfirm}
+        isOnline={isOnline}
       />
     </Container>
   );

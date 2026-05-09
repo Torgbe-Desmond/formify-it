@@ -27,6 +27,7 @@ import EmailComposerDialog from '../components/email/EmailComposerDialog'
 import { v4 as uuidv4 } from 'uuid';
 
 import { breadcrumbApi, pdfExport } from '../store/api/apiClient';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 function stripCssBlock(content) {
     if (!content) return content;
@@ -41,6 +42,7 @@ export default function FileEditorPage() {
     const dispatch = useDispatch();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isOnline = useOnlineStatus();
 
     const file = useSelector(selectCurrentFile);
     const storedContent = useSelector(selectCurrentContent);
@@ -177,7 +179,7 @@ export default function FileEditorPage() {
         try {
             setDownloading(true)
             const id = uuidv4()
-            const res = await pdfExport.post(id,{
+            const res = await pdfExport.post(id, {
                 html: renderedContent,
                 filename: file.name,
                 margins: previewMargins,
@@ -248,13 +250,14 @@ export default function FileEditorPage() {
                     setAnchorEl(null);
                     setEditDataOpen(true);
                 }}
-                onPDFDownload={()=>{
+                onPDFDownload={() => {
                     setAnchorEl(null);
                     handleDownloadPDF()
                 }}
                 onEmailClick={() => {
                     setEmailOpen(true)
                 }}
+                isOnline={isOnline}
             />
 
             {isEditing ? (

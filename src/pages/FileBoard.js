@@ -26,11 +26,14 @@ import FileBoardHeader from '../components/fileboard/FileBoardHeader';
 import FileList from '../components/fileboard/FileList';
 import RenameFolderDialog from '../components/fileboard/RenameFolderDialog';
 import DeleteFolderDialog from '../components/fileboard/DeleteFolderDialog';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 export default function FileBoard() {
   const { folderId, projectId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isOnline = useOnlineStatus();
+
 
   const folder = useSelector(selectFolderById(folderId));
   const files = useSelector(selectFilesByFolder(folderId));
@@ -99,6 +102,7 @@ export default function FileBoard() {
         onDeleteClick={() => { handleMenuClose(); setDeleteConfirmOpen(true); }}
         onEditSchemaClick={handleEditSchema}
         searchQuery={searchQuery}
+        isOnline={isOnline}
         onSearchChange={setSearchQuery}
       />
 

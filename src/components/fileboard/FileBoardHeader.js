@@ -1,7 +1,4 @@
-import {
-  Box, Button, TextField, InputAdornment,
-  IconButton, Menu, MenuItem, ListItemIcon, ListItemText,
-} from '@mui/material';
+import { Box, Button, TextField, InputAdornment, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -12,100 +9,42 @@ import { useParams } from 'react-router-dom';
 import Breadcrumbs from '../Breadcrumbs';
 import { useGetBreadcrumbQuery } from '../../store/api/apiSlice';
 
-export default function FileBoardHeader({
-  folderName,
-  anchorEl,
-  open,
-  onMenuClick,
-  onMenuClose,
-  onRenameClick,
-  onAddFileClick,
-  onDeleteClick,
-  onEditSchemaClick,
-  searchQuery,
-  onSearchChange,
-}) {
+export default function FileBoardHeader({ folderName, anchorEl, open, isOnline, onMenuClick, onMenuClose, onRenameClick, onAddFileClick, onDeleteClick, onEditSchemaClick, searchQuery, onSearchChange }) {
   const { folderId } = useParams();
-
-  // Use RTK Query to fetch breadcrumbs
-  const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery(
-    { type: 'folder', id: folderId },
-    { skip: !folderId }
-  );
-
+  const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery({ type: 'folder', id: folderId }, { skip: !folderId });
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 1 }, pl: { xs: 2.5, sm: 3.5 }, pt: { xs: 2.5, sm: 2 }, pb: 2 }}>
-      {/* Breadcrumb */}
+    <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 2.5 }}>
       <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
-
-      {/* Title + search + buttons */}
-      <Box sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'stretch', sm: 'center' },
-        gap: 1.5,
-      }}>
-        {/* <Typography variant="h5" fontWeight={700} sx={{ flexShrink: 0 }}>
-          {folderName || 'Folder'}
-        </Typography> */}
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, maxWidth: { sm: 480 }, ml: { sm: 'auto' } }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, maxWidth: { sm: 480 }, ml: { sm: 'auto' } }}>
           <TextField
-            fullWidth size="small"
-            placeholder="Find a file..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                '& fieldset': { borderColor: 'divider' },
-                '&:hover fieldset': { borderColor: 'text.secondary' },
-              },
-            }}
+            fullWidth size="small" placeholder="Search files..."
+            value={searchQuery} onChange={(e) => onSearchChange(e.target.value)}
+            slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: 'text.disabled' }} /></InputAdornment> } }}
           />
-
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddRoundedIcon />}
-            onClick={onAddFileClick}
-            sx={{ whiteSpace: 'nowrap', borderRadius: 2, px: 2 }}
-          >
-            Add File
+          <Button disabled={!isOnline} variant="contained" size="small" startIcon={<AddRoundedIcon />} onClick={onAddFileClick}
+            sx={{ whiteSpace: 'nowrap', px: 2.5, borderRadius: 7 }}>
+            Add file
           </Button>
-
-          {/* More actions */}
-          <IconButton size="small" onClick={onMenuClick} sx={{ color: 'text.secondary', border: '1px solid', borderColor: 'divider', borderRadius: 1.5 }}>
+          <IconButton size="small" onClick={onMenuClick}
+            sx={{ color: 'text.secondary', border: '1px solid #e8e6e1', borderRadius: '8px', '&:hover': { borderColor: '#1a1f36', bgcolor: 'rgba(26,31,54,0.04)' } }}>
             <MoreHorizIcon fontSize="small" />
           </IconButton>
         </Box>
       </Box>
-
-      <Menu
-        anchorEl={anchorEl} open={open} onClose={onMenuClose}
+      <Menu anchorEl={anchorEl} open={open} onClose={onMenuClose}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        slotProps={{ paper: { elevation: 3, sx: { borderRadius: 1, minWidth: 180 } } }}
-      >
-        <MenuItem onClick={onEditSchemaClick}>
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
+        <MenuItem disabled={!isOnline} onClick={onEditSchemaClick}>
           <ListItemIcon><SchemaRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Edit Schema</ListItemText>
         </MenuItem>
-        <MenuItem onClick={onRenameClick}>
+        <MenuItem disabled={!isOnline} onClick={onRenameClick}>
           <ListItemIcon><DriveFileRenameOutlineRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Rename Folder</ListItemText>
         </MenuItem>
-        <MenuItem onClick={onDeleteClick} sx={{ color: 'error.main' }}>
+        <MenuItem disabled={!isOnline} onClick={onDeleteClick} sx={{ color: 'error.main' }}>
           <ListItemIcon sx={{ color: 'error.main' }}><FolderDeleteRoundedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Delete Folder</ListItemText>
         </MenuItem>

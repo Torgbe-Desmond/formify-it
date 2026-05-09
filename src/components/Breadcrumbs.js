@@ -1,102 +1,60 @@
 import { Box, Typography, Skeleton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
-function buildPath(crumb, allCrumbs, index) {
+function buildPath(crumb, allCrumbs) {
     const project = allCrumbs.find(c => c.type === "project");
     const folder = allCrumbs.find(c => c.type === "folder");
-
     switch (crumb.type) {
-        case "project":
-            return `/project/${crumb.id}`;
-
-        case "folder":
-            return `/project/${project?.id}/folder/${crumb.id}`;
-
-        case "file":
-            return `/project/${project?.id}/folder/${folder?.id}/file/${crumb.id}`;
-
-        default:
-            return "/";
+        case "project": return `/project/${crumb.id}`;
+        case "folder": return `/project/${project?.id}/folder/${crumb.id}`;
+        case "file": return `/project/${project?.id}/folder/${folder?.id}/file/${crumb.id}`;
+        default: return "/";
     }
 }
 
 export default function Breadcrumbs({ crumbs = [], loadingBreadcrumbs }) {
-
+    const isOnline = useOnlineStatus();
     const navigate = useNavigate();
 
-    // Fix: Added return statement and adjusted skeleton to match text height
     if (loadingBreadcrumbs) {
         return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, py:1 }}>
-                <Skeleton variant="circular" width={24} height={24} />
-                <Skeleton variant="text" width={150} sx={{ fontSize: 'body2.fontSize' }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, py: 0.5 }}>
+                <Skeleton variant="text" width={160} sx={{ fontSize: '13px' }} />
             </Box>
         );
     }
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-            {crumbs.length > 0 && (
-                <Typography
-                    variant="body2"
-                    onClick={() => navigate("/")}
-                    sx={{
-                        cursor: 'pointer',
-                        color: crumbs.length === 0 ? 'text.primary' : 'text.secondary',
-                        fontWeight: crumbs.length === 0 ? 600 : 400,
-                        '&:hover': {
-                            color: 'primary.main',
-                            textDecoration: 'underline',
-                        },
-                    }}
-                >
-                    Projects /
-                </Typography>
-            )}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5, flexWrap: 'wrap' }}>
+            <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', color: 'text.disabled', '&:hover': { color: '#1a1f36' }, transition: 'color 0.15s' }}
+                onClick={() => navigate("/")}
+            >
+                <HomeOutlinedIcon sx={{ fontSize: 14, mt: 0.3 }} />
+                <Typography sx={{ fontSize: '13px', color: 'inherit' }}>Projects</Typography>
+            </Box>
 
             {crumbs.map((crumb, index) => {
                 const isLast = index === crumbs.length - 1;
-
                 return (
-                    <Box
-                        key={`${crumb.type}-${crumb.id}`}
-                        sx={{ display: "flex", alignItems: "center" }}
-                    >
+                    <Box key={`${crumb.type}-${crumb.id}`} sx={{ display: "flex", alignItems: "center" }}>
+                        <Typography sx={{ mx: 0.5, fontSize: '13px', color: 'text.disabled' }}>/</Typography>
                         <Typography
-                            variant="body2"
-                            onClick={() =>
-                                !isLast &&
-                                navigate(buildPath(crumb, crumbs, index))
-                            }
+                            onClick={() => !isLast && navigate(buildPath(crumb, crumbs))}
                             sx={{
+                                fontSize: '13px',
                                 cursor: isLast ? "default" : "pointer",
                                 fontWeight: isLast ? 600 : 400,
-                                color: isLast
-                                    ? "text.primary"
-                                    : "text.secondary",
+                                color: isLast ? "#1a1f36" : "text.secondary",
                                 whiteSpace: "nowrap",
-                                "&:hover": !isLast
-                                    ? {
-                                        color: "primary.main",
-                                        textDecoration: "underline",
-                                    }
-                                    : {},
+                                transition: 'color 0.15s',
+                                "&:hover": !isLast ? { color: "#1a1f36" } : {},
                             }}
                         >
                             {crumb.name}
                         </Typography>
-
-                        {!isLast && (
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    mx: 0.5,
-                                    color: "text.disabled",
-                                }}
-                            >
-                                /
-                            </Typography>
-                        )}
                     </Box>
                 );
             })}

@@ -6,7 +6,6 @@ import {
   Box, Button, TextField, Typography, Stack,
   Alert, useTheme, useMediaQuery, CircularProgress,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 
 export default function Login() {
   const dispatch = useAppDispatch();
@@ -16,8 +15,6 @@ export default function Login() {
   const { loading, error } = useAppSelector((state) => state.auth);
   const [form, setForm] = useState({ email: '', password: '' });
 
-  const p = theme.palette;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await dispatch(login(form));
@@ -25,174 +22,124 @@ export default function Login() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: '#f8f7f4' }}>
 
       {/* ── LEFT PANEL ────────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          flex: isMobile ? 1 : '0 0 440px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          px: { xs: 3, sm: 7 },
-          py: 8,
-          bgcolor: 'background.paper',
-          borderRight: isMobile ? 'none' : `1px solid ${p.divider}`,
-          zIndex: 1,
-        }}
-      >
+      <Box sx={{
+        flex: isMobile ? 1 : '0 0 460px',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        px: { xs: 4, sm: 8 }, py: 8,
+        bgcolor: 'white',
+        borderRight: isMobile ? 'none' : '1px solid #e8e6e1',
+        zIndex: 1,
+      }}>
         {/* Brand */}
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1.25}
-          sx={{ mb: 5, justifyContent: isMobile ? 'center' : 'flex-start' }}
+        <Stack direction="row" alignItems="center" spacing={1.5}
+          sx={{ mb: 6, justifyContent: isMobile ? 'center' : 'flex-start' }}
         >
           <Box sx={{
-            width: 30, height: 30, flexShrink: 0,
-            bgcolor: p.primary.main,
-            clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-          }} />
-          <Typography fontWeight={800} fontSize="18px" color="text.primary">
+            width: 32, height: 32, flexShrink: 0,
+            background: 'linear-gradient(135deg, #1a1f36 0%, #2d3561 100%)',
+            borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Box sx={{ width: 12, height: 12, background: '#f59e0b', borderRadius: '3px', transform: 'rotate(45deg)' }} />
+          </Box>
+          <Typography fontWeight={700} fontSize="16px" color="#1a1f36" letterSpacing="-0.01em">
             Formify
           </Typography>
         </Stack>
 
-        {/* Heading */}
-        <Typography
-          variant="h4"
-          fontWeight={800}
-          color="text.primary"
-          sx={{ mb: 0.75, textAlign: isMobile ? 'center' : 'left', letterSpacing: '-0.02em' }}
-        >
-          Welcome back.
+        <Typography variant="h4" sx={{ mb: 0.75, textAlign: isMobile ? 'center' : 'left', color: '#1a1f36' }}>
+          Welcome back
         </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mb: 4, textAlign: isMobile ? 'center' : 'left' }}
-        >
-          Sign in to access your documents.
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 5, textAlign: isMobile ? 'center' : 'left', fontSize: '14px' }}>
+          Sign in to continue to your workspace
         </Typography>
 
-        {/* Form */}
         <Box component="form" onSubmit={handleSubmit}>
-          <Typography
-            sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'text.disabled', mb: 0.75 }}
-          >
-            Email
+          <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#1a1f36', mb: 0.75, letterSpacing: '0.01em' }}>
+            Email address
           </Typography>
           <TextField
-            fullWidth
-            type="email"
-            size="small"
-            required
-            sx={{ mb: 2.5 }}
+            fullWidth type="email" required
+            placeholder="name@company.com"
+            sx={{ mb: 3 }}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
 
-          <Typography
-            sx={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'text.disabled', mb: 0.75 }}
-          >
-            Password
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.75 }}>
+            <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#1a1f36', letterSpacing: '0.01em' }}>
+              Password
+            </Typography>
+          </Box>
           <TextField
-            fullWidth
-            type="password"
-            size="small"
-            required
-            sx={{ mb: 3 }}
+            fullWidth type="password" required
+            placeholder="••••••••"
+            sx={{ mb: 3.5 }}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2.5, fontSize: '13px' }}>
-              {error}
-            </Alert>
+            <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
           )}
 
           <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disableElevation
-            disabled={loading}
-            size="large"
-            sx={{
-              fontWeight: 700,
-              fontSize: '14px',
-              py: 1.5,
-              boxShadow: `0 4px 16px ${alpha(p.primary.main, 0.25)}`,
-            }}
+            type="submit" variant="contained" fullWidth disabled={loading} size="large"
+            sx={{ borderRadius: 8, py: 1.4, boxShadow: '0 4px 16px rgba(26,31,54,0.2)' }}
           >
-            {loading ? <CircularProgress size={20} color="inherit" /> : 'Sign In'}
+            {loading ? <CircularProgress size={18} color="inherit" /> : 'Sign in'}
           </Button>
         </Box>
 
-        {/* Footer link */}
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 4, textAlign: 'center', fontSize: '13.5px' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: p.primary.main, fontWeight: 700, textDecoration: 'none' }}>
-            Register
+          <Link to="/register" style={{ color: '#1a1f36', fontWeight: 700, textDecoration: 'none', borderBottom: '1.5px solid #f59e0b' }}>
+            Create one
           </Link>
         </Typography>
       </Box>
 
       {/* ── RIGHT PANEL ───────────────────────────────────────────────── */}
       {!isMobile && (
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'background.default',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Grid background */}
+        <Box sx={{
+          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          bgcolor: '#f8f7f4', position: 'relative', overflow: 'hidden',
+        }}>
+          {/* Dot grid */}
           <Box sx={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            backgroundImage: `linear-gradient(${p.divider} 1px, transparent 1px), linear-gradient(90deg, ${p.divider} 1px, transparent 1px)`,
-            backgroundSize: '44px 44px',
-            maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
-            opacity: 0.7,
+            backgroundImage: `radial-gradient(circle, #c8c5bd 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+            maskImage: 'radial-gradient(ellipse 65% 65% at 50% 50%, black 30%, transparent 100%)',
+            opacity: 0.6,
           }} />
-
-          {/* Glow */}
+          {/* Amber glow */}
           <Box sx={{
-            position: 'absolute',
-            width: '500px', height: '500px',
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha(p.primary.main, 0.07)} 0%, transparent 65%)`,
+            position: 'absolute', width: '400px', height: '400px', borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
 
-          {/* Info card */}
-          <Box
-            sx={{
-              position: 'relative', zIndex: 1,
-              bgcolor: 'background.paper',
-              border: `1px solid ${p.divider}`,
-              borderRadius: 3,
-              p: 4,
-              maxWidth: 280,
-              boxShadow: `0 12px 40px ${alpha('#000', 0.06)}`,
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
-                textTransform: 'uppercase', color: p.primary.main, mb: 1.5,
-              }}
-            >
-              Secure Login
+          {/* Feature card */}
+          <Box sx={{
+            position: 'relative', zIndex: 1,
+            bgcolor: 'white', border: '1px solid #e8e6e1', borderRadius: 3,
+            p: 4.5, maxWidth: 300,
+            boxShadow: '0 16px 48px rgba(26,31,54,0.07)',
+          }}>
+            <Box sx={{
+              width: 44, height: 44, borderRadius: '11px',
+              bgcolor: 'rgba(245,158,11,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              mb: 2.5, fontSize: '20px', color: '#d97706',
+            }}>
+              🔒
+            </Box>
+            <Typography fontWeight={700} color="#1a1f36" sx={{ mb: 1, fontSize: '15px' }}>
+              Secure & private
             </Typography>
-            <Typography variant="body2" color="text.secondary" lineHeight={1.7}>
-              Your data is encrypted and synced across all your devices in real-time.
+            <Typography variant="body2" color="text.secondary" lineHeight={1.7} fontSize="13.5px">
+              Your data is encrypted and synced securely. Only you can access your workspace.
             </Typography>
           </Box>
         </Box>

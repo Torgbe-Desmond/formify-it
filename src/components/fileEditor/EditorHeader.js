@@ -1,7 +1,4 @@
-import {
-    Box, IconButton, Menu,
-    MenuItem, ListItemIcon, ListItemText,
-} from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
@@ -11,54 +8,41 @@ import { useParams } from 'react-router-dom';
 import { useGetBreadcrumbQuery } from "../../store/api/apiSlice";
 import Breadcrumbs from "../Breadcrumbs";
 
-export default function EditorHeader({
-    fileName, anchorEl, open,
-    onMenuClick, onMenuClose,
-    onRenameClick, onDeleteClick, onEditMetadataClick, onPDFDownload, onEmailClick
-}) {
-    const { fileId } = useParams()
+export default function EditorHeader({ fileName, anchorEl, open, isOnline, onMenuClick, onMenuClose, onRenameClick, onDeleteClick, onEditMetadataClick, onPDFDownload, onEmailClick }) {
+    const { fileId } = useParams();
     const { data: crumbs = [], isLoading: loadingBreadcrumbs } = useGetBreadcrumbQuery(
         { type: 'file', id: fileId },
         { skip: !fileId }
     );
 
     return (
-        <Box sx={{ display: 'flex', width: "100%", justifyContent: "space-between", gap: 1, px: { xs: 2, sm: 1 }, pt: { xs: 2, sm: 1.5 }, pb: 2 }}>
-
+        <Box sx={{ display: 'flex', width: "100%", justifyContent: "space-between", alignItems: 'center', gap: 1, pt: { xs: 3, sm: 3.5 }, pb: 2 }}>
             <Breadcrumbs crumbs={crumbs} loadingBreadcrumbs={loadingBreadcrumbs} />
 
-            <IconButton onClick={onMenuClick}>
-                <MoreHorizIcon />
+            <IconButton onClick={onMenuClick}
+                sx={{ color: 'text.secondary', border: '1px solid #e8e6e1', borderRadius: '8px', flexShrink: 0, '&:hover': { borderColor: '#1a1f36', bgcolor: 'rgba(26,31,54,0.04)' } }}>
+                <MoreHorizIcon sx={{ fontSize: 16 }} />
             </IconButton>
 
-            <Menu sx={{ borderRadius: 1 }} anchorEl={anchorEl} open={open} onClose={onMenuClose}>
-                <MenuItem onClick={onRenameClick}>
+            <Menu anchorEl={anchorEl} open={open} onClose={onMenuClose}>
+                <MenuItem disabled={!isOnline} onClick={onRenameClick}>
                     <ListItemIcon><DriveFileRenameOutlineRoundedIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Rename File</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={onEditMetadataClick}>
+                <MenuItem disabled={!isOnline} onClick={onEditMetadataClick}>
                     <ListItemIcon><EditRoundedIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Edit Data</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={onDeleteClick} sx={{ color: 'error.main' }}>
-                    <ListItemIcon sx={{ color: 'error.main' }}>
-                        <DeleteOutlineRoundedIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Delete File</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={onPDFDownload}>
-                    <ListItemIcon>
-                        <PictureAsPdfIcon fontSize="small" />
-                    </ListItemIcon>
+                <Divider sx={{ my: 0.5 }} />
+                <MenuItem disabled={!isOnline} onClick={onPDFDownload}>
+                    <ListItemIcon><PictureAsPdfIcon fontSize="small" /></ListItemIcon>
                     <ListItemText>Download PDF</ListItemText>
                 </MenuItem>
-
-                {/* <MenuItem onClick={onEmailClick}>
-                    <ListItemIcon>
-                        <PictureAsPdfIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>Email</ListItemText>
-                </MenuItem> */}
+                <Divider sx={{ my: 0.5 }} />
+                <MenuItem disabled={!isOnline} onClick={onDeleteClick} sx={{ color: 'error.main' }}>
+                    <ListItemIcon sx={{ color: 'error.main' }}><DeleteOutlineRoundedIcon fontSize="small" /></ListItemIcon>
+                    <ListItemText>Delete File</ListItemText>
+                </MenuItem>
             </Menu>
         </Box>
     );

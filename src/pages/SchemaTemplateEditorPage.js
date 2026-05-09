@@ -484,21 +484,25 @@ export default function SchemaTemplateEditorPage() {
         />
 
         {/* Download / Upload toolbar */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-            {hasContent && (<Tooltip title="Download all schemas as a .schema.json file">
-                <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon />}
-                    onClick={handleDownload}>
-                    Download Schema
-                </Button>
-            </Tooltip>)}
-            <Tooltip title="Upload a previously downloaded .schema.json file">
-                <Button size="small" variant="outlined" color="secondary"
-                    startIcon={<UploadRoundedIcon />} onClick={handleUploadClick}>
-                    Upload Schema
-                </Button>
-            </Tooltip>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "space-between", gap: 1, mb: 2, flexWrap: 'wrap' }}>
+            <Box>
+                {hasContent && (<Tooltip title="Download all schemas as a .schema.json file">
+                    <Button size="small" variant="outlined" startIcon={<DownloadRoundedIcon />}
+                        onClick={handleDownload}>
+                        Download Schema
+                    </Button>
+                </Tooltip>)}
+                <Tooltip title="Upload a previously downloaded .schema.json file">
+                    <Button size="small" variant="outlined" color="secondary"
+                        startIcon={<UploadRoundedIcon />} onClick={handleUploadClick}>
+                        Upload Schema
+                    </Button>
+                </Tooltip>
+            </Box>
             <input ref={fileInputRef} type="file" accept=".json,.schema.json"
                 style={{ display: 'none' }} onChange={handleFileChange} />
+            <EditorActions isEditing={isEditing} onSave={handleSave} onCancel={handleCancelEdit}
+                hideMobileBar={view === 'builder'} />
         </Box>
 
         {/* Main layout: sidebar + editor */}
@@ -685,8 +689,7 @@ export default function SchemaTemplateEditorPage() {
                                 dangerouslySetInnerHTML={{ __html: renderedContent || '<p>No content to preview yet...</p>' }} />
                         </Paper>)}
 
-                    <EditorActions onSave={handleSave} onCancel={handleCancelEdit}
-                        hideMobileBar={view === 'builder'} />
+
                 </>) : (<Paper elevation={1} sx={{ p: 3, minHeight: '60vh', borderRadius: 2 }}>
                     {activeSchema ? (<div dangerouslySetInnerHTML={{
                         __html: renderedContent || '<p>No template content yet. Use the Edit button to add one.</p>'
