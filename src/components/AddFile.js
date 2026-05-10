@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Stack, Typography, Alert,
+  Button, Stack, Typography, Alert, IconButton, Box, useTheme, useMediaQuery,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { Liquid } from 'liquidjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Buffer } from 'buffer';
@@ -53,6 +54,9 @@ function getFieldsFromRef(refName, schemasMap, parsedCache) {
 
 export default function AddFile({ open, onClose, folderId, onFileAdded }) {
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const folderSchema = useSelector(selectSchemaByFolder(folderId));
   const schemasMap = useSelector(selectSchemasMap(folderId));
   const entrySchemaName = useSelector(selectEntrySchemaName(folderId));
@@ -121,31 +125,138 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
     } finally { setLoading(false); }
   };
 
+  const sheetPaperProps = isMobile ? {
+    sx: {
+      borderRadius: '16px 16px 0 0',
+      position: 'fixed',
+      m:0,
+      bottom: 0,
+      left: 0,
+      width: '100%',
+      right: 0,
+      maxHeight: '92dvh',
+    },
+  } : {};
+
+  // ── No schema state ───────────────────────────────────────────────
   if (!folderSchema || Object.keys(fields).length === 0) {
     return (
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>New file</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="sm"
+        fullScreen={false}
+        PaperProps={sheetPaperProps}
+      >
+        <DialogTitle
+         sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1,
+          pt: isMobile ? 2 : undefined,
+          // Drag handle hint on mobile
+          '&::before': isMobile ? {
+            content: '""',
+            display: 'block',
+            position: 'absolute',
+            top: 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 36,
+            height: 4,
+            borderRadius: 2,
+            bgcolor: 'divider',
+          } : {},
+        }}
+        >
+          New file
+          <IconButton edge="end" onClick={onClose} size="small" aria-label="close">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
-          <Alert severity="info" sx={{ mt: 2 }}>No schema defined for this folder. Create a schema first.</Alert>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            No schema defined for this folder. Create a schema first.
+          </Alert>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+        <DialogActions sx={{
+          px: 3,
+          pb: isMobile ? 3 : 2.5,
+          flexDirection: { xs: 'column-reverse', sm: 'row' },
+          '& .MuiButton-root': { width: { xs: '100%', sm: 'auto' } },
+        }}>
           <Button onClick={onClose} sx={{ borderRadius: 7 }}>Close</Button>
         </DialogActions>
       </Dialog>
     );
   }
 
+  // ── Main dialog ───────────────────────────────────────────────────
   return (
-    <Dialog open={open} onClose={loading ? undefined : onClose} fullWidth maxWidth="sm" disableEscapeKeyDown={loading}>
-      <DialogTitle>
-        New file
-        {frontMatter.description && (
-          <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5, fontWeight: 400 }}>
-            {frontMatter.description}
+    <Dialog
+      open={open}
+      onClose={loading ? undefined : onClose}
+      fullWidth
+      maxWidth="sm"
+      disableEscapeKeyDown={loading}
+      PaperProps={sheetPaperProps}
+    >
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 1,
+          pt: isMobile ? 2.5 : undefined,
+          // Drag handle on mobile
+          '&::before': isMobile ? {
+            content: '""',
+            display: 'block',
+            position: 'absolute',
+            top: 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 36,
+            height: 4,
+            borderRadius: 2,
+            bgcolor: 'divider',
+          } : {},
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+            New file
           </Typography>
-        )}
+          {frontMatter.description && (
+            <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5, fontWeight: 400 }}>
+              {frontMatter.description}
+            </Typography>
+          )}
+        </Box>
+        <IconButton
+          edge="end"
+          onClick={loading ? undefined : onClose}
+          disabled={loading}
+          size="small"
+          aria-label="close"
+          sx={{ flexShrink: 0, mt: 0.25 }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </DialogTitle>
-      <DialogContent dividers sx={{ '& .MuiDivider-root': { borderColor: '#e8e6e1' } }}>
+
+      <DialogContent
+        dividers
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          '& .MuiDivider-root': { borderColor: '#e8e6e1' },
+        }}
+      >
         <Stack spacing={2.5} sx={{ mt: 0.5 }}>
           {Object.entries(fields).map(([key, config]) => (
             <FieldRenderer
@@ -158,9 +269,22 @@ export default function AddFile({ open, onClose, folderId, onFileAdded }) {
           ))}
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
-        <Button onClick={onClose} disabled={loading} sx={{ borderRadius: 7 }}>Cancel</Button>
-        <Button variant="contained" onClick={handleAdd} disabled={loading} sx={{ borderRadius: 7 }}>
+
+      <DialogActions
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 2, sm: 2 },
+          pb: isMobile ? 3 : 2,
+          gap: 1,
+          flexDirection: { xs: 'column-reverse', sm: 'row' },
+          '& .MuiButton-root': {
+            width: { xs: '100%', sm: 'auto' },
+            borderRadius: 7,
+          },
+        }}
+      >
+        <Button onClick={onClose} disabled={loading}>Cancel</Button>
+        <Button variant="contained" onClick={handleAdd} disabled={loading}>
           {loading ? 'Creating…' : 'Create file'}
         </Button>
       </DialogActions>

@@ -26,38 +26,64 @@ export default function FileRow({ file, isLast, onClick }) {
     <Box
       onClick={onClick}
       sx={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 80px 120px',
+        display: 'flex',
         alignItems: 'center',
-        px: 3, py: 1.5,
-        cursor: 'pointer', bgcolor: 'white',
+        px: { xs: 2, sm: 3 },
+        py: { xs: 1.25, sm: 1.5 },
+        cursor: 'pointer',
+        bgcolor: 'white',
         borderBottom: isLast ? 'none' : '1px solid #e8e6e1',
         transition: 'background 0.1s',
         '&:hover': { bgcolor: '#fafaf8' },
         '&:hover .file-name': { color: '#1a1f36' },
+        gap: 2,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-        <Box sx={{
-          width: 32, height: 32, borderRadius: '8px',
-          bgcolor: 'rgba(26,31,54,0.05)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <InsertDriveFileOutlinedIcon sx={{ fontSize: 15, color: '#94a3b8' }} />
-        </Box>
-        <Typography className="file-name" variant="body2" fontWeight={500} noWrap
-          sx={{ fontSize: '13.5px', color: '#374151', transition: 'color 0.1s' }}>
+      {/* Icon */}
+      <Box sx={{
+        width: 32, height: 32, borderRadius: '8px',
+        bgcolor: 'rgba(26,31,54,0.05)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <InsertDriveFileOutlinedIcon sx={{ fontSize: 15, color: '#94a3b8' }} />
+      </Box>
+
+      {/* Name + mobile subtitle */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          className="file-name"
+          variant="body2"
+          fontWeight={500}
+          noWrap
+          sx={{ fontSize: '13.5px', color: '#374151', transition: 'color 0.1s' }}
+        >
           {file.name}
+        </Typography>
+        {/* Show size + time inline under the name on mobile */}
+        <Typography
+          variant="caption"
+          color="text.disabled"
+          sx={{ display: { xs: 'block', sm: 'none' }, fontSize: '11px', mt: 0.25 }}
+        >
+          {formatSize(file.sizeBytes)} · {timeAgo(file.updatedAt)}
         </Typography>
       </Box>
 
-      <Typography variant="caption" color="text.disabled"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', pr: 1, fontSize: '12px' }}>
+      {/* Size — desktop only */}
+      <Typography
+        variant="caption"
+        color="text.disabled"
+        sx={{ display: { xs: 'none', sm: 'block' }, flexShrink: 0, fontSize: '12px', minWidth: 60, textAlign: 'right' }}
+      >
         {formatSize(file.sizeBytes)}
       </Typography>
 
-      <Typography variant="caption" color="text.secondary"
-        sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right', fontSize: '12px' }}>
+      {/* Time — desktop only */}
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: { xs: 'none', sm: 'block' }, flexShrink: 0, fontSize: '12px', minWidth: 80, textAlign: 'right' }}
+      >
         {timeAgo(file.updatedAt)}
       </Typography>
     </Box>

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Stack, Alert,
+  Button, Stack, Alert, IconButton, Typography, useMediaQuery, useTheme,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { Liquid } from 'liquidjs';
 import yaml from 'js-yaml';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,20 +25,12 @@ const stripCssBlock = (str) => {
     .replace(/<!-- \/CSS -->\n?/g, '');
 };
 
-/**
- * Recursively flatten formData into the metadata shape the server expects.
- * Nested objects and arrays are JSON-stringified at their leaf level.
- */
 function flattenMetadata(data) {
   return Object.fromEntries(
     Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)])
   );
 }
 
-/**
- * Recursively parse existing metadata back into rich JS values.
- * Arrays and objects stored as JSON strings are parsed back out.
- */
 function parseMetadata(metadataArray) {
   const map = {};
   (Array.isArray(metadataArray) ? metadataArray : []).forEach((item) => {
@@ -47,10 +40,6 @@ function parseMetadata(metadataArray) {
   return map;
 }
 
-/**
- * Build initial form data from field definitions + existing metadata.
- * Handles $SchemaRef types by recursively building nested objects.
- */
 function buildInitialData(fieldsMap, existingMap, schemasMap, parsedCache, depth = 0) {
   if (!fieldsMap || depth > 10) return {};
   const result = {};
@@ -95,22 +84,24 @@ function getFieldsFromRef(refName, schemasMap, parsedCache) {
 }
 
 export default function EditFileDataDialog({ open, onClose, file, folderId, onSaved }) {
-  const dispatch      = useDispatch();
-  const folderSchema  = useSelector(selectSchemaByFolder(folderId));
-  const schemasMap    = useSelector(selectSchemasMap(folderId));
+  const dispatch        = useDispatch();
+  const theme           = useTheme();
+  const isMobile        = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const folderSchema    = useSelector(selectSchemaByFolder(folderId));
+  const schemasMap      = useSelector(selectSchemasMap(folderId));
   const entrySchemaName = useSelector(selectEntrySchemaName(folderId));
 
-  // Stable mutable cache for parsed YAML across renders
   const parsedCache = useRef({});
 
-  const [fields,          setFields]          = useState({});
-  const [template,        setTemplate]        = useState('');
-  const [frontMatter,     setFrontMatter]     = useState({});
-  const [formData,        setFormData]        = useState({});
-  const [loading,         setLoading]         = useState(false);
-  const [loaded,          setLoaded]          = useState(false);
-  const [errors,          setErrors]          = useState({});
-  const [expandedArrays,  setExpandedArrays]  = useState({});
+  const [fields,         setFields]         = useState({});
+  const [template,       setTemplate]       = useState('');
+  const [frontMatter,    setFrontMatter]    = useState({});
+  const [formData,       setFormData]       = useState({});
+  const [loading,        setLoading]        = useState(false);
+  const [loaded,         setLoaded]         = useState(false);
+  const [errors,         setErrors]         = useState({});
+  const [expandedArrays, setExpandedArrays] = useState({});
 
   useEffect(() => {
     if (!open) {
@@ -124,9 +115,7 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
 
   useEffect(() => {
     if (!open || !file || !folderSchema) return;
-
     try {
-      // Use entry schema for the top-level fields + template
       const entryData = folderSchema.schemas?.[entrySchemaName || folderSchema.entrySchema];
       if (!entryData) return;
 
@@ -196,9 +185,9 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
       const metadata = flattenMetadata(formData);
 
       await dispatch(updateFile({
-        id:          file._id,
-        name:        fileName,
-        content:     renderedHtml,
+        id:       file._id,
+        name:     fileName,
+        content:  renderedHtml,
         metadata,
       }));
 
@@ -216,8 +205,15 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
 
   if (loaded && Object.keys(fields).length === 0) {
     return (
-      <Dialog open={open}>
-        <DialogTitle>Edit Data</DialogTitle>
+      <Dialog open={open} fullScreen={isMobile} fullWidth maxWidth="sm">
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          Edit Data
+          {isMobile && (
+            <IconButton edge="end" onClick={onClose} size="small">
+              <CloseIcon />
+            </IconButton>
+          )}
+        </DialogTitle>
         <DialogContent>
           <Alert severity="warning">No schema found for this file.</Alert>
         </DialogContent>
@@ -229,11 +225,72 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
   }
 
   return (
-    <Dialog open={open} 
-      disableEscapeKeyDown={loading} fullWidth maxWidth="sm">
-      <DialogTitle>Edit Data</DialogTitle>
+    <Dialog
+      open={open}
+      disableEscapeKeyDown={loading}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: isMobile ? {
+          // On mobile: slide up from the bottom like a sheet
+          m: 0,
+          borderRadius: '16px 16px 0 0',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          maxHeight: '92dvh',
+        } : {},
+      }}
+    >
+      {/* Title row — close X on mobile instead of relying on swipe/back */}
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 1,
+          pt: isMobile ? 2 : undefined,
+          // Drag handle hint on mobile
+          '&::before': isMobile ? {
+            content: '""',
+            display: 'block',
+            position: 'absolute',
+            top: 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 36,
+            height: 4,
+            borderRadius: 2,
+            bgcolor: 'divider',
+          } : {},
+        }}
+      >
+        <Typography variant="h6" component="span" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+          Edit Data
+        </Typography>
+        <IconButton
+          edge="end"
+          onClick={onClose}
+          disabled={loading}
+          size="small"
+          aria-label="close"
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent
+        dividers
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
+          // On mobile the content scrolls within the sheet; prevent body scroll
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <Stack spacing={2}>
           {Object.entries(fields).map(([key, config]) => (
             <FieldRenderer
@@ -254,8 +311,21 @@ export default function EditFileDataDialog({ open, onClose, file, folderId, onSa
         </Stack>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} disabled={loading}>Cancel</Button>
+      <DialogActions
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 2, sm: 1.5 },
+          gap: 1,
+          // Stack buttons full-width on mobile
+          flexDirection: { xs: 'column-reverse', sm: 'row' },
+          '& .MuiButton-root': {
+            width: { xs: '100%', sm: 'auto' },
+          },
+        }}
+      >
+        <Button onClick={onClose} disabled={loading}>
+          Cancel
+        </Button>
         <Button variant="contained" onClick={handleSave} disabled={loading}>
           {loading ? 'Saving...' : 'Save'}
         </Button>

@@ -2,21 +2,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Paper, Typography, Slider, Tooltip, Chip } from '@mui/material';
 import ArticleIcon from '@mui/icons-material/Article';
+import { useTheme, useMediaQuery } from '@mui/material';
 
 // A4 at 96dpi
 const PAGE_WIDTH_PX = 794;
 const PAGE_HEIGHT_PX = 1123;
 const DEFAULT_MARGIN = 60;
+const MOBILE_MARGIN = 24;
 
 /**
  * Splits HTML content into A4-sized pages by:
  * 1. Rendering full content in a hidden off-screen div at exact A4 width
  * 2. Walking DOM nodes and tracking cumulative offset to find page breaks
  * 3. Slicing with CSS clip so each page is a positioned window into the content
- *
- * This avoids the clone-measurement bug (clones not in DOM = 0 height)
- * and handles long single elements (images, tables, paragraphs) gracefully
- * by allowing them to cross page boundaries as a "bleed" rather than vanishing.
  */
 function usePageSplitter(content, margin) {
   const [pages, setPages] = useState([]);
@@ -27,7 +25,6 @@ function usePageSplitter(content, margin) {
       return;
     }
 
-    // Ensure the hidden measuring container exists in the DOM
     let measurer = document.getElementById('__pdf-measurer__');
     if (!measurer) {
       measurer = document.createElement('div');
@@ -44,8 +41,8 @@ function usePageSplitter(content, margin) {
       document.body.appendChild(measurer);
     }
 
-    const contentWidth = PAGE_WIDTH_PX - margin;
-    const usableHeight = PAGE_HEIGHT_PX - margin;
+    const contentWidth = PAGE_WIDTH_PX - margin * 2;
+    const usableHeight = PAGE_HEIGHT_PX - margin * 2;
 
     measurer.style.width = `${contentWidth}px`;
     measurer.innerHTML = content;
@@ -56,7 +53,6 @@ function usePageSplitter(content, margin) {
     const totalHeight = measurer.scrollHeight;
     const numPages = Math.max(1, Math.ceil(totalHeight / usableHeight));
 
-    // Build page descriptors: each page is just an offset into the full render
     const newPages = [];
     for (let i = 0; i < numPages; i++) {
       newPages.push({
@@ -75,7 +71,6 @@ function usePageSplitter(content, margin) {
     return () => clearTimeout(timer);
   }, [split]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       const el = document.getElementById('__pdf-measurer__');
@@ -91,6 +86,41 @@ function PageView({ pageInfo, content, margin, scale, pageNumber, totalPages }) 
   const { offsetY, usableHeight } = pageInfo;
   const contentWidth = PAGE_WIDTH_PX - margin * 2;
 
+  // Counter-scale font sizes so text is always ~14-16px on screen regardless of page zoom.
+  // e.g. at scale=0.45, we want rendered font to feel like 15px → inject 15/0.45 ≈ 33px into the DOM.
+  const TARGET_BODY_PX = 15;
+  const scaledBodyPx = Math.round(TARGET_BODY_PX / Math.max(scale, 0.1));
+  const scaledH1Px = Math.round(28 / Math.max(scale, 0.1));
+  const scaledH2Px = Math.round(22 / Math.max(scale, 0.1));
+  const scaledH3Px = Math.round(18 / Math.max(scale, 0.1));
+  const scaledSmallPx = Math.round(12 / Math.max(scale, 0.1));
+
+  const responsiveFontCss = `
+    .page-content-inner * { box-sizing: border-box; }
+    .page-content-inner p,
+    .page-content-inner li,
+    .page-content-inner td,
+    .page-content-inner th,
+    .page-content-inner span,
+    .page-content-inner div,
+    .page-content-inner label {
+      font-size: ${scaledBodyPx}px !important;
+      line-height: 1.65 !important;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    .page-content-inner h1 { font-size: ${scaledH1Px}px !important; line-height: 1.3 !important; }
+    .page-content-inner h2 { font-size: ${scaledH2Px}px !important; line-height: 1.35 !important; }
+    .page-content-inner h3 { font-size: ${scaledH3Px}px !important; line-height: 1.4 !important; }
+    .page-content-inner h4,
+    .page-content-inner h5,
+    .page-content-inner h6,
+    .page-content-inner small,
+    .page-content-inner caption { font-size: ${scaledSmallPx}px !important; }
+    .page-content-inner img { max-width: 100%; height: auto; display: block; }
+    .page-content-inner table { width: 100%; border-collapse: collapse; }
+  `;
+
   return (
     <Box
       sx={{
@@ -98,11 +128,11 @@ function PageView({ pageInfo, content, margin, scale, pageNumber, totalPages }) 
         width: PAGE_WIDTH_PX,
         transformOrigin: 'top center',
         transform: `scale(${scale})`,
-        // Collapse the margin that scaling creates below each page
         mb: scale < 1 ? `${-(PAGE_HEIGHT_PX * (1 - scale))}px` : 0,
       }}
     >
       <Paper
+        className="pagination-preview-paper"
         elevation={4}
         sx={{
           width: PAGE_WIDTH_PX,
@@ -125,13 +155,15 @@ function PageView({ pageInfo, content, margin, scale, pageNumber, totalPages }) 
             overflow: 'hidden',
           }}
         >
+          {/* Inject the counter-scaled font overrides into this page's shadow */}
+          <style>{responsiveFontCss}</style>
           <Box
+            className="page-content-inner"
             dangerouslySetInnerHTML={{ __html: content }}
             sx={{
               width: contentWidth,
               position: 'relative',
               top: -offsetY,
-              // Prevent text selection weirdness on clipped pages
               userSelect: 'text',
             }}
           />
@@ -151,7 +183,7 @@ function PageView({ pageInfo, content, margin, scale, pageNumber, totalPages }) 
         >
           <Typography
             sx={{
-              fontSize: '9px',
+              fontSize: `${Math.round(9 / Math.max(scale, 0.1))}px`,
               color: '#bbb',
               letterSpacing: '0.05em',
               fontFamily: 'monospace',
@@ -165,24 +197,36 @@ function PageView({ pageInfo, content, margin, scale, pageNumber, totalPages }) 
   );
 }
 
-export default function PaginationPreview({ content, margins = DEFAULT_MARGIN, onMarginChange }) {
-  const [currentMargin, setCurrentMargin] = useState(margins);
+export default function PaginationPreview({ content, margins = DEFAULT_MARGIN, onMarginChange, onEdit, isMobile: isMobileProp }) {
+  const theme = useTheme();
+  const isMobileDetected = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = isMobileProp ?? isMobileDetected;
+
+  const defaultMargin = isMobile ? MOBILE_MARGIN : margins;
+  const [currentMargin, setCurrentMargin] = useState(defaultMargin);
   const [scale, setScale] = useState(1);
   const wrapperRef = useRef(null);
 
   const pages = usePageSplitter(content, currentMargin);
 
-  // Responsive scaling: fit page into available container width
+  // Sync when `margins` prop changes (e.g. parent resets it)
+  useEffect(() => {
+    setCurrentMargin(isMobile ? MOBILE_MARGIN : margins);
+  }, [margins, isMobile]);
+
+  // Responsive scaling: fit A4 page into available container width
   useEffect(() => {
     if (!wrapperRef.current) return;
-    const observe = new ResizeObserver(([entry]) => {
-      const available = entry.contentRect.width - 48; // some breathing room
-      const newScale = available < PAGE_WIDTH_PX ? Math.max(0.3, available / PAGE_WIDTH_PX) : 1;
+    const observer = new ResizeObserver(([entry]) => {
+      const available = entry.contentRect.width - (isMobile ? 16 : 48);
+      const newScale = available < PAGE_WIDTH_PX
+        ? Math.max(0.25, available / PAGE_WIDTH_PX)
+        : 1;
       setScale(newScale);
     });
-    observe.observe(wrapperRef.current);
-    return () => observe.disconnect();
-  }, []);
+    observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   const handleMarginChange = (_, val) => {
     setCurrentMargin(val);
@@ -259,13 +303,12 @@ export default function PaginationPreview({ content, margins = DEFAULT_MARGIN, o
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: scale < 1 ? `${Math.round(24 * scale)}px` : '24px',
+          // Gaps between pages collapse at high scale-down so they don't stack
+          gap: scale < 1 ? `${Math.max(8, Math.round(24 * scale))}px` : '24px',
           pb: 4,
-          // Background mimics a document tray
-          // bgcolor: '#e8e8e8',
           borderRadius: 2,
-          pt: 3,
-          px: 2,
+          pt: { xs: 1, sm: 3 },
+          px: { xs: 0, sm: 2 },
           minHeight: 200,
         }}
       >
